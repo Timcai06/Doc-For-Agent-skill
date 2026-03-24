@@ -74,6 +74,7 @@ The script will scan and prefill from:
 - storage behavior
 - result contract fields
 - canonical terminology hints
+- existing `AGENTS/` section content when running in `refresh` mode
 
 ### Step 4: Review and tighten the generated docs
 
@@ -83,6 +84,7 @@ After generation, review the docs and tighten the parts the script cannot infer 
 - domain-specific constraints
 - ownership boundaries
 - any project-specific naming rules
+- any manual sections you want to preserve long term; `refresh` now keeps useful existing section bodies where possible
 ### Step 5: Keep it lean
 
 These docs are for coding agents, not human marketing docs.

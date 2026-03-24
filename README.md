@@ -18,6 +18,8 @@ This skill creates or refreshes an `AGENTS/` directory with:
 
 The generated files are prefilled from the actual repository structure, routes, scripts, and backend contract clues, then intended to be refined further where needed.
 
+When run in `refresh` mode, the generator now merges by section and tries to preserve useful existing manual content instead of blindly overwriting whole files.
+
 ## Repository Layout
 
 ```text

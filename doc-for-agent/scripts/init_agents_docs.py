@@ -19,6 +19,96 @@ def write_file(path: Path, content: str) -> None:
     path.write_text(content.strip() + "\n", encoding="utf-8")
 
 
+def split_markdown_sections(content: str) -> Tuple[str, List[Tuple[str, str]]]:
+    lines = content.strip().splitlines()
+    if not lines:
+        return ("", [])
+
+    title = lines[0].strip()
+    sections: List[Tuple[str, str]] = []
+    current_heading: Optional[str] = None
+    current_lines: List[str] = []
+
+    for line in lines[1:]:
+        if line.startswith("## "):
+            if current_heading is not None:
+                sections.append((current_heading, "\n".join(current_lines).strip()))
+            current_heading = line.strip()
+            current_lines = []
+        else:
+            if current_heading is not None:
+                current_lines.append(line)
+
+    if current_heading is not None:
+        sections.append((current_heading, "\n".join(current_lines).strip()))
+
+    return (title, sections)
+
+
+def is_manual_section(content: str) -> bool:
+    stripped = content.strip()
+    if not stripped:
+        return False
+
+    useful_lines = []
+    for line in stripped.splitlines():
+        text = line.strip()
+        if not text:
+            continue
+        if text.startswith("TODO:") or text.startswith("- TODO:") or text.startswith("# TODO:"):
+            continue
+        useful_lines.append(text)
+
+    if not useful_lines:
+        return False
+
+    placeholder_patterns = [
+        "identify",
+        "describe",
+        "record",
+        "list primary users",
+        "list important",
+        "未检测到",
+    ]
+    joined = " ".join(useful_lines).lower()
+    return not all(pattern in joined for pattern in placeholder_patterns[:1]) or len(useful_lines) > 1
+
+
+def merge_markdown(existing: str, generated: str) -> str:
+    existing_title, existing_sections = split_markdown_sections(existing)
+    generated_title, generated_sections = split_markdown_sections(generated)
+    if not existing_sections:
+        return generated.strip() + "\n"
+
+    existing_map = {heading: body for heading, body in existing_sections}
+    merged_lines = [generated_title or existing_title]
+    seen = set()
+
+    for heading, body in generated_sections:
+        chosen = body
+        existing_body = existing_map.get(heading, "")
+        if is_manual_section(existing_body):
+            chosen = existing_body
+        merged_lines.extend(["", heading, "", chosen or ""])
+        seen.add(heading)
+
+    remaining_sections = [
+        (heading, body)
+        for heading, body in existing_sections
+        if heading not in seen and body.strip()
+    ]
+    if remaining_sections:
+        merged_lines.extend(["", "## Preserved Notes", ""])
+        for heading, body in remaining_sections:
+            merged_lines.append(f"- {heading.removeprefix('## ').strip()}")
+            merged_lines.append(f"  - Preserved from previous manual edits.")
+            if body.strip():
+                for line in body.splitlines():
+                    merged_lines.append(f"  {line}" if line.strip() else "")
+
+    return "\n".join(merged_lines).strip() + "\n"
+
+
 def find_first_existing(root: Path, candidates: Sequence[str]) -> Optional[Path]:
     for candidate in candidates:
         path = root / candidate
@@ -540,7 +630,12 @@ def main() -> None:
     files = generate_docs(root, project_name)
 
     for name, content in files.items():
-        write_file(agents_dir / name, content)
+        path = agents_dir / name
+        if args.mode == "refresh" and path.exists():
+            merged = merge_markdown(read_text(path), content)
+            write_file(path, merged)
+        else:
+            write_file(path, content)
 
     print(f"{args.mode.capitalize()}ed AGENTS docs in: {agents_dir}")
 
