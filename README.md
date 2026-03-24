@@ -46,6 +46,18 @@ ln -sfn /absolute/path/to/doc-for-agent /Users/$USER/.codex/skills/doc-for-agent
 
 After installation, restart Codex so the skill is discovered in a new session.
 
+## Install From GitHub
+
+If you want to install this skill from the published repository, use the Codex skill installer against this repo path:
+
+```bash
+python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo Timcai06/Doc-For-Agent-skill \
+  --path doc-for-agent
+```
+
+After installation, restart Codex so the new skill is loaded in future sessions.
+
 ## Use
 
 Ask Codex something like:
