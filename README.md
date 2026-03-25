@@ -34,6 +34,7 @@ The generator is now more agent-first in three important ways:
 - it classifies the repository shape before choosing how to describe it
 - it distinguishes confirmed facts from agent-facing inferences and open questions
 - it writes docs toward agent execution and handoff, not just human-oriented project summaries
+- it can now move toward a layered `AGENTS/` operating model instead of treating flat bootstrap output as the only long-term shape
 
 Recent quality improvements also make output more directly usable:
 
@@ -90,6 +91,7 @@ DocForAgent_skill/
     │   ├── snapshots.json
     │   └── verify_generator_snapshots.py
     └── references/
+        ├── agent-doc-migration-blueprint.md
         ├── agents-structure.md
         ├── layered-agents-blueprint.md
         └── multi-platform-distribution-blueprint.md
@@ -103,8 +105,8 @@ Current structure on `main` is intentionally simple:
 - `doc-for-agent/installer/docagent.py` is the minimal Python installer CLI for repo-local adapter installs.
 - `doc-for-agent/templates/product.json` carries product metadata used by the installer and install receipts.
 - `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, and Continue.
-- `doc-for-agent/tests/fixtures/` contains six representative sample repositories used by the snapshot regression test.
-- `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, and CLI dry-run behavior.
+- `doc-for-agent/tests/fixtures/` contains eight representative sample repositories used by the snapshot regression test.
+- `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, dry-run behavior, platform adapters, and installer CLI behavior.
 - Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
 - `src/doc_for_agent/` is currently treated as a local packaging experiment on `main`, not the canonical implementation tree.
 
@@ -254,6 +256,7 @@ python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode re
 
 The current shipped output is still the lean flat profile, but the repository now also carries a next-step design reference for a more durable, BDI-inspired layered `AGENTS/` topology:
 
+- `doc-for-agent/references/agent-doc-migration-blueprint.md`
 - `doc-for-agent/references/layered-agents-blueprint.md`
 - `doc-for-agent/references/multi-platform-distribution-blueprint.md`
 
@@ -261,6 +264,7 @@ That blueprint captures a likely future direction for the skill:
 
 - keep the current bootstrap profile for fast onboarding
 - add a layered profile for long-lived, phase-driven projects
+- normalize messy or legacy agent docs into one canonical layered `AGENTS/` root
 - introduce entry, execution, and memory docs as first-class agent primitives
 - separate the engine from platform adapters so the product can ship beyond Codex
 

@@ -6,6 +6,19 @@ from typing import Dict, List, Optional
 
 
 @dataclass(frozen=True)
+class DocumentationInventory:
+    canonical_agents_root: Optional[Path] = None
+    detected_state: str = "initialize"
+    agent_roots: List[Path] = field(default_factory=list)
+    flat_agent_files: List[Path] = field(default_factory=list)
+    layered_agent_files: List[Path] = field(default_factory=list)
+    root_agent_files: List[Path] = field(default_factory=list)
+    supporting_docs: List[Path] = field(default_factory=list)
+    archive_candidates: List[Path] = field(default_factory=list)
+    reference_only_docs: List[Path] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class SkillMetadata:
     skill_file: Optional[Path] = None
     skill_name: str = ""
@@ -71,3 +84,4 @@ class RepoAnalysis:
     cli_entrypoints: List[Path] = field(default_factory=list)
     signals: RepoSignals = field(default_factory=RepoSignals)
     classification: RepoClassification = field(default_factory=lambda: RepoClassification(primary_type="unknown"))
+    docs_inventory: DocumentationInventory = field(default_factory=DocumentationInventory)

@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from .models import RepoAnalysis, RepoClassification, RepoSignals, SkillMetadata
+from .models import DocumentationInventory, RepoAnalysis, RepoClassification, RepoSignals, SkillMetadata
 from .utils import (
     extract_readme_summary,
     find_files,
@@ -27,6 +27,16 @@ SUPPORTED_REPO_TYPES = (
 
 FRONTEND_FRAMEWORK_PACKAGES = {"next", "react", "vue", "svelte", "astro"}
 BACKEND_NODE_FRAMEWORK_PACKAGES = {"express", "fastify", "koa", "hono", "nestjs"}
+FLAT_AGENTS_FILENAMES = {
+    "README.md",
+    "product.md",
+    "architecture.md",
+    "frontend.md",
+    "backend.md",
+    "workflows.md",
+    "glossary.md",
+}
+LAYERED_AGENTS_PREFIXES = ("00-entry", "01-product", "02-architecture", "03-execution", "04-memory")
 
 
 def load_package_metadata(package_path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -349,6 +359,94 @@ def detect_skill_metadata(root: Path) -> SkillMetadata:
         agent_manifests=yaml_files,
         references=references,
         scripts=scripts,
+    )
+
+
+def sort_paths(paths: Sequence[Path]) -> List[Path]:
+    return sorted(paths, key=lambda path: str(path).replace("\\", "/"))
+
+
+def discover_documentation_inventory(root: Path) -> DocumentationInventory:
+    agent_roots = sort_paths(
+        [
+            path
+            for path in root.rglob("*")
+            if path.is_dir() and path.name == "AGENTS"
+        ]
+    )
+    root_agents_dir = root / "AGENTS"
+    if root_agents_dir.is_dir() and root_agents_dir not in agent_roots:
+        agent_roots.insert(0, root_agents_dir)
+
+    flat_agent_files: List[Path] = []
+    layered_agent_files: List[Path] = []
+    root_agent_files: List[Path] = []
+    archive_candidates: List[Path] = []
+
+    for agent_root in agent_roots:
+        files = sort_paths([path for path in agent_root.rglob("*") if path.is_file()])
+        if agent_root == root_agents_dir:
+            root_agent_files.extend(files)
+
+        for path in files:
+            try:
+                rel = path.relative_to(agent_root)
+            except ValueError:
+                continue
+            normalized = str(rel).replace("\\", "/")
+            parts = rel.parts
+            if len(parts) == 1 and rel.name in FLAT_AGENTS_FILENAMES:
+                flat_agent_files.append(path)
+                if agent_root == root_agents_dir:
+                    archive_candidates.append(path)
+            if parts and parts[0] in LAYERED_AGENTS_PREFIXES:
+                layered_agent_files.append(path)
+
+    canonical_agents_root: Optional[Path]
+    if root_agents_dir.is_dir():
+        canonical_agents_root = root_agents_dir
+    elif len(agent_roots) == 1:
+        canonical_agents_root = agent_roots[0]
+    elif agent_roots:
+        layered_roots = [
+            agent_root
+            for agent_root in agent_roots
+            if any((agent_root / prefix).exists() for prefix in LAYERED_AGENTS_PREFIXES)
+        ]
+        canonical_agents_root = layered_roots[0] if layered_roots else agent_roots[0]
+    else:
+        canonical_agents_root = root_agents_dir
+
+    supporting_patterns = [
+        "README.md",
+        "CLAUDE.md",
+        "docs/**/*.md",
+        "plan/**/*.md",
+        "specs/**/*.md",
+        "roadmap/**/*.md",
+    ]
+    supporting_docs = sort_paths(find_files(root, supporting_patterns, limit=20))
+    reference_only_docs = [path for path in supporting_docs if root_agents_dir not in path.parents]
+
+    if layered_agent_files and flat_agent_files:
+        detected_state = "migrate"
+    elif layered_agent_files:
+        detected_state = "refresh"
+    elif flat_agent_files or agent_roots:
+        detected_state = "migrate"
+    else:
+        detected_state = "initialize"
+
+    return DocumentationInventory(
+        canonical_agents_root=canonical_agents_root,
+        detected_state=detected_state,
+        agent_roots=agent_roots,
+        flat_agent_files=sort_paths(flat_agent_files),
+        layered_agent_files=sort_paths(layered_agent_files),
+        root_agent_files=sort_paths(root_agent_files),
+        supporting_docs=supporting_docs,
+        archive_candidates=sort_paths(archive_candidates),
+        reference_only_docs=sort_paths(reference_only_docs),
     )
 
 
@@ -722,6 +820,7 @@ def analyze_repo(
     package_manager = detect_package_manager(frontend_root, root)
     frontend_stack, routes, components, frontend_scripts = describe_frontend(frontend_root)
     backend_stack, endpoints, storage_rules = detect_backend_stack(backend_root)
+    docs_inventory = discover_documentation_inventory(root)
 
     return RepoAnalysis(
         root=root,
@@ -749,4 +848,5 @@ def analyze_repo(
         cli_entrypoints=cli_entrypoints,
         signals=signals,
         classification=classification,
+        docs_inventory=docs_inventory,
     )

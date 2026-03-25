@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 
 from doc_for_agent_generator import (
     MANUAL_END,
@@ -31,6 +32,17 @@ __all__ = [
 ]
 
 
+LEGACY_FLAT_TO_LAYERED_TARGETS = {
+    "README.md": ("00-entry/AGENTS.md",),
+    "product.md": ("01-product/002-prd.md",),
+    "architecture.md": ("02-architecture/007-architecture-compatibility.md",),
+    "frontend.md": ("02-architecture/005-frontend-guidelines.md",),
+    "backend.md": ("02-architecture/006-backend-structure.md",),
+    "workflows.md": ("03-execution/008-implementation-plan.md",),
+    "glossary.md": ("00-entry/AGENTS.md",),
+}
+
+
 def generate_docs(
     root: Path,
     project_name: str,
@@ -49,8 +61,63 @@ def resolve_output_content(path: Path, generated: str, mode: str) -> str:
     return generated
 
 
-def describe_dry_run(root: Path, mode: str, files: Dict[str, str]) -> None:
-    agents_dir = root / "AGENTS"
+def append_legacy_migration_notes(content: str, source_label: str, source_text: str) -> str:
+    body = source_text.strip()
+    if not body:
+        return content
+    section = "\n".join(
+        [
+            "## Migrated Notes",
+            "",
+            f"- Legacy source: `{source_label}`",
+            "",
+            MANUAL_START,
+            body,
+            MANUAL_END,
+        ]
+    )
+    return content.rstrip() + "\n\n" + section + "\n"
+
+
+def apply_layered_migration_overlays(analysis, files: Dict[str, str]) -> Dict[str, str]:
+    if analysis.doc_profile != "layered":
+        return files
+
+    migrated = dict(files)
+    canonical_root = analysis.docs_inventory.canonical_agents_root or (analysis.root / "AGENTS")
+    for path in analysis.docs_inventory.flat_agent_files:
+        targets = LEGACY_FLAT_TO_LAYERED_TARGETS.get(path.name, ())
+        if not targets:
+            continue
+        source_text = read_text(path)
+        if not source_text.strip():
+            continue
+        try:
+            source_label = str(path.relative_to(canonical_root)).replace("\\", "/")
+        except ValueError:
+            source_label = path.name
+        for target in targets:
+            if target not in migrated:
+                continue
+            migrated[target] = append_legacy_migration_notes(migrated[target], f"AGENTS/{source_label}", source_text)
+    return migrated
+
+
+def archive_legacy_flat_files(analysis) -> None:
+    if analysis.doc_profile != "layered":
+        return
+    canonical_root = analysis.docs_inventory.canonical_agents_root or (analysis.root / "AGENTS")
+    archive_root = canonical_root / "_archive" / "flat"
+    for path in analysis.docs_inventory.archive_candidates:
+        if not path.exists():
+            continue
+        destination = archive_root / path.name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+        path.unlink()
+
+
+def describe_dry_run(agents_dir: Path, mode: str, files: Dict[str, str], archive_candidates: Iterable[Path]) -> None:
     print(f"Dry run: would {mode} AGENTS docs in: {agents_dir}")
 
     for name, generated in files.items():
@@ -63,6 +130,8 @@ def describe_dry_run(root: Path, mode: str, files: Dict[str, str]) -> None:
         else:
             action = "update"
         print(f"- {action} AGENTS/{name}")
+    for path in archive_candidates:
+        print(f"- archive {path.name} -> AGENTS/_archive/flat/{path.name}")
 
 
 def print_analysis_explanation(analysis) -> None:
@@ -88,6 +157,9 @@ def print_analysis_explanation(analysis) -> None:
     )
     print(f"- Package manager: `{analysis.package_manager}`")
     print(f"- Suggested profile: `{suggested_profile}`")
+    print(f"- Documentation state: `{analysis.docs_inventory.detected_state}`")
+    if analysis.docs_inventory.canonical_agents_root:
+        print(f"- Canonical AGENTS root: `{analysis.docs_inventory.canonical_agents_root}`")
     if suggested_profile != analysis.doc_profile:
         print(f"- Note: current run requested profile `{analysis.doc_profile}`.")
     print(
@@ -103,6 +175,17 @@ def print_analysis_explanation(analysis) -> None:
         ("Secondary traits", analysis.classification.secondary_traits),
         ("Conflicting signals", analysis.classification.conflicting_signals),
         ("Open questions", analysis.classification.open_questions),
+        (
+            "Documentation inventory",
+            [
+                f"detected state: {analysis.docs_inventory.detected_state}",
+                f"agent roots: {len(analysis.docs_inventory.agent_roots)}",
+                f"flat agent files: {len(analysis.docs_inventory.flat_agent_files)}",
+                f"layered agent files: {len(analysis.docs_inventory.layered_agent_files)}",
+                f"supporting docs: {len(analysis.docs_inventory.supporting_docs)}",
+                f"archive candidates: {len(analysis.docs_inventory.archive_candidates)}",
+            ],
+        ),
         (
             "Signals",
             [
@@ -125,6 +208,10 @@ def print_analysis_explanation(analysis) -> None:
                 print(f"- {item}")
         else:
             print("- none")
+    if analysis.docs_inventory.reference_only_docs:
+        print("Reference-only docs:")
+        for path in analysis.docs_inventory.reference_only_docs[:6]:
+            print(f"- {path}")
 
 
 def main() -> None:
@@ -159,17 +246,19 @@ def main() -> None:
         repo_type_override=args.repo_type,
         doc_profile=args.profile,
     )
-    files = generate_docs_from_analysis(analysis)
+    files = apply_layered_migration_overlays(analysis, generate_docs_from_analysis(analysis))
 
     if args.explain:
         print_analysis_explanation(analysis)
 
     if args.dry_run:
-        describe_dry_run(root, args.mode, files)
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        describe_dry_run(agents_dir, args.mode, files, analysis.docs_inventory.archive_candidates)
         return
 
-    agents_dir = root / "AGENTS"
+    agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
     agents_dir.mkdir(parents=True, exist_ok=True)
+    archive_legacy_flat_files(analysis)
 
     for name, content in files.items():
         path = agents_dir / name

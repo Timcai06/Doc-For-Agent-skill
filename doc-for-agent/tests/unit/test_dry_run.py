@@ -76,6 +76,10 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("Repo type overridden via CLI: `cli-tool`.", result.stdout)
             self.assertIn("Automatic classification would have selected `skill-meta` instead.", result.stdout)
             self.assertIn("Suggested profile: `bootstrap`", result.stdout)
+            self.assertIn("Documentation state: `migrate`", result.stdout)
+            self.assertIn("Documentation inventory:", result.stdout)
+            self.assertIn("agent roots: 1", result.stdout)
+            self.assertIn("flat agent files: 0", result.stdout)
             self.assertIn("Suggested command: python3 doc-for-agent/scripts/init_agents_docs.py --root", result.stdout)
             self.assertIn("Suggested source-of-truth files:", result.stdout)
             self.assertIn("has package bin metadata: no", result.stdout)
@@ -116,6 +120,97 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("create AGENTS/00-entry/AGENTS.md", result.stdout)
             self.assertIn("create AGENTS/04-memory/010-lessons.md", result.stdout)
             self.assertFalse((sandbox_root / "AGENTS").exists())
+
+    def test_layered_migration_dry_run_reports_archive_actions(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-dry-run-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "legacy_agents_repo"
+            (sandbox_root / "AGENTS").mkdir(parents=True)
+            (sandbox_root / "README.md").write_text("# Legacy Repo\n\nLegacy repo.\n", encoding="utf-8")
+            (sandbox_root / "AGENTS/product.md").write_text("# Product\n\nLegacy product notes.\n", encoding="utf-8")
+            (sandbox_root / "AGENTS/workflows.md").write_text("# Workflows\n\nLegacy workflow notes.\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--profile",
+                    "layered",
+                    "--dry-run",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("archive product.md -> AGENTS/_archive/flat/product.md", result.stdout)
+            self.assertIn("archive workflows.md -> AGENTS/_archive/flat/workflows.md", result.stdout)
+            self.assertFalse((sandbox_root / "AGENTS/_archive").exists())
+
+    def test_layered_migration_archives_flat_docs_and_preserves_notes(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "legacy_agents_repo"
+            (sandbox_root / "AGENTS").mkdir(parents=True)
+            (sandbox_root / "README.md").write_text("# Legacy Repo\n\nLegacy repo.\n", encoding="utf-8")
+            (sandbox_root / "AGENTS/product.md").write_text(
+                "# Product\n\n## Confirmed Facts\n\n- Legacy product notes.\n",
+                encoding="utf-8",
+            )
+            (sandbox_root / "AGENTS/workflows.md").write_text(
+                "# Workflows\n\n## Setup\n\n- Legacy workflow notes.\n",
+                encoding="utf-8",
+            )
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--profile",
+                    "layered",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertFalse((sandbox_root / "AGENTS/product.md").exists())
+            self.assertFalse((sandbox_root / "AGENTS/workflows.md").exists())
+            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/product.md").exists())
+            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/workflows.md").exists())
+
+            prd_content = (sandbox_root / "AGENTS/01-product/002-prd.md").read_text(encoding="utf-8")
+            plan_content = (sandbox_root / "AGENTS/03-execution/008-implementation-plan.md").read_text(encoding="utf-8")
+            self.assertIn("## Migrated Notes", prd_content)
+            self.assertIn("Legacy source: `AGENTS/product.md`", prd_content)
+            self.assertIn("Legacy product notes.", prd_content)
+            self.assertIn("Legacy source: `AGENTS/workflows.md`", plan_content)
+            self.assertIn("Legacy workflow notes.", plan_content)
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--profile",
+                    "layered",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertFalse((sandbox_root / "AGENTS/product.md").exists())
+            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/product.md").exists())
 
 
 if __name__ == "__main__":

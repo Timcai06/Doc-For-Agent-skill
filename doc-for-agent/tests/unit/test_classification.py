@@ -17,6 +17,14 @@ from doc_for_agent_generator.analysis import analyze_repo
 
 
 class RepoClassificationTests(unittest.TestCase):
+    def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
+        analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")
+
+        self.assertEqual(analysis.docs_inventory.detected_state, "initialize")
+        self.assertEqual(analysis.docs_inventory.canonical_agents_root, FIXTURES_ROOT / "backend_service" / "AGENTS")
+        self.assertEqual(analysis.docs_inventory.flat_agent_files, [])
+        self.assertEqual(analysis.docs_inventory.layered_agent_files, [])
+
     def test_hybrid_skill_cli_reports_secondary_traits_and_conflict(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "hybrid_skill_cli", "Route Steward")
 
@@ -123,6 +131,49 @@ class RepoClassificationTests(unittest.TestCase):
 
             self.assertEqual(analysis.repo_type, "web-app")
             self.assertIn("CLI distribution surface is also present.", analysis.classification.secondary_traits)
+
+    def test_docs_inventory_reports_refresh_for_layered_agents_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-state-") as tmpdir:
+            root = Path(tmpdir) / "layered-repo"
+            (root / "AGENTS/00-entry").mkdir(parents=True)
+            (root / "AGENTS/01-product").mkdir(parents=True)
+            (root / "README.md").write_text("# Layered Repo\n\nLayered repo.\n", encoding="utf-8")
+            (root / "AGENTS/00-entry/AGENTS.md").write_text("# Entry\n", encoding="utf-8")
+            (root / "AGENTS/01-product/001-core-goals.md").write_text("# Goals\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Layered Repo")
+
+            self.assertEqual(analysis.docs_inventory.detected_state, "refresh")
+            self.assertEqual(analysis.docs_inventory.canonical_agents_root, root / "AGENTS")
+            self.assertEqual(len(analysis.docs_inventory.layered_agent_files), 2)
+            self.assertEqual(analysis.docs_inventory.flat_agent_files, [])
+
+    def test_docs_inventory_reports_migrate_for_flat_agents_and_scattered_docs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-migrate-state-") as tmpdir:
+            root = Path(tmpdir) / "migrate-repo"
+            (root / "AGENTS").mkdir(parents=True)
+            (root / "docs/architecture").mkdir(parents=True)
+            (root / "plan").mkdir(parents=True)
+            (root / "README.md").write_text("# Migrate Repo\n\nNeeds migration.\n", encoding="utf-8")
+            (root / "AGENTS/product.md").write_text("# Product\n", encoding="utf-8")
+            (root / "AGENTS/workflows.md").write_text("# Workflows\n", encoding="utf-8")
+            (root / "docs/architecture/overview.md").write_text("# Overview\n", encoding="utf-8")
+            (root / "plan/roadmap.md").write_text("# Roadmap\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Migrate Repo")
+
+            self.assertEqual(analysis.docs_inventory.detected_state, "migrate")
+            self.assertEqual(analysis.docs_inventory.canonical_agents_root, root / "AGENTS")
+            self.assertEqual(
+                [path.name for path in analysis.docs_inventory.flat_agent_files],
+                ["product.md", "workflows.md"],
+            )
+            self.assertTrue(any(path.name == "overview.md" for path in analysis.docs_inventory.reference_only_docs))
+            self.assertTrue(any(path.name == "roadmap.md" for path in analysis.docs_inventory.reference_only_docs))
+            self.assertEqual(
+                [path.name for path in analysis.docs_inventory.archive_candidates],
+                ["product.md", "workflows.md"],
+            )
 
 
 if __name__ == "__main__":
