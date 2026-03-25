@@ -1,4 +1,17 @@
 __pycache__/
 *.pyc
 .DS_Store
-AGENTS/
+.pytest_cache/
+.coverage
+.venv/
+
+# Generated AGENTS output for this repository root only.
+/AGENTS/
+
+# Local build and packaging artifacts.
+/build/
+/dist/
+*.egg-info/
+
+# Packaging experiments are not part of main's source of truth yet.
+/src/doc_for_agent/

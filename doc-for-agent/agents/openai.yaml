@@ -1,0 +1,5 @@
+version: 1
+display_name: Doc For Agent
+short_description: Bootstrap an AGENTS documentation directory for a new or existing coding project.
+default_prompt: Create or refresh an AGENTS directory for this repository based on the actual codebase and development workflow.
+

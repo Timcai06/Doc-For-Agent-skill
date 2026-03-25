@@ -41,15 +41,30 @@ The generator is now more agent-first in three important ways:
 DocForAgent_skill/
 ├── README.md
 ├── LICENSE
+├── .gitignore
 └── doc-for-agent/
     ├── SKILL.md
     ├── agents/
     │   └── openai.yaml
+    ├── tests/
+    │   ├── fixtures/
+    │   ├── snapshots.json
+    │   └── verify_generator_snapshots.py
     ├── scripts/
     │   └── init_agents_docs.py
     └── references/
         └── agents-structure.md
 ```
+
+Current structure on `main` is intentionally simple:
+
+- `doc-for-agent/` is the source of truth for the reusable Codex skill.
+- `doc-for-agent/agents/openai.yaml` is the skill manifest shipped with the adapter.
+- `doc-for-agent/tests/fixtures/` contains representative sample repositories used by the snapshot regression test.
+- Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
+- `src/doc_for_agent/` is currently treated as a local packaging experiment on `main`, not the canonical implementation tree.
+
+This keeps the default branch easier to reason about before splitting work across multiple `git worktree` directories.
 
 ## Install As a Codex Skill
 

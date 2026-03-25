@@ -1,0 +1,4 @@
+version: 1
+display_name: Tool Skill
+short_description: Shared agent documentation helper.
+default_prompt: Refresh the docs for this repository.
