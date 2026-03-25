@@ -121,6 +121,8 @@ python3 doc-for-agent/installer/docagent.py install --platform claude --target /
 python3 doc-for-agent/installer/docagent.py install --platform continue --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py update --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py --version
 ```
 
 Use `all` or `install --platform all` to install every supported adapter in one pass:
@@ -154,6 +156,7 @@ Recommended install flow:
 python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py update --target /path/to/repo
 ```
 
 ## Install As a Codex Skill

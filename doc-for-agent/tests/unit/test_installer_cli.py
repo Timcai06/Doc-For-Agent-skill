@@ -93,6 +93,35 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("doc-for-agent versions", report)
             self.assertIn("Continue (continue): not installed", report)
 
+    def test_update_command_refreshes_installed_platforms(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
+            main(["install", "--platform", "codex", "--target", tmpdir])
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["update", "--platform", "codex", "--target", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            report = stdout.getvalue()
+            self.assertIn("doc-for-agent update", report)
+            self.assertIn("Platforms: codex", report)
+            self.assertIn("Updated platform adapters:", report)
+
+    def test_update_command_without_installs_returns_nonzero(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["update", "--platform", "all", "--target", tmpdir])
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("No installed platforms were detected", stdout.getvalue())
+
+    def test_version_flag_prints_product_version(self) -> None:
+        with self.assertRaises(SystemExit) as context:
+            main(["--version"])
+
+        self.assertEqual(context.exception.code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

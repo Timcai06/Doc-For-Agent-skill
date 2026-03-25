@@ -105,6 +105,24 @@ def install_selected_platforms(target_root: Path, platforms: Sequence[str]) -> L
     return installed_paths
 
 
+def detect_installed_platforms(
+    target_root: Path,
+    platforms: Sequence[str] | None = None,
+) -> List[str]:
+    statuses = collect_doctor_statuses(target_root, platforms)
+    return [status.platform for status in statuses if status.installed]
+
+
+def resolve_update_platforms(target_root: Path, requested_platform: str) -> List[str]:
+    if requested_platform == "all":
+        return detect_installed_platforms(target_root)
+
+    statuses = collect_doctor_statuses(target_root, [requested_platform])
+    if statuses and statuses[0].installed:
+        return [requested_platform]
+    return []
+
+
 def render_versions_report(target_root: Path, statuses: Iterable[PlatformDoctorStatus]) -> str:
     metadata = load_product_metadata()
     lines = [
@@ -132,10 +150,29 @@ def print_install_summary(target_root: Path, platforms: Sequence[str], installed
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 
+def print_update_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
+    metadata = load_product_metadata()
+    print(f"{metadata.product_name} update")
+    print(f"- Version: {metadata.version}")
+    print(f"- Target root: {target_root}")
+    print(f"- Platforms: {', '.join(platforms)}")
+    print("Updated platform adapters:")
+    for path in installed_paths:
+        print(f"- {path}")
+    print("Next steps:")
+    print(f"- Run `{metadata.installer_command} versions --target {target_root}` to confirm installed versions.")
+    print("- Restart the relevant assistant if it was already running.")
+
+
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
     parser = argparse.ArgumentParser(
         description=f"Install {metadata.product_name} platform adapters into repository-local assistant folders."
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"{metadata.product_name} {metadata.version}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -169,6 +206,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Limit version output to one platform.",
     )
 
+    update_parser = subparsers.add_parser("update", help="Refresh installed platform adapters to the current source version.")
+    update_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+    update_parser.add_argument(
+        "--platform",
+        choices=available_platforms() + ["all"],
+        default="all",
+        help="Update one installed platform or all installed platforms.",
+    )
+
     return parser
 
 
@@ -191,6 +237,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "versions":
         platforms = available_platforms() if args.platform == "all" else [args.platform]
         print(render_versions_report(target_root, collect_doctor_statuses(target_root, platforms)))
+        return 0
+
+    if args.command == "update":
+        platforms = resolve_update_platforms(target_root, args.platform)
+        if not platforms:
+            if args.platform == "all":
+                print("No installed platforms were detected. Run `install` or `all` first.")
+            else:
+                print(
+                    f"Platform `{args.platform}` is not currently installed in {target_root}. "
+                    "Run `install` first."
+                )
+            return 1
+        installed_paths = install_selected_platforms(target_root, platforms)
+        print_update_summary(target_root, platforms, installed_paths)
         return 0
 
     parser.error(f"Unsupported command: {args.command}")
