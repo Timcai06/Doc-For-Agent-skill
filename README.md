@@ -1,20 +1,24 @@
-# Doc For Agent Skill
+# Doc For Agent
 
-`doc-for-agent` is a reusable Codex skill for bootstrapping an `AGENTS/` documentation directory in a new or existing software repository.
+`doc-for-agent` is a platformized skill for generating and refreshing an `AGENTS/` directory so coding agents can start from stable, repo-specific context instead of rediscovering a codebase from scratch.
 
-It is designed for teams who want every project to start with a clean, agent-facing documentation structure so coding agents can work against consistent product, architecture, workflow, and terminology docs.
+It is built for teams using multiple agents across real repositories and wanting a shared, refreshable layer for product context, architecture notes, workflows, and canonical terminology.
 
-This repository is now organized as a platformized skill repo:
+## Why It Exists
 
-- `src/doc_for_agent/` is the source of truth
-- `doc-for-agent/` is the Codex adapter package
-- `.claude/skills/doc-for-agent/` is the Claude adapter scaffold
-- `.cursor/skills/doc-for-agent/`, `.continue/skills/doc-for-agent/`, and `.windsurf/skills/doc-for-agent/` are additional skill adapters
-- `scripts/sync_platform_adapters.py` syncs shared source files into adapters
+Without an `AGENTS/` layer, every new agent has to re-infer:
 
-## What It Does
+- what kind of repository this is
+- which files are canonical
+- how to run or verify it
+- which names and terms should stay stable
+- what still needs human confirmation
 
-This skill creates or refreshes an `AGENTS/` directory with:
+`doc-for-agent` turns that repeated discovery work into a reusable project asset.
+
+## What It Generates
+
+The generator creates or refreshes:
 
 - `AGENTS/README.md`
 - `AGENTS/product.md`
@@ -24,10 +28,28 @@ This skill creates or refreshes an `AGENTS/` directory with:
 - `AGENTS/workflows.md`
 - `AGENTS/glossary.md`
 
-The generated files are prefilled from the actual repository structure, routes, scripts, and backend contract clues, then intended to be refined further where needed.
+The output is agent-first:
 
-When run in `refresh` mode, the generator now merges by section and tries to preserve useful existing manual content instead of blindly overwriting whole files.
-For long-lived notes, you can explicitly protect a block inside any section with:
+- repository type is classified before docs are written
+- sections separate confirmed facts, inferences, and open questions
+- refresh supports explicit manual preservation blocks
+- docs are optimized for action and handoff, not just human prose
+
+## Before / After
+
+Before:
+
+- a new agent explores the repo from scratch
+- terminology and workflows drift between agents
+- refreshes are manual and inconsistent
+
+After:
+
+- agents get a shared project map on entry
+- core docs stay aligned with the real repo shape
+- long-lived notes can survive refresh with manual markers
+
+Manual preservation syntax:
 
 ```md
 <!-- doc-for-agent:manual-start -->
@@ -35,87 +57,72 @@ Your hand-maintained notes here.
 <!-- doc-for-agent:manual-end -->
 ```
 
-The refresh step will carry those manual blocks forward.
+## Quick Start
 
-The generator is now more agent-first in three important ways:
-
-- it classifies the repository shape before choosing how to describe it
-- it distinguishes confirmed facts from agent-facing inferences and open questions
-- it writes docs toward agent execution and handoff, not just human-oriented project summaries
-
-## Repository Layout
-
-```text
-DocForAgent_skill/
-├── README.md
-├── LICENSE
-├── CLAUDE.md
-├── src/
-│   └── doc_for_agent/
-│       ├── scripts/
-│       ├── references/
-│       └── assets/
-├── doc-for-agent/
-│   ├── SKILL.md
-│   ├── agents/
-│   ├── scripts/
-│   └── references/
-├── .claude/
-│   └── skills/
-│       └── doc-for-agent/
-├── scripts/
-│   └── sync_platform_adapters.py
-├── docs/
-└── cli/
-```
-
-## Install As a Codex Skill
-
-If you already use Codex local skills, install this skill into `~/.codex/skills/`.
-
-One approach is to symlink it:
-
-```bash
-ln -sfn /absolute/path/to/doc-for-agent /Users/$USER/.codex/skills/doc-for-agent
-```
-
-After installation, restart Codex so the skill is discovered in a new session.
-
-You can also use the bundled CLI installer:
+### Codex
 
 ```bash
 python3 cli/docforagent.py init --ai codex
 ```
 
-## Install From GitHub
+Default install path:
 
-If you want to install this skill from the published repository, use the Codex skill installer against this repo path:
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo Timcai06/Doc-For-Agent-skill \
-  --path doc-for-agent
+```text
+~/.codex/skills/doc-for-agent
 ```
 
-After installation, restart Codex so the new skill is loaded in future sessions.
-
-## Install For Claude-Style Skills
+### Claude / Cursor / Continue / Windsurf
 
 From the target project directory:
 
 ```bash
 python3 /absolute/path/to/DocForAgent_skill/cli/docforagent.py init --ai claude
+python3 /absolute/path/to/DocForAgent_skill/cli/docforagent.py init --ai cursor
+python3 /absolute/path/to/DocForAgent_skill/cli/docforagent.py init --ai continue
+python3 /absolute/path/to/DocForAgent_skill/cli/docforagent.py init --ai windsurf
 ```
 
-This installs the Claude adapter into:
+### pipx
+
+```bash
+pipx install /absolute/path/to/DocForAgent_skill
+docforagent doctor
+```
+
+## Supported Platforms
+
+- Codex
+- Claude-style local skills
+- Cursor
+- Continue
+- Windsurf
+
+The current repository is organized so one shared source of truth can feed multiple platform adapters.
+
+## Product Layout
 
 ```text
-.claude/skills/doc-for-agent
+DocForAgent_skill/
+├── src/doc_for_agent/                # source of truth
+├── doc-for-agent/                    # Codex adapter
+├── .claude/skills/doc-for-agent/     # Claude adapter
+├── .cursor/skills/doc-for-agent/     # Cursor adapter
+├── .continue/skills/doc-for-agent/   # Continue adapter
+├── .windsurf/skills/doc-for-agent/   # Windsurf adapter
+├── cli/                              # installer CLI
+├── scripts/                          # sync/build helpers
+├── docs/                             # maintenance and release docs
+└── .github/workflows/                # CI and release automation
 ```
+
+Key rule:
+
+- `src/doc_for_agent/` is the source of truth
+- platform folders are generated or synchronized distribution surfaces
 
 ## CLI
 
-The minimal distribution CLI currently supports:
+Core commands:
 
 ```bash
 python3 cli/docforagent.py init --ai codex
@@ -126,68 +133,73 @@ python3 cli/docforagent.py init --ai windsurf
 python3 cli/docforagent.py init --ai all
 python3 cli/docforagent.py sync
 python3 cli/docforagent.py doctor
+python3 cli/docforagent.py targets
+python3 cli/docforagent.py --version
 ```
 
-You can also install the CLI as a Python package:
+What they do:
 
-```bash
-pipx install /absolute/path/to/DocForAgent_skill
-docforagent doctor
-```
+- `init`: installs a platform adapter into a target environment
+- `sync`: regenerates and syncs adapters from the source of truth
+- `doctor`: checks repository integrity for packaging and installs
+- `targets`: shows supported install targets and default paths
 
-## Use
+## Use It In Practice
 
-Ask Codex something like:
+Ask your agent something like:
 
 - `Create an AGENTS directory for this repository using doc-for-agent`
-- `Use doc-for-agent to bootstrap agent docs for this project`
 - `Refresh this repo's AGENTS docs based on the real codebase`
+- `Bootstrap agent-facing docs for this project`
 
-The skill's initializer script can also be run directly:
+You can also run the generator directly:
 
 ```bash
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh
-```
-
-Optional explicit project name:
-
-```bash
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --project-name "My Project" --mode refresh
-```
-
-Use `--mode init` if you want to be explicit about a brand new repository:
-
-```bash
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode init
 ```
 
-## Design Goals
+## Verification
 
-- Keep agent-facing docs lean
-- Prefer real commands over generic prose
-- Separate product, architecture, frontend, backend, workflows, and glossary concerns
-- Classify repository type before applying documentation structure
-- Distinguish confirmed facts, inferences, and open questions for safer agent consumption
-- Make new projects easier to onboard for coding agents
-- Scan the current codebase and prefill useful content instead of generating empty templates
-- Support refreshing existing `AGENTS/` docs when the repository evolves
-
-## Verify
-
-Run the generator regression checks against the bundled fixtures:
+Regression checks:
 
 ```bash
 python3 doc-for-agent/tests/verify_generator_snapshots.py
 ```
 
-This verifies representative `skill-meta`, `web-app`, `cli-tool`, and `library-sdk` repository shapes and checks that `init` followed by `refresh` stays stable.
-
-Sync the source-of-truth files into platform adapters after changing shared generator logic:
+Adapter regeneration:
 
 ```bash
 python3 scripts/sync_platform_adapters.py
 ```
 
-## Publishing
+CLI health:
 
-This repository is suitable for publishing on GitHub as a reusable skill source. Other users can install the skill from the repo path once the repository is public.
+```bash
+python3 cli/docforagent.py doctor
+```
+
+## Release Readiness
+
+This repository now includes:
+
+- centralized versioning
+- changelog tracking
+- CI verification
+- release workflow automation
+- buildable Python distribution artifacts
+
+See:
+
+- [CHANGELOG.md](/Users/tim/DocForAgent_skill/CHANGELOG.md)
+- [release-workflow.md](/Users/tim/DocForAgent_skill/docs/release-workflow.md)
+- [platform-architecture.md](/Users/tim/DocForAgent_skill/docs/platform-architecture.md)
+
+## Design Goals
+
+- keep agent-facing docs lean and executable
+- classify repository shape before writing docs
+- preserve high-signal human knowledge across refreshes
+- support multi-agent handoff and shared terminology
+- make packaging and installation explicit across platforms

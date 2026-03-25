@@ -72,6 +72,18 @@ python3 cli/docforagent.py sync
 python3 cli/docforagent.py doctor
 ```
 
+### Show supported targets
+
+```bash
+python3 cli/docforagent.py targets
+```
+
+### Show CLI version
+
+```bash
+python3 cli/docforagent.py --version
+```
+
 ## pipx Installation
 
 You can also install the CLI itself as a Python package:
@@ -86,3 +98,4 @@ docforagent doctor
 - The source of truth lives under `src/doc_for_agent/`.
 - `sync` updates all platform adapter copies from the source of truth.
 - `init` copies an adapter package into the target environment; it does not create symlinks.
+- `targets` shows the default install path for each supported platform in the current working directory.
