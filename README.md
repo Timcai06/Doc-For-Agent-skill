@@ -140,6 +140,18 @@ Preview the file plan without writing anything:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --dry-run
 ```
 
+Force a repo type when auto-detection is ambiguous:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --repo-type cli-tool
+```
+
+Explain the classification signals and reasoning before writing:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --explain
+```
+
 ## Design Goals
 
 - Keep agent-facing docs lean

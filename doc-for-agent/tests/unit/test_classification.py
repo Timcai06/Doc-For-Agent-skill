@@ -35,6 +35,21 @@ class RepoClassificationTests(unittest.TestCase):
         self.assertIn("Backend-like Python service structure detected without a separate frontend.", analysis.repo_type_reasons)
         self.assertIn("POST /events", analysis.endpoints)
 
+    def test_repo_type_override_replaces_automatic_classification(self) -> None:
+        analysis = analyze_repo(
+            FIXTURES_ROOT / "hybrid_skill_cli",
+            "Route Steward",
+            repo_type_override="cli-tool",
+        )
+
+        self.assertEqual(analysis.repo_type, "cli-tool")
+        self.assertEqual(analysis.classification.confidence, "high")
+        self.assertIn("Repo type overridden via CLI: `cli-tool`.", analysis.classification.reasons)
+        self.assertIn(
+            "Automatic classification would have selected `skill-meta` instead.",
+            analysis.classification.conflicting_signals,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

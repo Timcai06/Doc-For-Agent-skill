@@ -65,4 +65,5 @@ class RepoAnalysis:
     skill_meta: SkillMetadata = field(default_factory=SkillMetadata)
     library_entrypoints: List[Path] = field(default_factory=list)
     cli_entrypoints: List[Path] = field(default_factory=list)
+    signals: RepoSignals = field(default_factory=RepoSignals)
     classification: RepoClassification = field(default_factory=lambda: RepoClassification(primary_type="unknown"))

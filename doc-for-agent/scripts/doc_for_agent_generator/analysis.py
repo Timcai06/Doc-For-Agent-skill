@@ -15,6 +15,16 @@ from .utils import (
     read_text,
 )
 
+SUPPORTED_REPO_TYPES = (
+    "skill-meta",
+    "cli-tool",
+    "library-sdk",
+    "backend-service",
+    "web-app",
+    "monorepo",
+    "unknown",
+)
+
 
 def detect_frontend_root(root: Path) -> Optional[Path]:
     candidates = [root / "frontend", root]
@@ -455,6 +465,33 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
     )
 
 
+def apply_repo_type_override(
+    classification: RepoClassification,
+    forced_primary_type: Optional[str],
+) -> RepoClassification:
+    if not forced_primary_type:
+        return classification
+
+    reasons = [f"Repo type overridden via CLI: `{forced_primary_type}`."]
+    reasons.extend(classification.reasons)
+
+    conflicting_signals = list(classification.conflicting_signals)
+    if classification.primary_type != forced_primary_type:
+        conflicting_signals.insert(
+            0,
+            f"Automatic classification would have selected `{classification.primary_type}` instead.",
+        )
+
+    return RepoClassification(
+        primary_type=forced_primary_type,
+        confidence="high",
+        reasons=reasons,
+        secondary_traits=list(classification.secondary_traits),
+        conflicting_signals=conflicting_signals,
+        open_questions=list(classification.open_questions),
+    )
+
+
 def detect_repo_type(
     root: Path,
     frontend_root: Optional[Path],
@@ -478,7 +515,11 @@ def detect_repo_type(
     )
 
 
-def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
+def analyze_repo(
+    root: Path,
+    project_name: str,
+    repo_type_override: Optional[str] = None,
+) -> RepoAnalysis:
     frontend_root = detect_frontend_root(root)
     backend_root = detect_backend_root(root)
     cli_entrypoints = detect_cli_entrypoints(root)
@@ -492,7 +533,10 @@ def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
         library_entrypoints,
         skill_meta,
     )
-    classification = classify_repo(signals)
+    classification = apply_repo_type_override(
+        classify_repo(signals),
+        repo_type_override,
+    )
 
     summary = extract_readme_summary(root)
     package_manager = detect_package_manager(frontend_root, root)
@@ -522,5 +566,6 @@ def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
         skill_meta=skill_meta,
         library_entrypoints=library_entrypoints,
         cli_entrypoints=cli_entrypoints,
+        signals=signals,
         classification=classification,
     )
