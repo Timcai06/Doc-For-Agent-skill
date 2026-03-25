@@ -424,6 +424,10 @@ def collect_repo_signals(
         **(package.get("devDependencies") or {}),
     }
     dependency_names = sorted(str(key) for key in deps if isinstance(key, str))
+    package_bin = package.get("bin")
+    has_package_bin = isinstance(package_bin, str) or (
+        isinstance(package_bin, dict) and any(isinstance(key, str) for key in package_bin)
+    )
 
     has_workspace_config = any(
         (root / filename).exists() for filename in ("pnpm-workspace.yaml", "turbo.json", "nx.json", "lerna.json")
@@ -450,6 +454,7 @@ def collect_repo_signals(
         has_frontend=frontend_root is not None,
         has_backend=backend_root is not None,
         has_package_json=package_json.exists(),
+        has_package_bin=has_package_bin,
         has_python_packaging=find_first_existing(root, ["pyproject.toml", "setup.py"]) is not None,
         package_name=str(package.get("name") or ""),
         package_dependencies=dependency_names,
@@ -538,10 +543,15 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
                     "Root-level skill markers exist alongside workspace signals; confirm whether this repository is primarily a skill package or an application monorepo.",
                     severity="soft",
                 )
-    elif signals.cli_entrypoints and has_packaged_distribution:
+    elif (signals.cli_entrypoints or signals.has_package_bin) and has_packaged_distribution:
         primary_type = "cli-tool"
         confidence = "high"
-        reasons.append("CLI-like entrypoints detected in `bin/` or `cli/`.")
+        if signals.cli_entrypoints and signals.has_package_bin:
+            reasons.append("CLI-like entrypoints and package `bin` metadata were detected.")
+        elif signals.cli_entrypoints:
+            reasons.append("CLI-like entrypoints detected in `bin/` or `cli/`.")
+        else:
+            reasons.append("Package `bin` metadata indicates a CLI distribution surface.")
         if signals.has_package_json:
             append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
         if signals.has_python_packaging:

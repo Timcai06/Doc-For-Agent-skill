@@ -26,6 +26,7 @@ class RepoSignals:
     has_frontend: bool = False
     has_backend: bool = False
     has_package_json: bool = False
+    has_package_bin: bool = False
     has_python_packaging: bool = False
     package_name: str = ""
     package_dependencies: List[str] = field(default_factory=list)

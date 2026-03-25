@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Sequence
 
 from .models import RepoAnalysis
-from .utils import find_files, rel_path
+from .utils import find_files, load_json, rel_path
 
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
 
@@ -98,6 +98,107 @@ def detect_generator_script(root: Path) -> Path | None:
         limit=1,
     )
     return matches[0] if matches else None
+
+
+def detect_workspace_config_paths(root: Path) -> list[Path]:
+    names = ("pnpm-workspace.yaml", "turbo.json", "nx.json", "lerna.json")
+    return [root / name for name in names if (root / name).exists()]
+
+
+def detect_package_metadata_paths(root: Path) -> list[Path]:
+    names = ("package.json", "pyproject.toml", "setup.py", "requirements.txt", "requirements-dev.txt")
+    return [root / name for name in names if (root / name).exists()]
+
+
+def infer_source_of_truth_lines(analysis: RepoAnalysis) -> list[str]:
+    lines: list[str] = []
+
+    if analysis.repo_type == "skill-meta":
+        if analysis.skill_meta.skill_file:
+            lines.append(f"`{rel_path(analysis.skill_meta.skill_file, analysis.root)}` for trigger conditions and maintainer workflow")
+        if analysis.skill_meta.agent_manifests:
+            lines.append(
+                f"`{rel_path(analysis.skill_meta.agent_manifests[0], analysis.root)}` for launcher/marketplace invocation metadata"
+            )
+        script_root = analysis.root / "doc-for-agent/scripts"
+        if script_root.exists():
+            lines.append("`doc-for-agent/scripts/` for generation behavior and repository scanning")
+        reference_root = analysis.root / "doc-for-agent/references"
+        if reference_root.exists():
+            lines.append("`doc-for-agent/references/` for documentation structure and writing constraints")
+    elif analysis.repo_type == "monorepo":
+        for path in detect_workspace_config_paths(analysis.root):
+            lines.append(f"`{rel_path(path, analysis.root)}` for workspace/package boundaries")
+        if analysis.frontend_root:
+            lines.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for frontend behavior and scripts")
+        if analysis.backend_root:
+            lines.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for service/runtime behavior")
+        root_package = analysis.root / "package.json"
+        if root_package.exists():
+            lines.append("`package.json` for root-level scripts and workspace orchestration")
+    elif analysis.repo_type == "web-app":
+        if analysis.frontend_root:
+            lines.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for client routes, components, and UI scripts")
+        if analysis.backend_root:
+            lines.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for API endpoints and runtime behavior")
+        extend_unique(lines, [f"`{rel_path(path, analysis.root)}` for package/runtime metadata" for path in detect_package_metadata_paths(analysis.root)])
+    elif analysis.repo_type == "backend-service":
+        if analysis.backend_root:
+            lines.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for service logic and runtime wiring")
+            extend_unique(
+                lines,
+                [
+                    f"`{rel_path(path, analysis.root)}` for backend dependency/runtime configuration"
+                    for path in detect_package_metadata_paths(analysis.backend_root)
+                ],
+            )
+        if analysis.endpoints:
+            lines.append("Backend route decorators are canonical for endpoint contract discovery")
+    elif analysis.repo_type == "cli-tool":
+        if analysis.cli_entrypoints:
+            lines.append(f"`{rel_path(analysis.cli_entrypoints[0], analysis.root)}` as the primary command entrypoint")
+        if analysis.script_files:
+            lines.append("`scripts/` for operational helper commands and smoke checks")
+        extend_unique(lines, [f"`{rel_path(path, analysis.root)}` for installation/distribution metadata" for path in detect_package_metadata_paths(analysis.root)])
+    elif analysis.repo_type == "library-sdk":
+        if analysis.library_entrypoints:
+            lines.append(f"`{rel_path(analysis.library_entrypoints[0], analysis.root)}` as a likely public API entrypoint")
+        extend_unique(lines, [f"`{rel_path(path, analysis.root)}` for package/runtime metadata" for path in detect_package_metadata_paths(analysis.root)])
+
+    if not lines:
+        if analysis.frontend_root:
+            lines.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for frontend behavior and scripts")
+        if analysis.backend_root:
+            lines.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for backend/runtime behavior")
+    if not lines:
+        lines.append("Needs human confirmation: identify the files agents should treat as canonical entrypoints")
+
+    return lines
+
+
+def detect_root_package_scripts(root: Path) -> Dict[str, str]:
+    package_json = root / "package.json"
+    if not package_json.exists():
+        return {}
+    package = load_json(package_json)
+    scripts = package.get("scripts") or {}
+    return {
+        str(key): str(value)
+        for key, value in scripts.items()
+        if isinstance(key, str) and isinstance(value, str)
+    }
+
+
+def append_package_script_commands(lines: list[str], package_manager: str, scripts: Dict[str, str], keys: Sequence[str]) -> None:
+    for key in keys:
+        if key not in scripts:
+            continue
+        if package_manager == "yarn":
+            command = f"yarn {key}"
+        else:
+            command = f"{package_manager} run {key}"
+        if command not in lines:
+            lines.append(command)
 
 
 def build_readme(analysis: RepoAnalysis) -> str:
@@ -199,24 +300,7 @@ def build_architecture(analysis: RepoAnalysis) -> str:
         if analysis.skill_meta.agent_manifests:
             facts.append("Agent manifest files are present for marketplace or launcher integration.")
 
-    source_of_truth = []
-    if analysis.repo_type == "skill-meta":
-        source_of_truth.extend(
-            [
-                "`doc-for-agent/SKILL.md` for trigger conditions and operator workflow",
-                "`doc-for-agent/scripts/` for generation behavior and repository scanning",
-                "`doc-for-agent/references/` for output structure and style constraints",
-            ]
-        )
-    else:
-        if analysis.frontend_root:
-            source_of_truth.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for client-side code and scripts")
-        if analysis.backend_root:
-            source_of_truth.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for service/runtime logic")
-        if not source_of_truth:
-            source_of_truth.append(
-                "Needs human confirmation: identify the files agents should treat as canonical entrypoints"
-            )
+    source_of_truth = infer_source_of_truth_lines(analysis)
 
     handoff = []
     if analysis.repo_type == "skill-meta":
@@ -550,6 +634,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
     run_lines = []
     verify_lines = []
     refresh_lines = []
+    root_package_scripts = detect_root_package_scripts(analysis.root)
 
     if analysis.frontend_root:
         frontend_prefix = (
@@ -582,6 +667,20 @@ def build_workflows(analysis: RepoAnalysis) -> str:
                         else f"yarn {key}",
                     ]
                 )
+    elif root_package_scripts:
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.append(install_cmd)
+        append_package_script_commands(run_lines, analysis.package_manager, root_package_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            root_package_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
 
     if analysis.backend_root:
         backend_prefix = (
@@ -614,11 +713,11 @@ def build_workflows(analysis: RepoAnalysis) -> str:
     extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
 
     if not setup_lines:
-        setup_lines = ["# TODO: add repository setup commands"]
+        setup_lines = ["Review README setup steps and install dependencies with the repository's package manager."]
     if not run_lines:
-        run_lines = ["# TODO: add local run commands"]
+        run_lines = ["Run the primary local command from README examples (app start, CLI invocation, or generator refresh)."]
     if not verify_lines:
-        verify_lines = ["# TODO: add lint / test / build commands"]
+        verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     if not refresh_lines:
         refresh_lines = ["Refresh `AGENTS/` after major codebase, workflow, or terminology changes."]
 
@@ -959,22 +1058,7 @@ def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
 
 
 def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
-    source_of_truth = []
-    if analysis.repo_type == "skill-meta":
-        source_of_truth.extend(
-            [
-                "`doc-for-agent/SKILL.md` for trigger conditions and workflow",
-                "`doc-for-agent/scripts/` for generation behavior",
-                "`doc-for-agent/references/` for documentation shape constraints",
-            ]
-        )
-    else:
-        if analysis.frontend_root:
-            source_of_truth.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for client-side behavior")
-        if analysis.backend_root:
-            source_of_truth.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for runtime/service behavior")
-        if not source_of_truth:
-            source_of_truth.append("Needs human confirmation: identify the canonical files and directories.")
+    source_of_truth = infer_source_of_truth_lines(analysis)
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",

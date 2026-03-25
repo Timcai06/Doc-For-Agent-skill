@@ -65,6 +65,33 @@ class WorkflowGenerationTests(unittest.TestCase):
             )
             self.assertNotIn("# TODO: add lint / test / build commands", workflows)
 
+    def test_package_scripts_are_used_when_no_frontend_root_is_detected(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-workflows-scripts-") as tmpdir:
+            root = Path(tmpdir) / "scripted-cli"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                "# Scripted CLI\n\nCLI with package scripts but no frontend framework deps.\n",
+                encoding="utf-8",
+            )
+            (root / "package.json").write_text(
+                (
+                    '{"name":"scripted-cli","scripts":{"start":"node cli.js","lint":"eslint .",'
+                    '"test":"node --test","build":"tsup src/index.ts"}}\n'
+                ),
+                encoding="utf-8",
+            )
+            (root / "cli.js").write_text("console.log('ok')\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Scripted CLI")
+            workflows = build_workflows(analysis)
+
+            self.assertIn("npm install", workflows)
+            self.assertIn("npm run start", workflows)
+            self.assertIn("npm run lint", workflows)
+            self.assertIn("npm run test", workflows)
+            self.assertIn("npm run build", workflows)
+            self.assertNotIn("# TODO:", workflows)
+
 
 if __name__ == "__main__":
     unittest.main()
