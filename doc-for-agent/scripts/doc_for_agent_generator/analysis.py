@@ -25,27 +25,114 @@ SUPPORTED_REPO_TYPES = (
     "unknown",
 )
 
+FRONTEND_FRAMEWORK_PACKAGES = {"next", "react", "vue", "svelte", "astro"}
+BACKEND_NODE_FRAMEWORK_PACKAGES = {"express", "fastify", "koa", "hono", "nestjs"}
+
+
+def load_package_metadata(package_path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
+    package = load_json(package_path)
+    deps = {
+        str(key): str(value)
+        for key, value in {
+            **(package.get("dependencies") or {}),
+            **(package.get("devDependencies") or {}),
+        }.items()
+        if isinstance(key, str)
+    }
+    scripts = {
+        str(key): str(value)
+        for key, value in (package.get("scripts") or {}).items()
+        if isinstance(key, str) and isinstance(value, str)
+    }
+    return deps, scripts
+
+
+def collect_candidate_dirs(
+    root: Path,
+    fixed_rel_paths: Sequence[str],
+    parent_dirs: Sequence[str],
+) -> List[Path]:
+    candidates: List[Path] = []
+    seen: set[str] = set()
+
+    def add(path: Path) -> None:
+        resolved = str(path.resolve())
+        if path.is_dir() and resolved not in seen:
+            candidates.append(path)
+            seen.add(resolved)
+
+    for rel_path in fixed_rel_paths:
+        add(root / rel_path)
+
+    for parent_dir in parent_dirs:
+        parent_path = root / parent_dir
+        if not parent_path.is_dir():
+            continue
+        for child in sorted(parent_path.iterdir()):
+            add(child)
+
+    add(root)
+    return candidates
+
 
 def detect_frontend_root(root: Path) -> Optional[Path]:
-    candidates = [root / "frontend", root]
+    candidates = collect_candidate_dirs(
+        root,
+        fixed_rel_paths=(
+            "frontend",
+            "client",
+            "web",
+            "apps/web",
+            "apps/frontend",
+            "apps/client",
+            "apps/site",
+            "packages/web",
+            "packages/frontend",
+            "packages/client",
+        ),
+        parent_dirs=("apps", "packages"),
+    )
+
     for candidate in candidates:
-        if (candidate / "package.json").exists():
-            package = load_json(candidate / "package.json")
-            deps = {
-                **(package.get("dependencies") or {}),
-                **(package.get("devDependencies") or {}),
-            }
-            if any(key in deps for key in ("next", "react", "vue", "svelte", "astro")):
-                return candidate
+        package_json = candidate / "package.json"
+        if not package_json.exists():
+            continue
+        deps, _ = load_package_metadata(package_json)
+        if FRONTEND_FRAMEWORK_PACKAGES.intersection(deps):
+            return candidate
     return None
 
 
 def detect_backend_root(root: Path) -> Optional[Path]:
-    candidates = [root / "backend", root]
+    candidates = collect_candidate_dirs(
+        root,
+        fixed_rel_paths=(
+            "backend",
+            "api",
+            "server",
+            "services/api",
+            "services/backend",
+            "apps/api",
+            "apps/server",
+            "packages/api",
+            "packages/server",
+        ),
+        parent_dirs=("services", "apps", "packages"),
+    )
+
     for candidate in candidates:
         if (candidate / "app").exists() or (candidate / "requirements.txt").exists() or (candidate / "requirements-dev.txt").exists():
             if candidate != root or (candidate / "app").exists():
                 return candidate
+
+        package_json = candidate / "package.json"
+        if not package_json.exists():
+            continue
+        deps, scripts = load_package_metadata(package_json)
+        if BACKEND_NODE_FRAMEWORK_PACKAGES.intersection(deps):
+            if candidate != root or {"start", "dev", "serve"}.intersection(scripts):
+                return candidate
+
     return None
 
 
@@ -297,6 +384,30 @@ def detect_cli_entrypoints(root: Path) -> List[Path]:
     )
 
 
+def is_primary_skill_file(path: Optional[Path], root: Path) -> bool:
+    if not path:
+        return False
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        return False
+    return str(rel).replace("\\", "/") in {"SKILL.md", "skill.md", "doc-for-agent/SKILL.md"}
+
+
+def is_primary_agent_manifest(path: Path, root: Path) -> bool:
+    try:
+        parts = path.relative_to(root).parts
+    except ValueError:
+        return False
+    if not parts:
+        return False
+    if len(parts) >= 2 and parts[0] == "agents":
+        return True
+    if len(parts) >= 3 and parts[0] == "doc-for-agent" and parts[1] == "agents":
+        return True
+    return False
+
+
 def collect_repo_signals(
     root: Path,
     frontend_root: Optional[Path],
@@ -314,12 +425,28 @@ def collect_repo_signals(
     }
     dependency_names = sorted(str(key) for key in deps if isinstance(key, str))
 
+    has_workspace_config = any(
+        (root / filename).exists() for filename in ("pnpm-workspace.yaml", "turbo.json", "nx.json", "lerna.json")
+    )
+    has_workspace_layout = bool({"packages", "apps"}.intersection(top_level_dirs)) or has_workspace_config
+    if isinstance(package.get("workspaces"), list):
+        has_workspace_layout = True
+
+    has_skill_file = skill_meta.skill_file is not None
+    has_agent_manifests = bool(skill_meta.agent_manifests)
+    has_root_skill_markers = is_primary_skill_file(skill_meta.skill_file, root) or any(
+        is_primary_agent_manifest(path, root) for path in skill_meta.agent_manifests
+    )
+    has_embedded_skill_markers = (has_skill_file or has_agent_manifests) and not has_root_skill_markers
+
     return RepoSignals(
         top_level_dirs=top_level_dirs,
         top_level_files=list_top_level_files(root),
-        has_skill_file=skill_meta.skill_file is not None,
-        has_agent_manifests=bool(skill_meta.agent_manifests),
-        has_workspace_layout=bool({"packages", "apps"}.intersection(top_level_dirs)) or (root / "pnpm-workspace.yaml").exists(),
+        has_skill_file=has_skill_file,
+        has_agent_manifests=has_agent_manifests,
+        has_root_skill_markers=has_root_skill_markers,
+        has_embedded_skill_markers=has_embedded_skill_markers,
+        has_workspace_layout=has_workspace_layout,
         has_frontend=frontend_root is not None,
         has_backend=backend_root is not None,
         has_package_json=package_json.exists(),
@@ -336,10 +463,13 @@ def append_unique(target: List[str], item: str) -> None:
         target.append(item)
 
 
-def reduce_confidence(level: str, conflicts: int) -> str:
+def reduce_confidence(level: str, hard_conflicts: int, soft_conflicts: int = 0) -> str:
     levels = ["low", "medium", "high"]
     index = levels.index(level)
-    return levels[max(0, index - min(conflicts, 2))]
+    penalty = min(hard_conflicts, 2)
+    if soft_conflicts >= 2:
+        penalty = min(2, penalty + 1)
+    return levels[max(0, index - penalty)]
 
 
 def classify_repo(signals: RepoSignals) -> RepoClassification:
@@ -349,16 +479,32 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
     open_questions: List[str] = []
     primary_type = "unknown"
     confidence = "low"
+    hard_conflicts = 0
+    soft_conflicts = 0
+
+    def add_conflict(message: str, severity: str = "hard") -> None:
+        nonlocal hard_conflicts, soft_conflicts
+        if message in conflicting_signals:
+            return
+        conflicting_signals.append(message)
+        if severity == "soft":
+            soft_conflicts += 1
+        else:
+            hard_conflicts += 1
 
     build_like_deps = {"typescript", "tsup", "rollup", "vite"}
     has_build_deps = bool(build_like_deps.intersection(signals.package_dependencies))
     has_skill_markers = signals.has_skill_file or signals.has_agent_manifests
     has_packaged_distribution = signals.has_package_json or signals.has_python_packaging
+    has_primary_skill_markers = signals.has_root_skill_markers
+    has_strong_application_envelope = signals.has_workspace_layout or (signals.has_frontend and signals.has_backend)
 
-    if has_skill_markers:
+    if has_skill_markers and (has_primary_skill_markers or not has_strong_application_envelope):
         primary_type = "skill-meta"
         confidence = "high"
         reasons.append("Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).")
+        if signals.has_embedded_skill_markers and not has_primary_skill_markers:
+            reasons.append("Skill markers were detected in nested directories and no stronger app envelope was detected.")
         if signals.cli_entrypoints:
             append_unique(secondary_traits, "CLI distribution surface is also present.")
         if signals.has_package_json:
@@ -370,7 +516,7 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
         if signals.has_workspace_layout:
             append_unique(secondary_traits, "Workspace/monorepo layout is also present.")
         if signals.cli_entrypoints or has_packaged_distribution:
-            conflicting_signals.append(
+            add_conflict(
                 "Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities."
             )
     elif signals.has_workspace_layout:
@@ -385,6 +531,13 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
             append_unique(secondary_traits, "CLI tooling is also present.")
         if signals.has_package_json:
             append_unique(secondary_traits, "Package/distribution metadata is also present.")
+        if has_skill_markers:
+            append_unique(secondary_traits, "Embedded skill metadata is also present.")
+            if has_primary_skill_markers:
+                add_conflict(
+                    "Root-level skill markers exist alongside workspace signals; confirm whether this repository is primarily a skill package or an application monorepo.",
+                    severity="soft",
+                )
     elif signals.cli_entrypoints and has_packaged_distribution:
         primary_type = "cli-tool"
         confidence = "high"
@@ -396,11 +549,11 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
         if signals.library_entrypoints:
             append_unique(secondary_traits, "Library-style entrypoints are also present.")
         if signals.has_frontend:
-            conflicting_signals.append(
+            add_conflict(
                 "Frontend application signals exist alongside CLI entrypoints; confirm whether the CLI is the primary user surface."
             )
         if signals.has_backend:
-            conflicting_signals.append(
+            add_conflict(
                 "Backend service signals exist alongside CLI entrypoints; confirm whether the CLI is the primary user surface."
             )
     elif signals.cli_entrypoints:
@@ -417,6 +570,13 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
             append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
         if signals.has_python_packaging:
             append_unique(secondary_traits, "Python packaging metadata is also present.")
+        if has_skill_markers:
+            append_unique(secondary_traits, "Embedded skill metadata is also present.")
+            if has_primary_skill_markers:
+                add_conflict(
+                    "Root-level skill markers exist alongside web-app signals; confirm whether this repository is primarily a skill package or an application.",
+                    severity="soft",
+                )
 
     if primary_type == "unknown" and signals.has_backend and not signals.has_frontend:
         primary_type = "backend-service"
@@ -433,7 +593,7 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
             if signals.cli_entrypoints:
                 append_unique(secondary_traits, "CLI distribution surface is also present.")
             if signals.has_python_packaging:
-                conflicting_signals.append(
+                add_conflict(
                     "Both JavaScript and Python packaging metadata are present; confirm which install surface is canonical."
                 )
         elif signals.package_name:
@@ -448,12 +608,17 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
         if signals.cli_entrypoints:
             append_unique(secondary_traits, "CLI distribution surface is also present.")
 
+    if primary_type == "unknown" and has_skill_markers:
+        primary_type = "skill-meta"
+        confidence = "medium"
+        reasons.append("Skill markers were detected, but the repository shape remained ambiguous.")
+
     if primary_type == "unknown" and signals.top_level_files:
         open_questions.append(
             "Repository shape was not strongly classified; confirm whether this is an app, library, or tooling repo."
         )
 
-    confidence = reduce_confidence(confidence, len(conflicting_signals))
+    confidence = reduce_confidence(confidence, hard_conflicts=hard_conflicts, soft_conflicts=soft_conflicts)
 
     return RepoClassification(
         primary_type=primary_type,

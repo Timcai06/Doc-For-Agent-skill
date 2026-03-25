@@ -20,6 +20,8 @@ class RepoSignals:
     top_level_files: List[str] = field(default_factory=list)
     has_skill_file: bool = False
     has_agent_manifests: bool = False
+    has_root_skill_markers: bool = False
+    has_embedded_skill_markers: bool = False
     has_workspace_layout: bool = False
     has_frontend: bool = False
     has_backend: bool = False

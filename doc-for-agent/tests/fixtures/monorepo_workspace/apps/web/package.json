@@ -1,0 +1,12 @@
+{
+  "name": "repo-fleet-web",
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "18.3.1"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "lint": "next lint",
+    "build": "next build"
+  }
+}

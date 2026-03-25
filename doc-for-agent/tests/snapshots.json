@@ -130,6 +130,32 @@
       ]
     }
   },
+  "monorepo_workspace": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `monorepo`"
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "Workspace-style directories or pnpm workspace config detected.",
+        "Frontend application signals are also present.",
+        "Backend service signals are also present."
+      ]
+    },
+    "frontend.md": {
+      "contains": [
+        "Next.js 14.2.0, React 18.3.1",
+        "`/`"
+      ]
+    },
+    "backend.md": {
+      "contains": [
+        "FastAPI, Uvicorn",
+        "`GET /health`"
+      ]
+    }
+  },
   "layered_product_app": {
     "__profile": "layered",
     "__required_docs": [
