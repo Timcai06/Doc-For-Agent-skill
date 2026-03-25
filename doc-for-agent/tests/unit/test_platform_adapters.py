@@ -13,7 +13,13 @@ SCRIPT_ROOT = TEST_ROOT.parents[0] / "scripts"
 if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
-from render_platform_adapter import available_platforms, install_platform, load_platform_config, render_adapter
+from render_platform_adapter import (
+    available_platforms,
+    install_platform,
+    load_platform_config,
+    load_product_metadata,
+    render_adapter,
+)
 
 
 class PlatformAdapterTests(unittest.TestCase):
@@ -35,6 +41,7 @@ class PlatformAdapterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-adapter-") as tmpdir:
             target_root = Path(tmpdir)
             install_root = install_platform(target_root, load_platform_config("claude"))
+            receipt_path = install_root / load_product_metadata().install_receipt_filename
 
             self.assertTrue((install_root / "SKILL.md").exists())
             self.assertTrue((install_root / "scripts" / "init_agents_docs.py").exists())
@@ -42,9 +49,14 @@ class PlatformAdapterTests(unittest.TestCase):
             self.assertTrue((install_root / "agents" / "openai.yaml").exists())
             self.assertTrue((install_root / "templates" / "platforms" / "codex.json").exists())
             self.assertTrue((install_root / "installer" / "docagent.py").exists())
+            self.assertTrue(receipt_path.exists())
 
             skill_text = (install_root / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("python3 .claude/skills/doc-for-agent/scripts/init_agents_docs.py", skill_text)
+
+            receipt_text = receipt_path.read_text(encoding="utf-8")
+            self.assertIn('"platform": "claude"', receipt_text)
+            self.assertIn('"version": "0.2.0-dev"', receipt_text)
 
     def test_rendered_continue_adapter_uses_continue_paths(self) -> None:
         config = load_platform_config("continue")
