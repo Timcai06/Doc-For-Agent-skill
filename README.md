@@ -19,6 +19,21 @@ This skill creates or refreshes an `AGENTS/` directory with:
 The generated files are prefilled from the actual repository structure, routes, scripts, and backend contract clues, then intended to be refined further where needed.
 
 When run in `refresh` mode, the generator now merges by section and tries to preserve useful existing manual content instead of blindly overwriting whole files.
+For long-lived notes, you can explicitly protect a block inside any section with:
+
+```md
+<!-- doc-for-agent:manual-start -->
+Your hand-maintained notes here.
+<!-- doc-for-agent:manual-end -->
+```
+
+The refresh step will carry those manual blocks forward.
+
+The generator is now more agent-first in three important ways:
+
+- it classifies the repository shape before choosing how to describe it
+- it distinguishes confirmed facts from agent-facing inferences and open questions
+- it writes docs toward agent execution and handoff, not just human-oriented project summaries
 
 ## Repository Layout
 
@@ -91,9 +106,21 @@ python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode in
 - Keep agent-facing docs lean
 - Prefer real commands over generic prose
 - Separate product, architecture, frontend, backend, workflows, and glossary concerns
+- Classify repository type before applying documentation structure
+- Distinguish confirmed facts, inferences, and open questions for safer agent consumption
 - Make new projects easier to onboard for coding agents
 - Scan the current codebase and prefill useful content instead of generating empty templates
 - Support refreshing existing `AGENTS/` docs when the repository evolves
+
+## Verify
+
+Run the generator regression checks against the bundled fixtures:
+
+```bash
+python3 doc-for-agent/tests/verify_generator_snapshots.py
+```
+
+This verifies representative `skill-meta`, `web-app`, `cli-tool`, and `library-sdk` repository shapes and checks that `init` followed by `refresh` stays stable.
 
 ## Publishing
 

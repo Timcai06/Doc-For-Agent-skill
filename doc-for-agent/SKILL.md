@@ -19,6 +19,7 @@ This skill generates a pragmatic `AGENTS/` directory with these files:
 - `AGENTS/README.md`
 
 The generated docs are prefilled from the real repository structure. They are not generic placeholders only.
+They should help future agents act with lower ambiguity, not just read a prettier summary.
 
 ## When To Use
 
@@ -45,6 +46,7 @@ Before generating files, quickly inspect:
 Use that to infer:
 
 - project name
+- repository type
 - likely product purpose
 - likely frontend stack
 - likely backend stack
@@ -68,6 +70,7 @@ python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py -
 The script will scan and prefill from:
 
 - repository README
+- repository type signals such as skill markers, CLI entrypoints, package shape, and frontend/backend structure
 - frontend routes
 - frontend package scripts
 - backend endpoints
@@ -85,18 +88,22 @@ After generation, review the docs and tighten the parts the script cannot infer 
 - ownership boundaries
 - any project-specific naming rules
 - any manual sections you want to preserve long term; `refresh` now keeps useful existing section bodies where possible
+- any sections still marked as facts vs. inferences vs. open questions
+- any hand-maintained blocks wrapped with `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->`
 ### Step 5: Keep it lean
 
 These docs are for coding agents, not human marketing docs.
 
 Prefer:
 
+- confirmed facts over confident guesses
 - constraints
 - real commands
 - route structure
 - response contract notes
 - naming conventions
 - file ownership hints
+- task-oriented handoff guidance
 
 Avoid:
 
