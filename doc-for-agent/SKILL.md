@@ -6,6 +6,8 @@ description: Generate and maintain an AGENTS documentation directory for a codin
 
 Use this skill when the user wants to initialize or refresh an `AGENTS/` directory for a repository so future coding agents can work against a stable, project-specific documentation structure.
 
+This `doc-for-agent/` folder is the Codex adapter package. Shared logic is maintained under `src/doc_for_agent/` and synced here for distribution compatibility.
+
 ## What This Skill Produces
 
 This skill generates a pragmatic `AGENTS/` directory with these files:
@@ -116,3 +118,4 @@ Avoid:
 For the intended file purposes and writing style, see:
 
 - `references/agents-structure.md`
+- `../src/doc_for_agent/` for the source-of-truth implementation in this repository

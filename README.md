@@ -4,6 +4,14 @@
 
 It is designed for teams who want every project to start with a clean, agent-facing documentation structure so coding agents can work against consistent product, architecture, workflow, and terminology docs.
 
+This repository is now organized as a platformized skill repo:
+
+- `src/doc_for_agent/` is the source of truth
+- `doc-for-agent/` is the Codex adapter package
+- `.claude/skills/doc-for-agent/` is the Claude adapter scaffold
+- `.cursor/skills/doc-for-agent/`, `.continue/skills/doc-for-agent/`, and `.windsurf/skills/doc-for-agent/` are additional skill adapters
+- `scripts/sync_platform_adapters.py` syncs shared source files into adapters
+
 ## What It Does
 
 This skill creates or refreshes an `AGENTS/` directory with:
@@ -41,14 +49,24 @@ The generator is now more agent-first in three important ways:
 DocForAgent_skill/
 ├── README.md
 ├── LICENSE
-└── doc-for-agent/
-    ├── SKILL.md
-    ├── agents/
-    │   └── openai.yaml
-    ├── scripts/
-    │   └── init_agents_docs.py
-    └── references/
-        └── agents-structure.md
+├── CLAUDE.md
+├── src/
+│   └── doc_for_agent/
+│       ├── scripts/
+│       ├── references/
+│       └── assets/
+├── doc-for-agent/
+│   ├── SKILL.md
+│   ├── agents/
+│   ├── scripts/
+│   └── references/
+├── .claude/
+│   └── skills/
+│       └── doc-for-agent/
+├── scripts/
+│   └── sync_platform_adapters.py
+├── docs/
+└── cli/
 ```
 
 ## Install As a Codex Skill
@@ -63,6 +81,12 @@ ln -sfn /absolute/path/to/doc-for-agent /Users/$USER/.codex/skills/doc-for-agent
 
 After installation, restart Codex so the skill is discovered in a new session.
 
+You can also use the bundled CLI installer:
+
+```bash
+python3 cli/docforagent.py init --ai codex
+```
+
 ## Install From GitHub
 
 If you want to install this skill from the published repository, use the Codex skill installer against this repo path:
@@ -74,6 +98,42 @@ python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-githu
 ```
 
 After installation, restart Codex so the new skill is loaded in future sessions.
+
+## Install For Claude-Style Skills
+
+From the target project directory:
+
+```bash
+python3 /absolute/path/to/DocForAgent_skill/cli/docforagent.py init --ai claude
+```
+
+This installs the Claude adapter into:
+
+```text
+.claude/skills/doc-for-agent
+```
+
+## CLI
+
+The minimal distribution CLI currently supports:
+
+```bash
+python3 cli/docforagent.py init --ai codex
+python3 cli/docforagent.py init --ai claude
+python3 cli/docforagent.py init --ai cursor
+python3 cli/docforagent.py init --ai continue
+python3 cli/docforagent.py init --ai windsurf
+python3 cli/docforagent.py init --ai all
+python3 cli/docforagent.py sync
+python3 cli/docforagent.py doctor
+```
+
+You can also install the CLI as a Python package:
+
+```bash
+pipx install /absolute/path/to/DocForAgent_skill
+docforagent doctor
+```
 
 ## Use
 
@@ -121,6 +181,12 @@ python3 doc-for-agent/tests/verify_generator_snapshots.py
 ```
 
 This verifies representative `skill-meta`, `web-app`, `cli-tool`, and `library-sdk` repository shapes and checks that `init` followed by `refresh` stays stable.
+
+Sync the source-of-truth files into platform adapters after changing shared generator logic:
+
+```bash
+python3 scripts/sync_platform_adapters.py
+```
 
 ## Publishing
 
