@@ -62,6 +62,7 @@ DocForAgent_skill/
     │   ├── base/
     │   │   ├── skill-content.md
     │   │   └── workflow-content.md
+    │   ├── product.json
     │   └── platforms/
     │       ├── claude.json
     │       ├── codex.json
@@ -92,6 +93,7 @@ Current structure on `main` is intentionally simple:
 - `doc-for-agent/agents/openai.yaml` is the manifest shipped with installed adapters.
 - `doc-for-agent/scripts/doc_for_agent_generator/` contains the modular generator core for analysis, content building, merge logic, and shared models.
 - `doc-for-agent/installer/docagent.py` is the minimal Python installer CLI for repo-local adapter installs.
+- `doc-for-agent/templates/product.json` carries product metadata used by the installer and install receipts.
 - `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, and Continue.
 - `doc-for-agent/tests/fixtures/` contains six representative sample repositories used by the snapshot regression test.
 - `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, and CLI dry-run behavior.
@@ -109,11 +111,14 @@ python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py install --platform codex --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py install --platform claude --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py install --platform continue --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
 ```
 
-Use `--platform all` to install every supported adapter in one pass:
+Use `all` or `install --platform all` to install every supported adapter in one pass:
 
 ```bash
+python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
 python3 doc-for-agent/installer/docagent.py install --platform all --target /path/to/repo
 ```
 
@@ -123,7 +128,25 @@ Each install writes a self-contained bundle under the platform's hidden folder:
 - Claude Code: `.claude/skills/doc-for-agent/`
 - Continue: `.continue/skills/doc-for-agent/`
 
-The installed bundle includes the rendered `SKILL.md`, generator scripts, templates, references, agent manifests, and the installer itself.
+The installed bundle includes:
+
+- the rendered `SKILL.md`
+- generator scripts
+- platform templates
+- references
+- agent manifests
+- the installer itself
+- an `INSTALLATION.json` receipt with platform and version metadata
+
+The current product metadata lives in `doc-for-agent/templates/product.json`, so the installer and the installed bundle share one version source.
+
+Recommended install flow:
+
+```bash
+python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
+```
 
 ## Install As a Codex Skill
 

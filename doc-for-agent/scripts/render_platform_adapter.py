@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import shutil
 from dataclasses import dataclass
@@ -26,6 +27,15 @@ class PlatformConfig:
     post_install_notes: List[str]
 
 
+@dataclass(frozen=True)
+class ProductMetadata:
+    product_name: str
+    product_slug: str
+    version: str
+    installer_command: str
+    install_receipt_filename: str
+
+
 def skill_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -36,6 +46,17 @@ def templates_root() -> Path:
 
 def load_template(name: str) -> str:
     return read_text(templates_root() / "base" / name)
+
+
+def load_product_metadata() -> ProductMetadata:
+    payload = json.loads(read_text(templates_root() / "product.json"))
+    return ProductMetadata(
+        product_name=str(payload["product_name"]),
+        product_slug=str(payload["product_slug"]),
+        version=str(payload["version"]),
+        installer_command=str(payload["installer_command"]),
+        install_receipt_filename=str(payload["install_receipt_filename"]),
+    )
 
 
 def available_platforms() -> List[str]:
@@ -113,12 +134,38 @@ def copy_bundled_assets(install_root: Path) -> None:
             shutil.copytree(source, install_root / directory_name, dirs_exist_ok=True)
 
 
+def install_receipt_path(install_root: Path) -> Path:
+    return install_root / load_product_metadata().install_receipt_filename
+
+
+def write_install_receipt(install_root: Path, config: PlatformConfig) -> Path:
+    metadata = load_product_metadata()
+    receipt = {
+        "product_name": metadata.product_name,
+        "product_slug": metadata.product_slug,
+        "version": metadata.version,
+        "installed_at_utc": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+        "platform": config.platform,
+        "display_name": config.display_name,
+        "adapter_kind": config.adapter_kind,
+        "install_type": config.install_type,
+        "install_root": str(install_root),
+        "adapter_file": config.folder_structure["filename"],
+        "bundled_assets": bundled_asset_directories(),
+        "installer_command": metadata.installer_command,
+    }
+    receipt_path = install_receipt_path(install_root)
+    write_file(receipt_path, json.dumps(receipt, indent=2))
+    return receipt_path
+
+
 def install_platform(target_root: Path, config: PlatformConfig) -> Path:
     install_root = platform_install_root(target_root, config)
     install_root.mkdir(parents=True, exist_ok=True)
 
     write_file(install_root / config.folder_structure["filename"], render_adapter(config))
     copy_bundled_assets(install_root)
+    write_install_receipt(install_root, config)
     return install_root
 
 

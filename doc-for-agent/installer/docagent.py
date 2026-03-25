@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import sys
 from dataclasses import dataclass
@@ -19,7 +20,9 @@ if str(SCRIPTS_ROOT) not in sys.path:
 from render_platform_adapter import (  # noqa: E402
     available_platforms,
     bundled_asset_directories,
+    install_receipt_path,
     install_platform,
+    load_product_metadata,
     load_platform_config,
     platform_install_root,
 )
@@ -33,10 +36,19 @@ class PlatformDoctorStatus:
     install_root: Path
     installed: bool
     assistant_root_exists: bool
+    installed_version: str | None
+    receipt_path: Path
 
 
 def resolve_target_root(target: str) -> Path:
     return Path(target).expanduser().resolve()
+
+
+def load_install_receipt(install_root: Path) -> dict[str, object]:
+    try:
+        return json.loads(install_receipt_path(install_root).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
 
 
 def collect_doctor_statuses(target_root: Path, platforms: Sequence[str] | None = None) -> List[PlatformDoctorStatus]:
@@ -47,6 +59,8 @@ def collect_doctor_statuses(target_root: Path, platforms: Sequence[str] | None =
         assistant_root = target_root / config.folder_structure["root"]
         install_root = platform_install_root(target_root, config)
         adapter_file = install_root / config.folder_structure["filename"]
+        receipt_path = install_receipt_path(install_root)
+        receipt = load_install_receipt(install_root)
         statuses.append(
             PlatformDoctorStatus(
                 platform=platform,
@@ -55,15 +69,19 @@ def collect_doctor_statuses(target_root: Path, platforms: Sequence[str] | None =
                 install_root=install_root,
                 installed=adapter_file.exists(),
                 assistant_root_exists=assistant_root.exists(),
+                installed_version=str(receipt.get("version")) if receipt.get("version") else None,
+                receipt_path=receipt_path,
             )
         )
     return statuses
 
 
 def render_doctor_report(target_root: Path, statuses: Iterable[PlatformDoctorStatus]) -> str:
+    metadata = load_product_metadata()
     python_path = shutil.which("python3") or shutil.which("python") or "missing"
     lines = [
-        f"doc-for-agent doctor",
+        f"{metadata.product_name} doctor",
+        f"- Version: {metadata.version}",
         f"- Target root: {target_root}",
         f"- Skill source: {SKILL_ROOT}",
         f"- Python: {python_path}",
@@ -73,8 +91,9 @@ def render_doctor_report(target_root: Path, statuses: Iterable[PlatformDoctorSta
     for status in statuses:
         install_state = "installed" if status.installed else "not installed"
         root_state = "assistant folder present" if status.assistant_root_exists else "assistant folder will be created"
+        version_state = f"version={status.installed_version}" if status.installed_version else "version=unknown"
         lines.append(
-            f"- {status.display_name} ({status.platform}): {install_state}; {root_state}; target={status.install_root}"
+            f"- {status.display_name} ({status.platform}): {install_state}; {version_state}; {root_state}; target={status.install_root}"
         )
     return "\n".join(lines)
 
@@ -86,9 +105,37 @@ def install_selected_platforms(target_root: Path, platforms: Sequence[str]) -> L
     return installed_paths
 
 
+def render_versions_report(target_root: Path, statuses: Iterable[PlatformDoctorStatus]) -> str:
+    metadata = load_product_metadata()
+    lines = [
+        f"{metadata.product_name} versions",
+        f"- Source version: {metadata.version}",
+        f"- Target root: {target_root}",
+    ]
+    for status in statuses:
+        installed_version = status.installed_version or "not installed"
+        lines.append(f"- {status.display_name} ({status.platform}): {installed_version}")
+    return "\n".join(lines)
+
+
+def print_install_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
+    metadata = load_product_metadata()
+    print(f"{metadata.product_name} install")
+    print(f"- Version: {metadata.version}")
+    print(f"- Target root: {target_root}")
+    print(f"- Platforms: {', '.join(platforms)}")
+    print("Installed platform adapters:")
+    for path in installed_paths:
+        print(f"- {path}")
+    print("Next steps:")
+    print(f"- Run `{metadata.installer_command} doctor --target {target_root}` to verify the install.")
+    print("- Restart the relevant assistant so the new local skill bundle is loaded.")
+
+
 def build_parser() -> argparse.ArgumentParser:
+    metadata = load_product_metadata()
     parser = argparse.ArgumentParser(
-        description="Install doc-for-agent platform adapters into a repository-local assistant folder."
+        description=f"Install {metadata.product_name} platform adapters into repository-local assistant folders."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -110,6 +157,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     install_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
 
+    all_parser = subparsers.add_parser("all", help="Install all supported platform adapters.")
+    all_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+
+    versions_parser = subparsers.add_parser("versions", help="Show source and installed platform versions.")
+    versions_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+    versions_parser.add_argument(
+        "--platform",
+        choices=available_platforms() + ["all"],
+        default="all",
+        help="Limit version output to one platform.",
+    )
+
     return parser
 
 
@@ -123,12 +182,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(render_doctor_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
 
-    if args.command == "install":
-        platforms = available_platforms() if args.platform == "all" else [args.platform]
+    if args.command in {"install", "all"}:
+        platforms = available_platforms() if args.command == "all" or args.platform == "all" else [args.platform]
         installed_paths = install_selected_platforms(target_root, platforms)
-        print("Installed platform adapters:")
-        for path in installed_paths:
-            print(f"- {path}")
+        print_install_summary(target_root, platforms, installed_paths)
+        return 0
+
+    if args.command == "versions":
+        platforms = available_platforms() if args.platform == "all" else [args.platform]
+        print(render_versions_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
 
     parser.error(f"Unsupported command: {args.command}")
