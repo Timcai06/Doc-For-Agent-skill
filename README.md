@@ -62,13 +62,17 @@ DocForAgent_skill/
     │       ├── markdown.py
     │       ├── models.py
     │       └── utils.py
+    ├── installer/
+    │   ├── __init__.py
+    │   └── docagent.py
     ├── templates/
     │   ├── base/
     │   │   ├── skill-content.md
     │   │   └── workflow-content.md
     │   └── platforms/
     │       ├── claude.json
-    │       └── codex.json
+    │       ├── codex.json
+    │       └── continue.json
     ├── tests/
     │   ├── fixtures/
     │   │   ├── backend_service/
@@ -92,8 +96,10 @@ DocForAgent_skill/
 Current structure on `main` is intentionally simple:
 
 - `doc-for-agent/` is the source of truth for the reusable Codex skill.
-- `doc-for-agent/agents/openai.yaml` is the skill manifest shipped with the adapter.
+- `doc-for-agent/agents/openai.yaml` is the manifest shipped with installed adapters.
 - `doc-for-agent/scripts/doc_for_agent_generator/` contains the modular generator core for analysis, content building, merge logic, and shared models.
+- `doc-for-agent/installer/docagent.py` is the minimal Python installer CLI for repo-local adapter installs.
+- `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, and Continue.
 - `doc-for-agent/tests/fixtures/` contains six representative sample repositories used by the snapshot regression test.
 - `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, and CLI dry-run behavior.
 - Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
@@ -101,11 +107,34 @@ Current structure on `main` is intentionally simple:
 
 This keeps the default branch easier to reason about before splitting work across multiple `git worktree` directories.
 
+## Install With the Product CLI
+
+The new minimal installer CLI gives `doc-for-agent` a cleaner distribution surface for repo-local assistant installs:
+
+```bash
+python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py install --platform codex --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py install --platform claude --target /path/to/repo
+python3 doc-for-agent/installer/docagent.py install --platform continue --target /path/to/repo
+```
+
+Use `--platform all` to install every supported adapter in one pass:
+
+```bash
+python3 doc-for-agent/installer/docagent.py install --platform all --target /path/to/repo
+```
+
+Each install writes a self-contained bundle under the platform's hidden folder:
+
+- Codex: `.codex/skills/doc-for-agent/`
+- Claude Code: `.claude/skills/doc-for-agent/`
+- Continue: `.continue/skills/doc-for-agent/`
+
+The installed bundle includes the rendered `SKILL.md`, generator scripts, templates, references, agent manifests, and the installer itself.
+
 ## Install As a Codex Skill
 
-If you already use Codex local skills, install this skill into `~/.codex/skills/`.
-
-One approach is to symlink it:
+If you already use Codex local skills and want a manual install into `~/.codex/skills/`, symlinking still works:
 
 ```bash
 ln -sfn /absolute/path/to/doc-for-agent /Users/$USER/.codex/skills/doc-for-agent
@@ -168,6 +197,7 @@ Render the current platform adapter scaffold into a project-local assistant fold
 ```bash
 python3 doc-for-agent/scripts/render_platform_adapter.py --platform codex --target /path/to/repo
 python3 doc-for-agent/scripts/render_platform_adapter.py --platform claude --target /path/to/repo
+python3 doc-for-agent/scripts/render_platform_adapter.py --platform continue --target /path/to/repo
 ```
 
 Force a repo type when auto-detection is ambiguous:
@@ -225,4 +255,11 @@ This now verifies representative `skill-meta`, `hybrid skill + CLI`, `backend se
 
 ## Publishing
 
-This repository is suitable for publishing on GitHub as a reusable skill source. Other users can install the skill from the repo path once the repository is public.
+This repository now has the beginnings of a product distribution shape:
+
+- the engine stays Python-first
+- platform adapters are template-driven
+- installs produce self-contained bundles
+- the installer exposes a clear `doctor` / `install` surface
+
+The next likely packaging step is a publishable Python entrypoint so `docagent` can be installed directly with `pipx` or `uv tool install`.

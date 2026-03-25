@@ -97,16 +97,28 @@ def render_adapter(config: PlatformConfig) -> str:
     return content
 
 
+def platform_install_root(target_root: Path, config: PlatformConfig) -> Path:
+    return target_root / config.folder_structure["root"] / config.folder_structure["skill_path"]
+
+
+def bundled_asset_directories() -> List[str]:
+    # Keep adapters self-contained so a project-local install can be copied or refreshed later.
+    return ["scripts", "references", "agents", "templates", "installer"]
+
+
+def copy_bundled_assets(install_root: Path) -> None:
+    for directory_name in bundled_asset_directories():
+        source = skill_root() / directory_name
+        if source.exists():
+            shutil.copytree(source, install_root / directory_name, dirs_exist_ok=True)
+
+
 def install_platform(target_root: Path, config: PlatformConfig) -> Path:
-    install_root = target_root / config.folder_structure["root"] / config.folder_structure["skill_path"]
+    install_root = platform_install_root(target_root, config)
     install_root.mkdir(parents=True, exist_ok=True)
 
     write_file(install_root / config.folder_structure["filename"], render_adapter(config))
-    shutil.copytree(skill_root() / "scripts", install_root / "scripts", dirs_exist_ok=True)
-    shutil.copytree(skill_root() / "references", install_root / "references", dirs_exist_ok=True)
-    agent_manifest = skill_root() / "agents"
-    if agent_manifest.exists():
-        shutil.copytree(agent_manifest, install_root / "agents", dirs_exist_ok=True)
+    copy_bundled_assets(install_root)
     return install_root
 
 
