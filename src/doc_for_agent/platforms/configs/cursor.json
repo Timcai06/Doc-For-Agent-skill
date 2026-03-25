@@ -1,0 +1,7 @@
+{
+  "platform": "cursor",
+  "name": "doc-for-agent",
+  "description": "Generate and refresh an AGENTS directory for a repository so coding agents can work from stable, project-specific context instead of rediscovering the codebase every time.",
+  "body_template": "generic_skill.md",
+  "script_path": ".cursor/skills/doc-for-agent/scripts/init_agents_docs.py"
+}

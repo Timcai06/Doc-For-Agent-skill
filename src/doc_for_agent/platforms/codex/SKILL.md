@@ -58,13 +58,13 @@ Use that to infer:
 Run:
 
 ```bash
-python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh
+python3 doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh
 ```
 
 If the user gives a project name, also pass:
 
 ```bash
-python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --project-name "<name>" --mode refresh
+python3 doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --project-name "<name>" --mode refresh
 ```
 
 ### Step 3: Let the script prefill from the actual codebase
@@ -92,6 +92,7 @@ After generation, review the docs and tighten the parts the script cannot infer 
 - any manual sections you want to preserve long term; `refresh` now keeps useful existing section bodies where possible
 - any sections still marked as facts vs. inferences vs. open questions
 - any hand-maintained blocks wrapped with `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->`
+
 ### Step 5: Keep it lean
 
 These docs are for coding agents, not human marketing docs.
@@ -118,4 +119,3 @@ Avoid:
 For the intended file purposes and writing style, see:
 
 - `references/agents-structure.md`
-- `../src/doc_for_agent/` for the source-of-truth implementation in this repository

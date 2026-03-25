@@ -1,7 +1,3 @@
----
-name: doc-for-agent
-description: Generate and maintain an AGENTS documentation directory for a coding agent at the start of a new project or when an existing repository needs a clear agent-facing docs structure. Use this when the user wants a reusable AGENTS folder with product, architecture, frontend, backend, workflows, and glossary docs scanned and prefilled from the current codebase, or refreshed against existing code and docs.
----
 # doc-for-agent
 
 Use this skill when the user wants to initialize or refresh an `AGENTS/` directory for a repository so future coding agents can work against a stable, project-specific documentation structure.

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 
@@ -13,6 +15,9 @@ def copy_file(src: Path, dst: Path) -> None:
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     src_root = repo_root / "src/doc_for_agent"
+    generator = src_root / "scripts/generate_platform_adapters.py"
+
+    subprocess.run([sys.executable, str(generator)], check=True)
 
     copy_map = {
         src_root / "platforms/codex/SKILL.md": [
