@@ -1,0 +1,94 @@
+{
+  "cli_tool": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `CLI/tool repository`"
+      ]
+    },
+    "product.md": {
+      "contains": [
+        "This repository is best understood as a `CLI/tool repository`.",
+        "Primary users are likely developers integrating or running the packaged tooling."
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "CLI-like entrypoints detected in `bin/` or `cli/`."
+      ]
+    },
+    "workflows.md": {
+      "contains": [
+        "./scripts/smoke.sh"
+      ]
+    }
+  },
+  "library_sdk": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `library/SDK repository`"
+      ]
+    },
+    "product.md": {
+      "contains": [
+        "This repository is best understood as a `library/SDK repository`.",
+        "Primary users are likely developers integrating or running the packaged tooling."
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "Package manifest suggests a library or tool package."
+      ]
+    }
+  },
+  "skill_meta": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `skill/meta repository`"
+      ]
+    },
+    "product.md": {
+      "contains": [
+        "This repository appears to ship reusable instructions and scripts for coding agents rather than a standalone product app."
+      ]
+    },
+    "frontend.md": {
+      "contains": [
+        "Primary user interaction likely happens through an AI assistant invoking this skill rather than a browser UI.",
+        "`tool-skill/agents/openai.yaml`"
+      ]
+    },
+    "backend.md": {
+      "contains": [
+        "Generation or support scripts are present and act as the runtime behavior of this skill.",
+        "`tool-skill/scripts/generate.py`"
+      ]
+    }
+  },
+  "web_app": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `web application repository`"
+      ]
+    },
+    "frontend.md": {
+      "contains": [
+        "Detected frontend stack: Next.js 14.2.0, React 18.3.1.",
+        "`/dashboard`"
+      ]
+    },
+    "backend.md": {
+      "contains": [
+        "Detected backend/runtime stack: FastAPI, Uvicorn.",
+        "`GET /health`"
+      ]
+    },
+    "workflows.md": {
+      "contains": [
+        "npm install",
+        "npm run dev",
+        "npm run lint",
+        "uvicorn app.main:app --reload"
+      ]
+    }
+  }
+}

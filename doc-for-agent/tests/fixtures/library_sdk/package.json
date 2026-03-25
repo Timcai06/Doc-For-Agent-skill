@@ -1,0 +1,7 @@
+{
+  "name": "data-bridge-sdk",
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "tsup": "8.2.0"
+  }
+}
