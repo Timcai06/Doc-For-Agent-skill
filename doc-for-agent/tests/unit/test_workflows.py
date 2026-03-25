@@ -11,7 +11,7 @@ if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
 from doc_for_agent_generator.analysis import analyze_repo
-from doc_for_agent_generator.builders import build_workflows
+from doc_for_agent_generator.builders import build_layered_implementation_plan, build_workflows
 
 
 class WorkflowGenerationTests(unittest.TestCase):
@@ -91,6 +91,28 @@ class WorkflowGenerationTests(unittest.TestCase):
             self.assertIn("npm run test", workflows)
             self.assertIn("npm run build", workflows)
             self.assertNotIn("# TODO:", workflows)
+
+    def test_layered_implementation_plan_uses_package_scripts_without_todo_fallback(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-plan-") as tmpdir:
+            root = Path(tmpdir) / "layered-cli"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text("# Layered CLI\n\nLayered profile repo with scripts.\n", encoding="utf-8")
+            (root / "package.json").write_text(
+                (
+                    '{"name":"layered-cli","scripts":{"start":"node cli.js","lint":"eslint .","test":"node --test"}}\n'
+                ),
+                encoding="utf-8",
+            )
+            (root / "cli.js").write_text("console.log('ok')\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Layered CLI", doc_profile="layered")
+            plan = build_layered_implementation_plan(analysis)
+
+            self.assertIn("npm install", plan)
+            self.assertIn("npm run start", plan)
+            self.assertIn("npm run lint", plan)
+            self.assertIn("npm run test", plan)
+            self.assertNotIn("# TODO:", plan)
 
 
 if __name__ == "__main__":

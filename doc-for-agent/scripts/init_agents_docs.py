@@ -90,6 +90,10 @@ def print_analysis_explanation(analysis) -> None:
     print(f"- Suggested profile: `{suggested_profile}`")
     if suggested_profile != analysis.doc_profile:
         print(f"- Note: current run requested profile `{analysis.doc_profile}`.")
+    print(
+        "Suggested command: "
+        f"python3 doc-for-agent/scripts/init_agents_docs.py --root {analysis.root} --mode refresh --profile {suggested_profile}"
+    )
     print("Suggested source-of-truth files:")
     for line in infer_source_of_truth_lines(analysis)[:6]:
         print(f"- {line}")
@@ -107,6 +111,7 @@ def print_analysis_explanation(analysis) -> None:
                 f"has agent manifests: {'yes' if analysis.signals.has_agent_manifests else 'no'}",
                 f"has workspace layout: {'yes' if analysis.signals.has_workspace_layout else 'no'}",
                 f"has package.json: {'yes' if analysis.signals.has_package_json else 'no'}",
+                f"has package bin metadata: {'yes' if analysis.signals.has_package_bin else 'no'}",
                 f"has Python packaging: {'yes' if analysis.signals.has_python_packaging else 'no'}",
                 f"CLI entrypoints: {len(analysis.signals.cli_entrypoints)}",
                 f"library entrypoints: {len(analysis.signals.library_entrypoints)}",

@@ -102,6 +102,28 @@ class RepoClassificationTests(unittest.TestCase):
                 analysis.classification.reasons,
             )
 
+    def test_web_app_envelope_is_not_overridden_by_package_bin_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-web-bin-") as tmpdir:
+            root = Path(tmpdir) / "web-with-bin"
+            (root / "app").mkdir(parents=True)
+            (root / "backend/app").mkdir(parents=True)
+            (root / "README.md").write_text("# Web With Bin\n\nWeb app with helper bin metadata.\n", encoding="utf-8")
+            (root / "package.json").write_text(
+                (
+                    '{"name":"web-with-bin","dependencies":{"next":"14.2.0","react":"18.3.1"},'
+                    '"bin":{"helper":"bin/helper.js"}}\n'
+                ),
+                encoding="utf-8",
+            )
+            (root / "app/page.tsx").write_text("export default function Page(){return <main/>}\n", encoding="utf-8")
+            (root / "backend/requirements.txt").write_text("fastapi==0.112.0\n", encoding="utf-8")
+            (root / "backend/app/main.py").write_text("from fastapi import FastAPI\napp = FastAPI()\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Web With Bin")
+
+            self.assertEqual(analysis.repo_type, "web-app")
+            self.assertIn("CLI distribution surface is also present.", analysis.classification.secondary_traits)
+
 
 if __name__ == "__main__":
     unittest.main()

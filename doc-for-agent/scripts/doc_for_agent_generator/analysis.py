@@ -543,7 +543,7 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
                     "Root-level skill markers exist alongside workspace signals; confirm whether this repository is primarily a skill package or an application monorepo.",
                     severity="soft",
                 )
-    elif (signals.cli_entrypoints or signals.has_package_bin) and has_packaged_distribution:
+    elif (signals.cli_entrypoints or signals.has_package_bin) and has_packaged_distribution and not has_strong_application_envelope:
         primary_type = "cli-tool"
         confidence = "high"
         if signals.cli_entrypoints and signals.has_package_bin:
@@ -576,6 +576,8 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
         primary_type = "web-app"
         confidence = "high"
         reasons.append("Both frontend and backend roots were detected.")
+        if signals.cli_entrypoints or signals.has_package_bin:
+            append_unique(secondary_traits, "CLI distribution surface is also present.")
         if signals.has_package_json:
             append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
         if signals.has_python_packaging:
@@ -592,6 +594,8 @@ def classify_repo(signals: RepoSignals) -> RepoClassification:
         primary_type = "backend-service"
         confidence = "medium"
         reasons.append("Backend-like Python service structure detected without a separate frontend.")
+        if signals.cli_entrypoints or signals.has_package_bin:
+            append_unique(secondary_traits, "CLI distribution surface is also present.")
         if signals.has_python_packaging:
             append_unique(secondary_traits, "Python packaging metadata is also present.")
 
