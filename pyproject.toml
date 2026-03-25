@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "doc-for-agent-cli"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Platformized installer and maintenance CLI for the doc-for-agent skill."
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
   {name = "Tim Cai"}
 ]
@@ -20,6 +20,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.dynamic]
+version = {attr = "doc_for_agent.version.__version__"}
+
 [tool.setuptools.package-data]
 doc_for_agent = [
   "references/*.md",
@@ -27,5 +30,7 @@ doc_for_agent = [
   "platforms/*/SKILL.md",
   "platforms/codex/agents/*.yaml",
   "assets/templates/*.md",
-  "assets/examples/*.md"
+  "assets/examples/*.md",
+  "templates/*.md",
+  "templates/bodies/*.md"
 ]

@@ -7,6 +7,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from .version import __version__
+
+VERSION = __version__
+SUPPORTED_TARGETS = ["codex", "claude", "cursor", "continue", "windsurf"]
 
 
 def repo_root_from(path: Path) -> Path:
@@ -45,6 +49,7 @@ def run_sync(repo_root: Path) -> None:
     if sync_script.exists():
         subprocess.run([sys.executable, str(sync_script)], check=True)
 
+
 def content_root(repo_root: Path) -> Path:
     src_root = repo_root / "src/doc_for_agent"
     if src_root.exists():
@@ -79,14 +84,20 @@ def cmd_init(args: argparse.Namespace) -> int:
 
     run_sync(repo_root)
 
-    targets = ["codex", "claude", "cursor", "continue", "windsurf"] if args.ai == "all" else [args.ai]
+    targets = SUPPORTED_TARGETS if args.ai == "all" else [args.ai]
+    installed: list[tuple[str, Path]] = []
     with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
         staging = Path(tmpdir)
         for ai in targets:
             src = build_adapter_bundle(content, ai, staging)
             dst = install_target(ai, cwd, args.dest if len(targets) == 1 else None)
             copy_tree(src, dst, force=args.force)
-            print(f"Installed {ai} adapter to: {dst}")
+            installed.append((ai, dst))
+
+    print("Installed adapters:")
+    for ai, dst in installed:
+        print(f"- {ai}: {dst}")
+    print("Next step: restart the target tool or reopen the target project so the new skill is discovered.")
 
     return 0
 
@@ -94,6 +105,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 def cmd_sync(args: argparse.Namespace) -> int:
     repo_root = Path(args.repo_root).expanduser().resolve()
     run_sync(repo_root)
+    print("Synchronized platform adapters from source-of-truth.")
     return 0
 
 
@@ -111,17 +123,32 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         "reference": content / "references/agents-structure.md",
     }
     failures = []
+    print(f"doc-for-agent CLI {VERSION}")
     for label, path in checks.items():
         exists = path.exists()
         print(f"{label}: {'OK' if exists else 'MISSING'} - {path}")
         if not exists:
             failures.append(label)
+    if failures:
+        print(f"Doctor failed: {len(failures)} missing checks.")
+    else:
+        print(f"Doctor passed: {len(checks)} checks OK.")
     return 1 if failures else 0
+
+
+def cmd_targets(args: argparse.Namespace) -> int:
+    cwd = Path.cwd()
+    print(f"doc-for-agent CLI {VERSION}")
+    print("Supported install targets:")
+    for ai in SUPPORTED_TARGETS:
+        print(f"- {ai}: default -> {default_dest(ai, cwd)}")
+    return 0
 
 
 def build_parser(default_repo_root: Path) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Installer and maintenance CLI for doc-for-agent.")
     parser.set_defaults(func=None)
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument(
         "--repo-root",
         default=str(default_repo_root),
@@ -133,7 +160,7 @@ def build_parser(default_repo_root: Path) -> argparse.ArgumentParser:
     init_parser = subparsers.add_parser("init", help="Install a platform adapter into a target environment.")
     init_parser.add_argument(
         "--ai",
-        choices=["codex", "claude", "cursor", "continue", "windsurf", "all"],
+        choices=[*SUPPORTED_TARGETS, "all"],
         required=True,
         help="Which adapter to install.",
     )
@@ -147,17 +174,31 @@ def build_parser(default_repo_root: Path) -> argparse.ArgumentParser:
     doctor_parser = subparsers.add_parser("doctor", help="Check that source and adapter files exist.")
     doctor_parser.set_defaults(func=cmd_doctor)
 
+    targets_parser = subparsers.add_parser("targets", help="List supported platform install targets.")
+    targets_parser.set_defaults(func=cmd_targets)
+
     return parser
 
 
 def main() -> int:
-    repo_root = repo_root_from(Path(__file__))
-    parser = build_parser(repo_root)
-    args = parser.parse_args()
-    if args.func is None:
-        parser.print_help()
+    try:
+        repo_root = repo_root_from(Path(__file__))
+        parser = build_parser(repo_root)
+        args = parser.parse_args()
+        if args.func is None:
+            parser.print_help()
+            return 1
+        return args.func(args)
+    except FileExistsError as error:
+        print(f"Install failed: {error}", file=sys.stderr)
+        print("Tip: rerun with --force if you want to overwrite the destination.", file=sys.stderr)
         return 1
-    return args.func(args)
+    except subprocess.CalledProcessError as error:
+        print(f"Command failed while preparing adapters: {error}", file=sys.stderr)
+        return 1
+    except Exception as error:
+        print(f"doc-for-agent CLI failed: {error}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
