@@ -1,0 +1,23 @@
+{
+  "platform": "codex",
+  "display_name": "Codex",
+  "install_type": "skill",
+  "adapter_kind": "skill",
+  "folder_structure": {
+    "root": ".codex",
+    "skill_path": "skills/doc-for-agent",
+    "filename": "SKILL.md"
+  },
+  "frontmatter": {
+    "name": "doc-for-agent",
+    "description": "Generate and maintain AGENTS documentation for coding agents."
+  },
+  "default_title": "doc-for-agent",
+  "default_description": "Project documentation bootstrapper for coding agents. Generates lean or layered AGENTS directories from the real repository structure.",
+  "quick_reference": false,
+  "script_relpath": ".codex/skills/doc-for-agent/scripts/init_agents_docs.py",
+  "post_install_notes": [
+    "Restart Codex so the new skill is discovered in a fresh session.",
+    "Install into a repository root when you want project-local assistant behavior."
+  ]
+}

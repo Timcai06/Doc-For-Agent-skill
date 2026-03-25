@@ -1,0 +1,23 @@
+{
+  "platform": "claude",
+  "display_name": "Claude Code",
+  "install_type": "skill",
+  "adapter_kind": "skill",
+  "folder_structure": {
+    "root": ".claude",
+    "skill_path": "skills/doc-for-agent",
+    "filename": "SKILL.md"
+  },
+  "frontmatter": {
+    "name": "doc-for-agent",
+    "description": "Generate and maintain AGENTS documentation for coding agents."
+  },
+  "default_title": "doc-for-agent",
+  "default_description": "Project documentation bootstrapper for coding agents. Generates lean or layered AGENTS directories from the real repository structure.",
+  "quick_reference": false,
+  "script_relpath": ".claude/skills/doc-for-agent/scripts/init_agents_docs.py",
+  "post_install_notes": [
+    "Restart Claude Code so the skill is reloaded in the next session.",
+    "Use the repository-local install when you want the project to carry its own skill wrapper."
+  ]
+}

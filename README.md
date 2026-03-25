@@ -48,12 +48,20 @@ DocForAgent_skill/
     │   └── openai.yaml
     ├── scripts/
     │   ├── init_agents_docs.py
+    │   ├── render_platform_adapter.py
     │   └── doc_for_agent_generator/
     │       ├── analysis.py
     │       ├── builders.py
     │       ├── markdown.py
     │       ├── models.py
     │       └── utils.py
+    ├── templates/
+    │   ├── base/
+    │   │   ├── skill-content.md
+    │   │   └── workflow-content.md
+    │   └── platforms/
+    │       ├── claude.json
+    │       └── codex.json
     ├── tests/
     │   ├── fixtures/
     │   │   ├── backend_service/
@@ -70,7 +78,8 @@ DocForAgent_skill/
     │   └── verify_generator_snapshots.py
     └── references/
         ├── agents-structure.md
-        └── layered-agents-blueprint.md
+        ├── layered-agents-blueprint.md
+        └── multi-platform-distribution-blueprint.md
 ```
 
 Current structure on `main` is intentionally simple:
@@ -147,6 +156,13 @@ Generate the BDI-style layered topology for long-lived or phase-driven projects:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --profile layered
 ```
 
+Render the current platform adapter scaffold into a project-local assistant folder:
+
+```bash
+python3 doc-for-agent/scripts/render_platform_adapter.py --platform codex --target /path/to/repo
+python3 doc-for-agent/scripts/render_platform_adapter.py --platform claude --target /path/to/repo
+```
+
 Force a repo type when auto-detection is ambiguous:
 
 ```bash
@@ -175,12 +191,14 @@ python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode re
 The current shipped output is still the lean flat profile, but the repository now also carries a next-step design reference for a more durable, BDI-inspired layered `AGENTS/` topology:
 
 - `doc-for-agent/references/layered-agents-blueprint.md`
+- `doc-for-agent/references/multi-platform-distribution-blueprint.md`
 
 That blueprint captures a likely future direction for the skill:
 
 - keep the current bootstrap profile for fast onboarding
 - add a layered profile for long-lived, phase-driven projects
 - introduce entry, execution, and memory docs as first-class agent primitives
+- separate the engine from platform adapters so the product can ship beyond Codex
 
 ## Verify
 
