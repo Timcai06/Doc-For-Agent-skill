@@ -90,5 +90,44 @@
         "uvicorn app.main:app --reload"
       ]
     }
+  },
+  "backend_service": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `backend service repository`"
+      ]
+    },
+    "backend.md": {
+      "contains": [
+        "Detected backend/runtime stack: FastAPI, Uvicorn.",
+        "`POST /events`"
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "Classification confidence: `medium`.",
+        "Backend-like Python service structure detected without a separate frontend."
+      ]
+    }
+  },
+  "hybrid_skill_cli": {
+    "README.md": {
+      "contains": [
+        "Detected repo type: `skill/meta repository`"
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "CLI distribution surface is also present.",
+        "JavaScript package/distribution metadata is also present.",
+        "Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities."
+      ]
+    },
+    "backend.md": {
+      "contains": [
+        "Generation or support scripts are present and act as the runtime behavior of this skill.",
+        "`scripts/sync.py`"
+      ]
+    }
   }
 }

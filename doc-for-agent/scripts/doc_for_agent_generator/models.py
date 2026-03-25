@@ -15,6 +15,33 @@ class SkillMetadata:
 
 
 @dataclass(frozen=True)
+class RepoSignals:
+    top_level_dirs: List[str] = field(default_factory=list)
+    top_level_files: List[str] = field(default_factory=list)
+    has_skill_file: bool = False
+    has_agent_manifests: bool = False
+    has_workspace_layout: bool = False
+    has_frontend: bool = False
+    has_backend: bool = False
+    has_package_json: bool = False
+    has_python_packaging: bool = False
+    package_name: str = ""
+    package_dependencies: List[str] = field(default_factory=list)
+    cli_entrypoints: List[Path] = field(default_factory=list)
+    library_entrypoints: List[Path] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class RepoClassification:
+    primary_type: str
+    confidence: str = "low"
+    reasons: List[str] = field(default_factory=list)
+    secondary_traits: List[str] = field(default_factory=list)
+    conflicting_signals: List[str] = field(default_factory=list)
+    open_questions: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class RepoAnalysis:
     root: Path
     project_name: str
@@ -38,3 +65,4 @@ class RepoAnalysis:
     skill_meta: SkillMetadata = field(default_factory=SkillMetadata)
     library_entrypoints: List[Path] = field(default_factory=list)
     cli_entrypoints: List[Path] = field(default_factory=list)
+    classification: RepoClassification = field(default_factory=lambda: RepoClassification(primary_type="unknown"))

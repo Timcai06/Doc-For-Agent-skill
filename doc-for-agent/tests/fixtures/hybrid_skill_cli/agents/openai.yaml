@@ -1,0 +1,4 @@
+version: 1
+display_name: Route Steward
+short_description: Keep route docs aligned.
+default_prompt: Refresh route guidance for this repository.

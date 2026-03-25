@@ -118,6 +118,7 @@ def build_architecture(analysis: RepoAnalysis) -> str:
     facts = [
         f"Repository root: `{analysis.root}`.",
         f"Detected repo type: `{analysis.repo_type}`.",
+        f"Classification confidence: `{analysis.classification.confidence}`.",
     ]
     if analysis.frontend_root:
         facts.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
@@ -180,6 +181,14 @@ def build_architecture(analysis: RepoAnalysis) -> str:
 ## Repo-Type Signals
 
 {format_bullets(list(analysis.repo_type_reasons), "No strong classification signals were detected automatically.")}
+
+## Secondary Traits
+
+{format_bullets(list(analysis.classification.secondary_traits), "No secondary traits were detected automatically.")}
+
+## Conflicting Signals
+
+{format_bullets(list(analysis.classification.conflicting_signals), "No major conflicting signals were detected automatically.")}
 
 ## Source Of Truth For Agents
 

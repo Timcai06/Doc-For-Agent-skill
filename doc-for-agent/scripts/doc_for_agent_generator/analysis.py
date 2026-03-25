@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from .models import RepoAnalysis, SkillMetadata
+from .models import RepoAnalysis, RepoClassification, RepoSignals, SkillMetadata
 from .utils import (
     extract_readme_summary,
     find_files,
@@ -287,68 +287,195 @@ def detect_cli_entrypoints(root: Path) -> List[Path]:
     )
 
 
+def collect_repo_signals(
+    root: Path,
+    frontend_root: Optional[Path],
+    backend_root: Optional[Path],
+    cli_entrypoints: Sequence[Path],
+    library_entrypoints: Sequence[Path],
+    skill_meta: SkillMetadata,
+) -> RepoSignals:
+    top_level_dirs = list_top_level_dirs(root)
+    package_json = root / "package.json"
+    package = load_json(package_json) if package_json.exists() else {}
+    deps = {
+        **(package.get("dependencies") or {}),
+        **(package.get("devDependencies") or {}),
+    }
+    dependency_names = sorted(str(key) for key in deps if isinstance(key, str))
+
+    return RepoSignals(
+        top_level_dirs=top_level_dirs,
+        top_level_files=list_top_level_files(root),
+        has_skill_file=skill_meta.skill_file is not None,
+        has_agent_manifests=bool(skill_meta.agent_manifests),
+        has_workspace_layout=bool({"packages", "apps"}.intersection(top_level_dirs)) or (root / "pnpm-workspace.yaml").exists(),
+        has_frontend=frontend_root is not None,
+        has_backend=backend_root is not None,
+        has_package_json=package_json.exists(),
+        has_python_packaging=find_first_existing(root, ["pyproject.toml", "setup.py"]) is not None,
+        package_name=str(package.get("name") or ""),
+        package_dependencies=dependency_names,
+        cli_entrypoints=list(cli_entrypoints),
+        library_entrypoints=list(library_entrypoints),
+    )
+
+
+def append_unique(target: List[str], item: str) -> None:
+    if item and item not in target:
+        target.append(item)
+
+
+def reduce_confidence(level: str, conflicts: int) -> str:
+    levels = ["low", "medium", "high"]
+    index = levels.index(level)
+    return levels[max(0, index - min(conflicts, 2))]
+
+
+def classify_repo(signals: RepoSignals) -> RepoClassification:
+    reasons: List[str] = []
+    secondary_traits: List[str] = []
+    conflicting_signals: List[str] = []
+    open_questions: List[str] = []
+    primary_type = "unknown"
+    confidence = "low"
+
+    build_like_deps = {"typescript", "tsup", "rollup", "vite"}
+    has_build_deps = bool(build_like_deps.intersection(signals.package_dependencies))
+    has_skill_markers = signals.has_skill_file or signals.has_agent_manifests
+    has_packaged_distribution = signals.has_package_json or signals.has_python_packaging
+
+    if has_skill_markers:
+        primary_type = "skill-meta"
+        confidence = "high"
+        reasons.append("Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).")
+        if signals.cli_entrypoints:
+            append_unique(secondary_traits, "CLI distribution surface is also present.")
+        if signals.has_package_json:
+            append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
+        if signals.has_python_packaging:
+            append_unique(secondary_traits, "Python packaging metadata is also present.")
+        if signals.library_entrypoints:
+            append_unique(secondary_traits, "Library-style entrypoints are also present.")
+        if signals.has_workspace_layout:
+            append_unique(secondary_traits, "Workspace/monorepo layout is also present.")
+        if signals.cli_entrypoints or has_packaged_distribution:
+            conflicting_signals.append(
+                "Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities."
+            )
+    elif signals.has_workspace_layout:
+        primary_type = "monorepo"
+        confidence = "high"
+        reasons.append("Workspace-style directories or pnpm workspace config detected.")
+        if signals.has_frontend:
+            append_unique(secondary_traits, "Frontend application signals are also present.")
+        if signals.has_backend:
+            append_unique(secondary_traits, "Backend service signals are also present.")
+        if signals.cli_entrypoints:
+            append_unique(secondary_traits, "CLI tooling is also present.")
+        if signals.has_package_json:
+            append_unique(secondary_traits, "Package/distribution metadata is also present.")
+    elif signals.cli_entrypoints and has_packaged_distribution:
+        primary_type = "cli-tool"
+        confidence = "high"
+        reasons.append("CLI-like entrypoints detected in `bin/` or `cli/`.")
+        if signals.has_package_json:
+            append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
+        if signals.has_python_packaging:
+            append_unique(secondary_traits, "Python packaging metadata is also present.")
+        if signals.library_entrypoints:
+            append_unique(secondary_traits, "Library-style entrypoints are also present.")
+        if signals.has_frontend:
+            conflicting_signals.append(
+                "Frontend application signals exist alongside CLI entrypoints; confirm whether the CLI is the primary user surface."
+            )
+        if signals.has_backend:
+            conflicting_signals.append(
+                "Backend service signals exist alongside CLI entrypoints; confirm whether the CLI is the primary user surface."
+            )
+    elif signals.cli_entrypoints:
+        reasons.append("CLI-like entrypoints detected in `bin/` or `cli/`.")
+        open_questions.append(
+            "CLI-like entrypoints were found without clear package metadata; confirm whether command files are examples, fixtures, or the primary product surface."
+        )
+
+    if primary_type == "unknown" and signals.has_frontend and signals.has_backend:
+        primary_type = "web-app"
+        confidence = "high"
+        reasons.append("Both frontend and backend roots were detected.")
+        if signals.has_package_json:
+            append_unique(secondary_traits, "JavaScript package/distribution metadata is also present.")
+        if signals.has_python_packaging:
+            append_unique(secondary_traits, "Python packaging metadata is also present.")
+
+    if primary_type == "unknown" and signals.has_backend and not signals.has_frontend:
+        primary_type = "backend-service"
+        confidence = "medium"
+        reasons.append("Backend-like Python service structure detected without a separate frontend.")
+        if signals.has_python_packaging:
+            append_unique(secondary_traits, "Python packaging metadata is also present.")
+
+    if primary_type == "unknown" and signals.has_package_json and not signals.has_frontend and not signals.has_backend:
+        if has_build_deps or signals.library_entrypoints:
+            primary_type = "library-sdk"
+            confidence = "medium"
+            reasons.append("Package manifest suggests a library or tool package.")
+            if signals.cli_entrypoints:
+                append_unique(secondary_traits, "CLI distribution surface is also present.")
+            if signals.has_python_packaging:
+                conflicting_signals.append(
+                    "Both JavaScript and Python packaging metadata are present; confirm which install surface is canonical."
+                )
+        elif signals.package_name:
+            open_questions.append(
+                f"Package `{signals.package_name}` was detected, but repository type still needs human confirmation."
+            )
+
+    if primary_type == "unknown" and signals.has_python_packaging and not signals.has_backend:
+        primary_type = "library-sdk"
+        confidence = "medium"
+        reasons.append("Python packaging files detected without service-style app layout.")
+        if signals.cli_entrypoints:
+            append_unique(secondary_traits, "CLI distribution surface is also present.")
+
+    if primary_type == "unknown" and signals.top_level_files:
+        open_questions.append(
+            "Repository shape was not strongly classified; confirm whether this is an app, library, or tooling repo."
+        )
+
+    confidence = reduce_confidence(confidence, len(conflicting_signals))
+
+    return RepoClassification(
+        primary_type=primary_type,
+        confidence=confidence,
+        reasons=reasons,
+        secondary_traits=secondary_traits,
+        conflicting_signals=conflicting_signals,
+        open_questions=open_questions,
+    )
+
+
 def detect_repo_type(
     root: Path,
     frontend_root: Optional[Path],
     backend_root: Optional[Path],
     cli_entrypoints: Sequence[Path],
 ) -> Tuple[str, List[str], List[str]]:
-    top_dirs = list_top_level_dirs(root)
-    top_files = list_top_level_files(root)
-    reasons: List[str] = []
-    open_questions: List[str] = []
-
-    has_skill_markers = (
-        find_first_existing(root, ["SKILL.md", "skill.md"]) is not None
-        or bool(find_files(root, ["agents/*.yaml", "agents/*.yml", "*/agents/*.yaml", "*/agents/*.yml"], limit=1))
+    skill_meta = detect_skill_metadata(root)
+    signals = collect_repo_signals(
+        root,
+        frontend_root,
+        backend_root,
+        cli_entrypoints,
+        detect_library_entrypoints(root),
+        skill_meta,
     )
-    if has_skill_markers:
-        reasons.append("Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).")
-        return ("skill-meta", reasons, open_questions)
-
-    if {"packages", "apps"}.intersection(top_dirs) or (root / "pnpm-workspace.yaml").exists():
-        reasons.append("Workspace-style directories or pnpm workspace config detected.")
-        return ("monorepo", reasons, open_questions)
-
-    if cli_entrypoints:
-        reasons.append("CLI-like entrypoints detected in `bin/` or `cli/`.")
-        if find_first_existing(root, ["package.json", "pyproject.toml"]):
-            return ("cli-tool", reasons, open_questions)
-
-    if frontend_root and backend_root:
-        reasons.append("Both frontend and backend roots were detected.")
-        return ("web-app", reasons, open_questions)
-
-    if backend_root and not frontend_root:
-        reasons.append("Backend-like Python service structure detected without a separate frontend.")
-        return ("backend-service", reasons, open_questions)
-
-    package_json = root / "package.json"
-    if package_json.exists():
-        package = load_json(package_json)
-        package_name = str(package.get("name") or "")
-        deps = {
-            **(package.get("dependencies") or {}),
-            **(package.get("devDependencies") or {}),
-        }
-        if not frontend_root and not backend_root:
-            if any(key in deps for key in ("typescript", "tsup", "rollup", "vite")):
-                reasons.append("Package manifest suggests a library or tool package.")
-                return ("library-sdk", reasons, open_questions)
-            if package_name:
-                open_questions.append(
-                    f"Package `{package_name}` was detected, but repository type still needs human confirmation."
-                )
-
-    if find_first_existing(root, ["pyproject.toml", "setup.py"]) and not backend_root:
-        reasons.append("Python packaging files detected without service-style app layout.")
-        return ("library-sdk", reasons, open_questions)
-
-    if top_files:
-        open_questions.append(
-            "Repository shape was not strongly classified; confirm whether this is an app, library, or tooling repo."
-        )
-    return ("unknown", reasons, open_questions)
+    classification = classify_repo(signals)
+    return (
+        classification.primary_type,
+        classification.reasons,
+        classification.open_questions,
+    )
 
 
 def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
@@ -356,12 +483,16 @@ def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
     backend_root = detect_backend_root(root)
     cli_entrypoints = detect_cli_entrypoints(root)
     library_entrypoints = detect_library_entrypoints(root)
-    repo_type, repo_type_reasons, repo_type_questions = detect_repo_type(
+    skill_meta = detect_skill_metadata(root)
+    signals = collect_repo_signals(
         root,
         frontend_root,
         backend_root,
         cli_entrypoints,
+        library_entrypoints,
+        skill_meta,
     )
+    classification = classify_repo(signals)
 
     summary = extract_readme_summary(root)
     package_manager = detect_package_manager(frontend_root, root)
@@ -371,9 +502,9 @@ def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
     return RepoAnalysis(
         root=root,
         project_name=project_name,
-        repo_type=repo_type,
-        repo_type_reasons=repo_type_reasons,
-        repo_type_questions=repo_type_questions,
+        repo_type=classification.primary_type,
+        repo_type_reasons=classification.reasons,
+        repo_type_questions=classification.open_questions,
         summary=summary,
         frontend_root=frontend_root,
         backend_root=backend_root,
@@ -388,7 +519,8 @@ def analyze_repo(root: Path, project_name: str) -> RepoAnalysis:
         script_files=detect_scripts(root),
         glossary_entries=detect_glossary(root),
         contract_fields=detect_result_contract(root),
-        skill_meta=detect_skill_metadata(root),
+        skill_meta=skill_meta,
         library_entrypoints=library_entrypoints,
         cli_entrypoints=cli_entrypoints,
+        classification=classification,
     )
