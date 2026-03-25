@@ -21,6 +21,10 @@ def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> s
     return "\n".join(f"- `{rel_path(path, root)}`" for path in paths)
 
 
+def supporting_doc_lines(paths: Sequence[Path], root: Path) -> list[str]:
+    return [f"`{rel_path(path, root)}`" for path in paths]
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -108,6 +112,30 @@ def detect_workspace_config_paths(root: Path) -> list[Path]:
 def detect_package_metadata_paths(root: Path) -> list[Path]:
     names = ("package.json", "pyproject.toml", "setup.py", "requirements.txt", "requirements-dev.txt")
     return [root / name for name in names if (root / name).exists()]
+
+
+def supporting_docs_for_role(analysis: RepoAnalysis, role: str) -> list[Path]:
+    role_paths: list[Path] = []
+    for path in analysis.docs_inventory.reference_only_docs:
+        normalized = rel_path(path, analysis.root).lower()
+        if role == "product":
+            if normalized == "readme.md" or normalized.startswith("docs/product/") or normalized.startswith("specs/"):
+                role_paths.append(path)
+        elif role == "architecture":
+            if (
+                normalized.startswith("docs/architecture/")
+                or "/architecture/" in normalized
+                or normalized.startswith("docs/adr")
+                or "adr" in path.name.lower()
+            ):
+                role_paths.append(path)
+        elif role == "execution":
+            if normalized.startswith("plan/") or normalized.startswith("roadmap/") or "runbook" in path.name.lower():
+                role_paths.append(path)
+        elif role == "memory":
+            if any(token in normalized for token in ("progress", "lessons", "handoff", "status")):
+                role_paths.append(path)
+    return role_paths
 
 
 def infer_source_of_truth_lines(analysis: RepoAnalysis) -> list[str]:
@@ -826,6 +854,7 @@ def build_layered_entry(analysis: RepoAnalysis) -> str:
     if analysis.repo_type in {"web-app", "skill-meta", "cli-tool"}:
         reading_order.insert(3, "`01-product/003-app-flow.md`")
         reading_order.insert(5, "`02-architecture/005-frontend-guidelines.md`")
+    supporting_docs = supporting_docs_for_role(analysis, "product") + supporting_docs_for_role(analysis, "architecture") + supporting_docs_for_role(analysis, "execution")
 
     rules = [
         "Read product and architecture docs before broad refactors.",
@@ -862,6 +891,10 @@ def build_layered_entry(analysis: RepoAnalysis) -> str:
 ## Canonical Fact Sources
 
 {format_bullets(list(analysis.repo_type_reasons), "Needs human confirmation: add canonical fact sources and classification reasons.")}
+
+## Referenced Repository Docs
+
+{format_bullets(supporting_doc_lines(supporting_docs, analysis.root), "No additional repository docs were referenced automatically.")}
 """
 
 
@@ -881,6 +914,7 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
     ]
     if analysis.classification.conflicting_signals:
         constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
+    references = supporting_docs_for_role(analysis, "product")
 
     return f"""# Core Goals
 
@@ -891,6 +925,10 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
 ## Constraints To Preserve
 
 {format_bullets(constraints, "Add repository-specific constraints.")}
+
+## Referenced Repository Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional product-oriented repository docs were referenced automatically.")}
 
 ## Open Questions
 
@@ -918,6 +956,7 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
         journeys.extend(
             [f"Agent surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
         )
+    references = supporting_docs_for_role(analysis, "product")
 
     return f"""# PRD
 
@@ -933,6 +972,10 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
 ## Current Entry Surfaces
 
 {format_bullets(journeys, "No obvious user entry surfaces were detected automatically.")}
+
+## Supporting Repository Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional product docs were detected outside AGENTS/.")}
 
 ## Questions To Resolve
 
@@ -1083,6 +1126,7 @@ def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
 
 def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     source_of_truth = infer_source_of_truth_lines(analysis)
+    references = supporting_docs_for_role(analysis, "architecture")
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
@@ -1100,6 +1144,10 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
 ## Source Of Truth
 
 {format_bullets(source_of_truth, "Needs human confirmation: add canonical source-of-truth files.")}
+
+## Referenced Architecture Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional architecture docs were detected outside AGENTS/.")}
 
 ## Compatibility Boundaries
 
@@ -1176,6 +1224,7 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
         run_lines = ["Run the primary local command from README examples (app start, CLI invocation, or generator refresh)."]
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
+    references = supporting_docs_for_role(analysis, "execution")
 
     return f"""# Implementation Plan
 
@@ -1204,6 +1253,10 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
 ```bash
 {chr(10).join(verify_lines)}
 ```
+
+## Supporting Execution Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional execution docs were detected outside AGENTS/.")}
 """
 
 
@@ -1223,6 +1276,7 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
     focus = list(analysis.repo_type_questions) or [
         "Confirm the next milestone and keep this file updated with human-approved progress.",
     ]
+    references = supporting_docs_for_role(analysis, "memory")
 
     return f"""# Progress
 
@@ -1233,6 +1287,10 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
 ## Current Focus
 
 {format_bullets(focus, "Add the current focus items.")}
+
+## Referenced Memory Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional progress or memory docs were detected automatically.")}
 """
 
 
@@ -1246,12 +1304,17 @@ def build_layered_lessons(analysis: RepoAnalysis) -> str:
         lessons.append("Keep manifests, README examples, and generator behavior aligned so the skill does not overpromise.")
     if analysis.classification.conflicting_signals:
         lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
+    references = supporting_docs_for_role(analysis, "memory")
 
     return f"""# Lessons
 
 ## Durable Lessons
 
 {format_bullets(lessons, "Add durable lessons that should survive session resets.")}
+
+## Referenced Historical Docs
+
+{format_bullets(supporting_doc_lines(references, analysis.root), "No additional lessons or status docs were detected automatically.")}
 """
 
 

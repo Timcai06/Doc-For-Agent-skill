@@ -422,6 +422,7 @@ def discover_documentation_inventory(root: Path) -> DocumentationInventory:
         "CLAUDE.md",
         "docs/**/*.md",
         "plan/**/*.md",
+        "notes/**/*.md",
         "specs/**/*.md",
         "roadmap/**/*.md",
     ]

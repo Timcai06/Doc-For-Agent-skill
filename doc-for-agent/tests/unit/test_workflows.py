@@ -11,7 +11,13 @@ if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
 from doc_for_agent_generator.analysis import analyze_repo
-from doc_for_agent_generator.builders import build_layered_implementation_plan, build_workflows
+from doc_for_agent_generator.builders import (
+    build_layered_architecture_compatibility,
+    build_layered_core_goals,
+    build_layered_implementation_plan,
+    build_layered_lessons,
+    build_workflows,
+)
 
 
 class WorkflowGenerationTests(unittest.TestCase):
@@ -113,6 +119,32 @@ class WorkflowGenerationTests(unittest.TestCase):
             self.assertIn("npm run lint", plan)
             self.assertIn("npm run test", plan)
             self.assertNotIn("# TODO:", plan)
+
+    def test_layered_docs_reference_scattered_repository_docs_by_role(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-supporting-docs-") as tmpdir:
+            root = Path(tmpdir) / "layered-docs"
+            (root / "docs/architecture").mkdir(parents=True)
+            (root / "specs").mkdir(parents=True)
+            (root / "plan").mkdir(parents=True)
+            (root / "notes").mkdir(parents=True)
+
+            (root / "README.md").write_text("# Layered Docs\n\nProject overview.\n", encoding="utf-8")
+            (root / "docs/architecture/overview.md").write_text("# Architecture\n", encoding="utf-8")
+            (root / "specs/prd.md").write_text("# PRD\n", encoding="utf-8")
+            (root / "plan/roadmap.md").write_text("# Roadmap\n", encoding="utf-8")
+            (root / "notes/status.md").write_text("# Status\n", encoding="utf-8")
+
+            analysis = analyze_repo(root, "Layered Docs", doc_profile="layered")
+            core_goals = build_layered_core_goals(analysis)
+            architecture = build_layered_architecture_compatibility(analysis)
+            plan = build_layered_implementation_plan(analysis)
+            lessons = build_layered_lessons(analysis)
+
+            self.assertIn("`README.md`", core_goals)
+            self.assertIn("`specs/prd.md`", core_goals)
+            self.assertIn("`docs/architecture/overview.md`", architecture)
+            self.assertIn("`plan/roadmap.md`", plan)
+            self.assertIn("`notes/status.md`", lessons)
 
 
 if __name__ == "__main__":
