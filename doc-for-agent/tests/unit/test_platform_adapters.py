@@ -56,7 +56,7 @@ class PlatformAdapterTests(unittest.TestCase):
 
             receipt_text = receipt_path.read_text(encoding="utf-8")
             self.assertIn('"platform": "claude"', receipt_text)
-            self.assertIn('"version": "0.2.0-dev"', receipt_text)
+            self.assertIn('"version": "0.2.0.dev0"', receipt_text)
 
     def test_rendered_continue_adapter_uses_continue_paths(self) -> None:
         config = load_platform_config("continue")
