@@ -50,6 +50,9 @@ Recent quality improvements also make output more directly usable:
 DocForAgent_skill/
 ├── README.md
 ├── LICENSE
+├── pyproject.toml
+├── setup.py
+├── MANIFEST.in
 ├── .gitignore
 └── doc-for-agent/
     ├── SKILL.md
@@ -66,7 +69,13 @@ DocForAgent_skill/
     │       └── utils.py
     ├── installer/
     │   ├── __init__.py
-    │   └── docagent.py
+    │   ├── __main__.py
+    │   ├── docagent.py
+    │   └── assets/
+    │       ├── scripts/
+    │       ├── templates/
+    │       ├── references/
+    │       └── agents/
     ├── templates/
     │   ├── base/
     │   │   ├── skill-content.md
@@ -102,7 +111,8 @@ Current structure on `main` is intentionally simple:
 - `doc-for-agent/` is the source of truth for the reusable Codex skill.
 - `doc-for-agent/agents/openai.yaml` is the manifest shipped with installed adapters.
 - `doc-for-agent/scripts/doc_for_agent_generator/` contains the modular generator core for analysis, content building, merge logic, and shared models.
-- `doc-for-agent/installer/docagent.py` is the minimal Python installer CLI for repo-local adapter installs.
+- `doc-for-agent/installer/docagent.py` is the product CLI entrypoint (`docagent`) for install, doctor, update, and generation flows.
+- `doc-for-agent/installer/assets/` is the packaged runtime bundle used when `docagent` is installed from wheel/sdist.
 - `doc-for-agent/templates/product.json` carries product metadata used by the installer and install receipts.
 - `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, and Continue.
 - `doc-for-agent/tests/fixtures/` contains eight representative sample repositories used by the snapshot regression test.
@@ -114,25 +124,34 @@ This keeps the default branch easier to reason about before splitting work acros
 
 ## Install With the Product CLI
 
-The new minimal installer CLI gives `doc-for-agent` a cleaner distribution surface for repo-local assistant installs:
+Install `docagent` from this repository as a Python CLI product:
 
 ```bash
-python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py install --platform codex --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py install --platform claude --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py install --platform continue --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py update --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py --version
+pipx install .
 ```
 
-Use `all` or `install --platform all` to install every supported adapter in one pass:
+or:
 
 ```bash
-python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py install --platform all --target /path/to/repo
+python3 -m pip install .
 ```
+
+After installation, use the product command directly:
+
+```bash
+docagent doctor --target /path/to/repo
+docagent install --platform codex --target /path/to/repo
+docagent install --platform claude --target /path/to/repo
+docagent install --platform continue --target /path/to/repo
+docagent all --target /path/to/repo
+docagent versions --target /path/to/repo
+docagent update --target /path/to/repo
+docagent generate --root /path/to/repo --mode refresh
+docagent refresh --root /path/to/repo
+docagent --version
+```
+
+`generate` and `refresh` are product-level wrappers over the bundled AGENTS generator, so users can stay on a single `docagent` command surface.
 
 Each install writes a self-contained bundle under the platform's hidden folder:
 
@@ -155,10 +174,16 @@ The current product metadata lives in `doc-for-agent/templates/product.json`, so
 Recommended install flow:
 
 ```bash
+docagent doctor --target /path/to/repo
+docagent all --target /path/to/repo
+docagent versions --target /path/to/repo
+docagent update --target /path/to/repo
+```
+
+Source checkout fallback (without package install) is still available:
+
+```bash
 python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py all --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py versions --target /path/to/repo
-python3 doc-for-agent/installer/docagent.py update --target /path/to/repo
 ```
 
 ## Install As a Codex Skill

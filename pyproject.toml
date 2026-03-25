@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc-for-agent"
+version = "0.2.0.dev0"
+description = "Installable product surface for doc-for-agent platform adapters and AGENTS generation."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "doc-for-agent contributors" }]
+keywords = ["ai", "agents", "documentation", "installer", "codex", "claude", "continue"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+
+[project.scripts]
+docagent = "installer.docagent:cli"
+
+[tool.setuptools]
+packages = ["installer"]
+package-dir = { "" = "doc-for-agent" }
+include-package-data = true
+
+[tool.setuptools.package-data]
+installer = ["assets/**/*"]
