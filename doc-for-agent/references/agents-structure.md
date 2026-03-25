@@ -2,6 +2,8 @@
 
 This skill creates a lean `AGENTS/` directory for coding agents.
 
+For the longer-term layered profile inspired by `/Users/tim/BDI/AGENTS`, see `references/layered-agents-blueprint.md`.
+
 ## File intent
 
 ### `AGENTS/README.md`
@@ -72,4 +74,3 @@ Capture:
 - Avoid restating generic framework knowledge
 - Make commands copyable
 - Record real constraints and actual paths
-

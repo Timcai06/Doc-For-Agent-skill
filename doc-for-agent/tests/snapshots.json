@@ -129,5 +129,47 @@
         "`scripts/sync.py`"
       ]
     }
+  },
+  "layered_product_app": {
+    "__profile": "layered",
+    "__required_docs": [
+      "00-entry/AGENTS.md",
+      "01-product/001-core-goals.md",
+      "01-product/002-prd.md",
+      "01-product/003-app-flow.md",
+      "02-architecture/004-tech-stack.md",
+      "02-architecture/005-frontend-guidelines.md",
+      "02-architecture/006-backend-structure.md",
+      "02-architecture/007-architecture-compatibility.md",
+      "03-execution/008-implementation-plan.md",
+      "04-memory/009-progress.md",
+      "04-memory/010-lessons.md"
+    ],
+    "00-entry/AGENTS.md": {
+      "contains": [
+        "`01-product/001-core-goals.md`",
+        "Current classification: `web application repository` with `high` confidence."
+      ]
+    },
+    "02-architecture/004-tech-stack.md": {
+      "contains": [
+        "Doc profile: `layered`.",
+        "Frontend stack: Next.js 14.2.0, React 18.3.1",
+        "Backend/runtime stack: FastAPI, Uvicorn"
+      ]
+    },
+    "03-execution/008-implementation-plan.md": {
+      "contains": [
+        "npm install",
+        "uvicorn app.main:app --reload"
+      ]
+    },
+    "04-memory/009-progress.md": {
+      "contains": [
+        "Doc profile in use: `layered`.",
+        "Frontend root detected at `frontend`.",
+        "Backend root detected at `backend`."
+      ]
+    }
   }
 }

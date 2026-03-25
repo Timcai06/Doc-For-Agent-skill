@@ -519,6 +519,7 @@ def analyze_repo(
     root: Path,
     project_name: str,
     repo_type_override: Optional[str] = None,
+    doc_profile: str = "bootstrap",
 ) -> RepoAnalysis:
     frontend_root = detect_frontend_root(root)
     backend_root = detect_backend_root(root)
@@ -547,6 +548,7 @@ def analyze_repo(
         root=root,
         project_name=project_name,
         repo_type=classification.primary_type,
+        doc_profile=doc_profile,
         repo_type_reasons=classification.reasons,
         repo_type_questions=classification.open_questions,
         summary=summary,

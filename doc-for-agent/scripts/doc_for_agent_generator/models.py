@@ -46,6 +46,7 @@ class RepoAnalysis:
     root: Path
     project_name: str
     repo_type: str
+    doc_profile: str = "bootstrap"
     repo_type_reasons: List[str] = field(default_factory=list)
     repo_type_questions: List[str] = field(default_factory=list)
     summary: str = ""

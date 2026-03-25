@@ -6,6 +6,8 @@ from typing import Dict, Sequence
 from .models import RepoAnalysis
 from .utils import find_files, rel_path
 
+SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
+
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:
     if not items:
@@ -30,6 +32,21 @@ def repo_type_label(repo_type: str) -> str:
         "unknown": "repository type not confidently classified",
     }
     return labels.get(repo_type, repo_type)
+
+
+def current_operating_posture(analysis: RepoAnalysis) -> str:
+    postures = {
+        "skill-meta": "Keep the skill definition, generator behavior, and generated documentation in sync.",
+        "web-app": "Keep product surface, frontend flow, and backend contract aligned while the repository evolves.",
+        "backend-service": "Preserve runtime contract stability while tightening service behavior and verification.",
+        "cli-tool": "Preserve command UX and script behavior while clarifying install and verification paths.",
+        "library-sdk": "Preserve public API surface and usage examples while improving implementation internals.",
+        "monorepo": "Keep boundaries between packages/apps explicit before making cross-cutting edits.",
+    }
+    return postures.get(
+        analysis.repo_type,
+        "Confirm current project phase and the next safe scope of work before making broad edits.",
+    )
 
 
 def extend_unique(target: list[str], items: Sequence[str]) -> None:
@@ -672,7 +689,450 @@ def build_glossary(analysis: RepoAnalysis) -> str:
 """
 
 
-def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+def build_layered_entry(analysis: RepoAnalysis) -> str:
+    reading_order = [
+        "`01-product/001-core-goals.md`",
+        "`01-product/002-prd.md`",
+        "`02-architecture/004-tech-stack.md`",
+        "`02-architecture/006-backend-structure.md`",
+        "`02-architecture/007-architecture-compatibility.md`",
+        "`03-execution/008-implementation-plan.md`",
+        "`04-memory/009-progress.md`",
+        "`04-memory/010-lessons.md`",
+    ]
+    if analysis.repo_type in {"web-app", "skill-meta", "cli-tool"}:
+        reading_order.insert(3, "`01-product/003-app-flow.md`")
+        reading_order.insert(5, "`02-architecture/005-frontend-guidelines.md`")
+
+    rules = [
+        "Read product and architecture docs before broad refactors.",
+        "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
+        "Prefer confirmed facts over speculative roadmap language.",
+        "Protect hand-maintained notes with manual blocks when refresh safety matters.",
+    ]
+    if analysis.repo_type == "skill-meta":
+        rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
+    elif analysis.repo_type == "web-app":
+        rules.append("Treat frontend routes, backend endpoints, and result contracts as linked surfaces.")
+
+    return f"""# AGENTS Entry
+
+## Purpose
+
+- Define the reading order before an agent changes code or docs
+- State the operating rules that should survive session resets
+- Point future agents at the repository's canonical fact sources
+
+## Reading Order
+
+{format_bullets(reading_order, "Add a repository-specific reading order.")}
+
+## Rules
+
+{format_bullets(rules, "Add repository-specific execution rules.")}
+
+## Current Operating Posture
+
+- {current_operating_posture(analysis)}
+- Current classification: `{repo_type_label(analysis.repo_type)}` with `{analysis.classification.confidence}` confidence.
+
+## Canonical Fact Sources
+
+{format_bullets(list(analysis.repo_type_reasons), "Needs human confirmation: add canonical fact sources and classification reasons.")}
+"""
+
+
+def build_layered_core_goals(analysis: RepoAnalysis) -> str:
+    goals = []
+    if analysis.summary:
+        goals.append(analysis.summary)
+    goals.append(f"This repository is currently best understood as a `{repo_type_label(analysis.repo_type)}`.")
+    if analysis.repo_type == "skill-meta":
+        goals.append("The core product is the reusable agent-documentation workflow, not only the generated files themselves.")
+    elif analysis.repo_type == "web-app":
+        goals.append("The core product includes both the user-facing flow and the runtime contract that supports it.")
+
+    constraints = [
+        "Avoid drifting away from the repository's real code, scripts, and naming conventions.",
+        "Prefer stable entrypoints and contracts over broad structural churn.",
+    ]
+    if analysis.classification.conflicting_signals:
+        constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
+
+    return f"""# Core Goals
+
+## Confirmed Facts
+
+{format_bullets(goals, "Needs human confirmation: add a concise project goal statement.")}
+
+## Constraints To Preserve
+
+{format_bullets(constraints, "Add repository-specific constraints.")}
+
+## Open Questions
+
+{format_bullets(list(analysis.repo_type_questions), "Confirm the top-level success criteria and non-goals for this repository.")}
+"""
+
+
+def build_layered_prd(analysis: RepoAnalysis) -> str:
+    users = [
+        f"Primary classification: `{repo_type_label(analysis.repo_type)}`.",
+    ]
+    if analysis.repo_type == "skill-meta":
+        users.append("Likely users are maintainers evolving the skill plus agents that consume its generated guidance.")
+    elif analysis.repo_type == "web-app":
+        users.append("Likely users are product operators using the app and engineers maintaining the full stack.")
+    elif analysis.repo_type in {"cli-tool", "library-sdk"}:
+        users.append("Likely users are developers integrating or operating the tooling.")
+
+    journeys = []
+    if analysis.routes:
+        journeys.extend([f"Route or entry surface: `{route}`" for route in analysis.routes[:8]])
+    elif analysis.cli_entrypoints:
+        journeys.extend([f"CLI entrypoint: `{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+    elif analysis.skill_meta.agent_manifests:
+        journeys.extend(
+            [f"Agent surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
+        )
+
+    return f"""# PRD
+
+## Best Used For
+
+- Aligning agents on who this repository serves
+- Checking whether a change still supports the intended user journey
+
+## Likely Users And Outcomes
+
+{format_bullets(users, "Needs human confirmation: describe the primary users and outcomes.")}
+
+## Current Entry Surfaces
+
+{format_bullets(journeys, "No obvious user entry surfaces were detected automatically.")}
+
+## Questions To Resolve
+
+- Confirm the primary audience and the exact outcome they expect from this repository.
+- Confirm which behaviors or labels must remain stable for downstream users.
+"""
+
+
+def build_layered_app_flow(analysis: RepoAnalysis) -> str:
+    stages = []
+    if analysis.routes:
+        stages.extend([f"Browser route: `{route}`" for route in analysis.routes[:8]])
+    if analysis.components:
+        stages.extend([f"Component surface: `{component}`" for component in analysis.components[:6]])
+    if analysis.cli_entrypoints:
+        stages.extend([f"Command surface: `{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+    if analysis.skill_meta.agent_manifests:
+        stages.extend(
+            [f"Agent manifest surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
+        )
+
+    guidance = [
+        "Treat the first visible or invoked surface as part of the product contract.",
+        "Keep user-facing names aligned across README examples, manifests, routes, and commands.",
+    ]
+    if analysis.repo_type == "web-app":
+        guidance.append("Preserve route semantics and component hierarchy before redesigning layout or navigation.")
+    elif analysis.repo_type == "skill-meta":
+        guidance.append("Treat install, invocation, and prompt surfaces as the equivalent of a frontend contract.")
+
+    return f"""# App Flow
+
+## Surfaces Detected
+
+{format_bullets(stages, "No routes, command surfaces, or manifest surfaces were detected automatically.")}
+
+## Guidance
+
+{format_bullets(guidance, "Add repository-specific flow guidance.")}
+"""
+
+
+def build_layered_tech_stack(analysis: RepoAnalysis) -> str:
+    stack = [
+        f"Repo type: `{analysis.repo_type}`.",
+        f"Doc profile: `{analysis.doc_profile}`.",
+        f"Classification confidence: `{analysis.classification.confidence}`.",
+        f"Package manager: `{analysis.package_manager}`.",
+        f"Frontend stack: {analysis.frontend_stack}",
+        f"Backend/runtime stack: {analysis.backend_stack}",
+    ]
+    if analysis.frontend_root:
+        stack.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
+    if analysis.backend_root:
+        stack.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+
+    return f"""# Tech Stack
+
+## Confirmed Facts
+
+{format_bullets(stack, "Needs human confirmation: record the canonical stack facts.")}
+
+## Secondary Traits
+
+{format_bullets(list(analysis.classification.secondary_traits), "No secondary traits were detected automatically.")}
+"""
+
+
+def build_layered_frontend_guidelines(analysis: RepoAnalysis) -> str:
+    guidance = [
+        "Keep user-facing routes, labels, prompts, or commands stable unless the repository intentionally renames them.",
+        "Review README examples and visible entry surfaces before changing interaction flows.",
+    ]
+    if analysis.repo_type == "web-app":
+        guidance.extend(
+            [
+                "Treat routes and component hierarchy as part of the working product contract.",
+                "Preserve the main interaction path before optimizing styling or layout details.",
+            ]
+        )
+    elif analysis.repo_type == "skill-meta":
+        guidance.extend(
+            [
+                "Treat skill manifests, trigger phrasing, and invocation prompts as the user-facing interface.",
+                "Do not let manifest language drift away from what the generator actually supports.",
+            ]
+        )
+
+    evidence = []
+    if analysis.routes:
+        evidence.extend([f"Detected route: `{route}`" for route in analysis.routes[:6]])
+    if analysis.components:
+        evidence.extend([f"Detected component: `{component}`" for component in analysis.components[:6]])
+    if analysis.skill_meta.agent_manifests:
+        evidence.extend(
+            [f"Detected manifest: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
+        )
+
+    return f"""# Frontend Guidelines
+
+## Guidance
+
+{format_bullets(guidance, "Add repository-specific frontend or interaction-surface guidance.")}
+
+## Evidence
+
+{format_bullets(evidence, "No route, component, or manifest evidence was detected automatically.")}
+"""
+
+
+def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
+    responsibilities = [
+        "Identify the runtime or automation entrypoint before changing behavior.",
+        "Treat outputs, contracts, and side effects as downstream-facing surfaces.",
+    ]
+    if analysis.repo_type == "skill-meta":
+        responsibilities.append("The generator script and helper scripts are the backend-like execution layer.")
+    elif analysis.repo_type == "backend-service":
+        responsibilities.append("HTTP endpoints and returned payload shapes are the clearest service contract.")
+
+    runtime_entries = []
+    if analysis.skill_meta.scripts:
+        runtime_entries.extend([f"`{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.scripts[:6]])
+    if analysis.cli_entrypoints:
+        runtime_entries.extend([f"`{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+    if analysis.endpoints:
+        runtime_entries.extend([f"`{endpoint}`" for endpoint in analysis.endpoints[:8]])
+
+    return f"""# Backend Structure
+
+## Responsibilities
+
+{format_bullets(responsibilities, "Add repository-specific backend responsibilities.")}
+
+## Runtime Entry Points
+
+{format_bullets(runtime_entries, "No runtime entrypoints were detected automatically.")}
+
+## Stable Contract Fields
+
+{format_bullets(list(analysis.contract_fields), "No stable contract fields were detected automatically.")}
+
+## Storage And Outputs
+
+{format_bullets(list(analysis.storage_rules), "No storage or output rules were detected automatically.")}
+"""
+
+
+def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
+    source_of_truth = []
+    if analysis.repo_type == "skill-meta":
+        source_of_truth.extend(
+            [
+                "`doc-for-agent/SKILL.md` for trigger conditions and workflow",
+                "`doc-for-agent/scripts/` for generation behavior",
+                "`doc-for-agent/references/` for documentation shape constraints",
+            ]
+        )
+    else:
+        if analysis.frontend_root:
+            source_of_truth.append(f"`{rel_path(analysis.frontend_root, analysis.root)}` for client-side behavior")
+        if analysis.backend_root:
+            source_of_truth.append(f"`{rel_path(analysis.backend_root, analysis.root)}` for runtime/service behavior")
+        if not source_of_truth:
+            source_of_truth.append("Needs human confirmation: identify the canonical files and directories.")
+
+    boundaries = [
+        "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
+        "Do not let generated docs drift away from the repository's actual entrypoints and workflows.",
+    ]
+    if analysis.repo_type == "skill-meta":
+        boundaries.append("Skill manifests, README examples, and generator output should describe the same capability surface.")
+
+    return f"""# Architecture Compatibility
+
+## Repo-Type Signals
+
+{format_bullets(list(analysis.repo_type_reasons), "No strong classification signals were detected automatically.")}
+
+## Source Of Truth
+
+{format_bullets(source_of_truth, "Needs human confirmation: add canonical source-of-truth files.")}
+
+## Compatibility Boundaries
+
+{format_bullets(boundaries, "Add explicit compatibility boundaries.")}
+
+## Conflicting Signals
+
+{format_bullets(list(analysis.classification.conflicting_signals), "No major conflicting signals were detected automatically.")}
+"""
+
+
+def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
+    next_steps = [
+        "Validate setup, run, and verify commands before broad edits.",
+        "Refresh AGENTS docs after changing repository structure or workflow commands.",
+    ]
+    if analysis.repo_type_questions:
+        next_steps.append("Resolve the open repository-shape questions before taking on large refactors.")
+
+    setup_lines = []
+    run_lines = []
+    verify_lines = []
+
+    if analysis.frontend_root:
+        frontend_prefix = (
+            f"cd {rel_path(analysis.frontend_root, analysis.root)}"
+            if analysis.frontend_root != analysis.root
+            else "# already at repo root"
+        )
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.extend([frontend_prefix, install_cmd])
+        if "dev" in analysis.frontend_scripts:
+            run_lines.extend(
+                [
+                    frontend_prefix,
+                    f"{analysis.package_manager} run dev" if analysis.package_manager != "yarn" else "yarn dev",
+                ]
+            )
+    if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
+        backend_prefix = (
+            f"cd {rel_path(analysis.backend_root, analysis.root)}"
+            if analysis.backend_root != analysis.root
+            else "# backend at repo root"
+        )
+        setup_lines.extend([backend_prefix, "python3 -m pip install -r requirements.txt"])
+        if (analysis.backend_root / "app").exists():
+            run_lines.extend([backend_prefix, "uvicorn app.main:app --reload"])
+
+    extend_unique(verify_lines, detect_unittest_commands(analysis.root))
+    extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
+
+    if not setup_lines:
+        setup_lines = ["# TODO: add repository setup commands"]
+    if not run_lines:
+        run_lines = ["# TODO: add local run commands"]
+    if not verify_lines:
+        verify_lines = ["# TODO: add lint / test / build commands"]
+
+    return f"""# Implementation Plan
+
+## Current Operating Posture
+
+- {current_operating_posture(analysis)}
+
+## Immediate Next Steps
+
+{format_bullets(next_steps, "Add the next repository-specific execution steps.")}
+
+## Setup
+
+```bash
+{chr(10).join(setup_lines)}
+```
+
+## Run
+
+```bash
+{chr(10).join(run_lines)}
+```
+
+## Verify
+
+```bash
+{chr(10).join(verify_lines)}
+```
+"""
+
+
+def build_layered_progress(analysis: RepoAnalysis) -> str:
+    facts = [
+        f"Detected repo type: `{analysis.repo_type}`.",
+        f"Doc profile in use: `{analysis.doc_profile}`.",
+        f"Classification confidence: `{analysis.classification.confidence}`.",
+    ]
+    if analysis.summary:
+        facts.append(f"Repository summary: {analysis.summary}")
+    if analysis.frontend_root:
+        facts.append(f"Frontend root detected at `{rel_path(analysis.frontend_root, analysis.root)}`.")
+    if analysis.backend_root:
+        facts.append(f"Backend root detected at `{rel_path(analysis.backend_root, analysis.root)}`.")
+
+    focus = list(analysis.repo_type_questions) or [
+        "Confirm the next milestone and keep this file updated with human-approved progress.",
+    ]
+
+    return f"""# Progress
+
+## Confirmed Facts
+
+{format_bullets(facts, "Add confirmed current-state facts.")}
+
+## Current Focus
+
+{format_bullets(focus, "Add the current focus items.")}
+"""
+
+
+def build_layered_lessons(analysis: RepoAnalysis) -> str:
+    lessons = [
+        "Read the entry and architecture docs before large structural edits.",
+        "Refresh generated agent docs after meaningful repository-shape changes.",
+        "Prefer explicit contracts and stable names over agent improvisation.",
+    ]
+    if analysis.repo_type == "skill-meta":
+        lessons.append("Keep manifests, README examples, and generator behavior aligned so the skill does not overpromise.")
+    if analysis.classification.conflicting_signals:
+        lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
+
+    return f"""# Lessons
+
+## Durable Lessons
+
+{format_bullets(lessons, "Add durable lessons that should survive session resets.")}
+"""
+
+
+def generate_bootstrap_docs(analysis: RepoAnalysis) -> Dict[str, str]:
     return {
         "README.md": build_readme(analysis),
         "product.md": build_product(analysis),
@@ -682,3 +1142,25 @@ def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
         "workflows.md": build_workflows(analysis),
         "glossary.md": build_glossary(analysis),
     }
+
+
+def generate_layered_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+    return {
+        "00-entry/AGENTS.md": build_layered_entry(analysis),
+        "01-product/001-core-goals.md": build_layered_core_goals(analysis),
+        "01-product/002-prd.md": build_layered_prd(analysis),
+        "01-product/003-app-flow.md": build_layered_app_flow(analysis),
+        "02-architecture/004-tech-stack.md": build_layered_tech_stack(analysis),
+        "02-architecture/005-frontend-guidelines.md": build_layered_frontend_guidelines(analysis),
+        "02-architecture/006-backend-structure.md": build_layered_backend_structure(analysis),
+        "02-architecture/007-architecture-compatibility.md": build_layered_architecture_compatibility(analysis),
+        "03-execution/008-implementation-plan.md": build_layered_implementation_plan(analysis),
+        "04-memory/009-progress.md": build_layered_progress(analysis),
+        "04-memory/010-lessons.md": build_layered_lessons(analysis),
+    }
+
+
+def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+    if analysis.doc_profile == "layered":
+        return generate_layered_docs(analysis)
+    return generate_bootstrap_docs(analysis)

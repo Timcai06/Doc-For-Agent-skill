@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 
-REQUIRED_DOCS = [
+DEFAULT_REQUIRED_DOCS = [
     "README.md",
     "product.md",
     "architecture.md",
@@ -23,9 +23,9 @@ MANUAL_START = "<!-- doc-for-agent:manual-start -->"
 MANUAL_END = "<!-- doc-for-agent:manual-end -->"
 
 
-def run_generator(generator: Path, root: Path, mode: str) -> None:
+def run_generator(generator: Path, root: Path, mode: str, profile: str = "bootstrap") -> None:
     subprocess.run(
-        [sys.executable, str(generator), "--root", str(root), "--mode", mode],
+        [sys.executable, str(generator), "--root", str(root), "--mode", mode, "--profile", profile],
         check=True,
         capture_output=True,
         text=True,
@@ -38,32 +38,36 @@ def read_text(path: Path) -> str:
 
 def verify_fixture(generator: Path, fixture_root: Path, expectations: dict) -> list[str]:
     failures: list[str] = []
+    profile = expectations.get("__profile", "bootstrap")
+    required_docs = expectations.get("__required_docs", DEFAULT_REQUIRED_DOCS)
     with tempfile.TemporaryDirectory(prefix="doc-for-agent-fixture-") as tmpdir:
         sandbox_root = Path(tmpdir) / fixture_root.name
         shutil.copytree(fixture_root, sandbox_root)
 
-        run_generator(generator, sandbox_root, "init")
+        run_generator(generator, sandbox_root, "init", profile=profile)
 
         agents_dir = sandbox_root / "AGENTS"
-        for filename in REQUIRED_DOCS:
+        for filename in required_docs:
             if not (agents_dir / filename).exists():
                 failures.append(f"{fixture_root.name}: missing AGENTS/{filename}")
 
         outputs_after_init = {
-            path.name: read_text(path)
-            for path in sorted(agents_dir.glob("*.md"))
+            str(path.relative_to(agents_dir)).replace("\\", "/"): read_text(path)
+            for path in sorted(agents_dir.rglob("*.md"))
         }
 
-        run_generator(generator, sandbox_root, "refresh")
+        run_generator(generator, sandbox_root, "refresh", profile=profile)
         outputs_after_refresh = {
-            path.name: read_text(path)
-            for path in sorted(agents_dir.glob("*.md"))
+            str(path.relative_to(agents_dir)).replace("\\", "/"): read_text(path)
+            for path in sorted(agents_dir.rglob("*.md"))
         }
 
         if outputs_after_init != outputs_after_refresh:
             failures.append(f"{fixture_root.name}: refresh output was not idempotent after init")
 
         for filename, checks in expectations.items():
+            if filename.startswith("__"):
+                continue
             content = outputs_after_refresh.get(filename)
             if content is None:
                 failures.append(f"{fixture_root.name}: expected file {filename} was not generated")

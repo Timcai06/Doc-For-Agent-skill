@@ -69,7 +69,8 @@ DocForAgent_skill/
     │   ├── snapshots.json
     │   └── verify_generator_snapshots.py
     └── references/
-        └── agents-structure.md
+        ├── agents-structure.md
+        └── layered-agents-blueprint.md
 ```
 
 Current structure on `main` is intentionally simple:
@@ -140,6 +141,12 @@ Preview the file plan without writing anything:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --dry-run
 ```
 
+Generate the BDI-style layered topology for long-lived or phase-driven projects:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --profile layered
+```
+
 Force a repo type when auto-detection is ambiguous:
 
 ```bash
@@ -162,6 +169,18 @@ python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode re
 - Make new projects easier to onboard for coding agents
 - Scan the current codebase and prefill useful content instead of generating empty templates
 - Support refreshing existing `AGENTS/` docs when the repository evolves
+
+## Blueprint
+
+The current shipped output is still the lean flat profile, but the repository now also carries a next-step design reference for a more durable, BDI-inspired layered `AGENTS/` topology:
+
+- `doc-for-agent/references/layered-agents-blueprint.md`
+
+That blueprint captures a likely future direction for the skill:
+
+- keep the current bootstrap profile for fast onboarding
+- add a layered profile for long-lived, phase-driven projects
+- introduce entry, execution, and memory docs as first-class agent primitives
 
 ## Verify
 

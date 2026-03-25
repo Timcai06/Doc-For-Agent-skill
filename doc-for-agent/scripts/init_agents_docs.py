@@ -8,6 +8,7 @@ from typing import Dict, Optional
 from doc_for_agent_generator import (
     MANUAL_END,
     MANUAL_START,
+    SUPPORTED_DOC_PROFILES,
     SUPPORTED_REPO_TYPES,
     analyze_repo,
     generate_docs as generate_docs_from_analysis,
@@ -33,10 +34,11 @@ def generate_docs(
     root: Path,
     project_name: str,
     repo_type_override: Optional[str] = None,
+    profile: str = "bootstrap",
 ) -> Dict[str, str]:
     # Keep the historical entrypoint shape while delegating to the modular core.
     return generate_docs_from_analysis(
-        analyze_repo(root, project_name, repo_type_override=repo_type_override)
+        analyze_repo(root, project_name, repo_type_override=repo_type_override, doc_profile=profile)
     )
 
 
@@ -66,6 +68,7 @@ def print_analysis_explanation(analysis) -> None:
     print(f"Analysis for: {analysis.root}")
     print(f"- Project name: {analysis.project_name}")
     print(f"- Repo type: `{analysis.repo_type}` ({repo_type_label(analysis.repo_type)})")
+    print(f"- Doc profile: `{analysis.doc_profile}`")
     print(f"- Confidence: `{analysis.classification.confidence}`")
     print(
         f"- Frontend root: `{analysis.frontend_root}`"
@@ -123,11 +126,22 @@ def main() -> None:
         action="store_true",
         help="Print classification signals and reasoning before any write actions.",
     )
+    parser.add_argument(
+        "--profile",
+        choices=SUPPORTED_DOC_PROFILES,
+        default="bootstrap",
+        help="Select the AGENTS documentation topology to generate.",
+    )
     args = parser.parse_args()
 
     root = Path(args.root).expanduser().resolve()
     project_name = infer_project_name(root, args.project_name)
-    analysis = analyze_repo(root, project_name, repo_type_override=args.repo_type)
+    analysis = analyze_repo(
+        root,
+        project_name,
+        repo_type_override=args.repo_type,
+        doc_profile=args.profile,
+    )
     files = generate_docs_from_analysis(analysis)
 
     if args.explain:

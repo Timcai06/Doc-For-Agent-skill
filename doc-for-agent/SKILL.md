@@ -65,6 +65,12 @@ If the user gives a project name, also pass:
 python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --project-name "<name>" --mode refresh
 ```
 
+If the repository is long-lived, phase-driven, or the user explicitly wants an entry/execution/memory layout, prefer:
+
+```bash
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --profile layered
+```
+
 ### Step 3: Let the script prefill from the actual codebase
 
 The script will scan and prefill from:

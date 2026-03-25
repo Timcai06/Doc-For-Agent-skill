@@ -13,6 +13,7 @@ def read_text(path: Path) -> str:
 
 
 def write_file(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content.strip() + "\n", encoding="utf-8")
 
 

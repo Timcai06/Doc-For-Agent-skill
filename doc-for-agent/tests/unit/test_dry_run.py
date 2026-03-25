@@ -87,6 +87,32 @@ class DryRunTests(unittest.TestCase):
             self.assertEqual(before_files, after_files)
             self.assertEqual(before_contents, after_contents)
 
+    def test_layered_profile_dry_run_reports_nested_agents_files_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-dry-run-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "layered_product_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "layered_product_app", sandbox_root)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--profile",
+                    "layered",
+                    "--dry-run",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("create AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("create AGENTS/04-memory/010-lessons.md", result.stdout)
+            self.assertFalse((sandbox_root / "AGENTS").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
