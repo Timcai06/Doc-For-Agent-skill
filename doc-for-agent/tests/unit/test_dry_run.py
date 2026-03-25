@@ -82,6 +82,8 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("flat agent files: 0", result.stdout)
             self.assertIn("Suggested command: python3 doc-for-agent/scripts/init_agents_docs.py --root", result.stdout)
             self.assertIn("Suggested source-of-truth files:", result.stdout)
+            self.assertIn("Supporting-doc synthesis summary:", result.stdout)
+            self.assertIn("product: confirmed=", result.stdout)
             self.assertIn("has package bin metadata: no", result.stdout)
             after_files = sorted(
                 str(path.relative_to(agents_root))

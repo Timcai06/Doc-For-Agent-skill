@@ -43,6 +43,7 @@ Recent quality improvements also make output more directly usable:
 - architecture docs now infer source-of-truth files based on repo type (workspace config, manifests, entrypoints, runtime roots)
 - workflows prefer executable fallback guidance over placeholder TODO lines
 - `--explain` now includes a suggested profile (`bootstrap` or `layered`), a copyable refresh command, and a source-of-truth quick list
+- layered generation now synthesizes supporting docs into agent-facing `confirmed / conflicting / unresolved` guidance instead of only listing reference paths
 
 ## Repository Layout
 

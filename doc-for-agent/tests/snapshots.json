@@ -211,5 +211,64 @@
         "Backend root detected at `backend`."
       ]
     }
+  },
+  "layered_messy_docs": {
+    "__profile": "layered",
+    "__required_docs": [
+      "00-entry/AGENTS.md",
+      "01-product/001-core-goals.md",
+      "01-product/002-prd.md",
+      "01-product/003-app-flow.md",
+      "02-architecture/004-tech-stack.md",
+      "02-architecture/005-frontend-guidelines.md",
+      "02-architecture/006-backend-structure.md",
+      "02-architecture/007-architecture-compatibility.md",
+      "03-execution/008-implementation-plan.md",
+      "04-memory/009-progress.md",
+      "04-memory/010-lessons.md"
+    ],
+    "01-product/001-core-goals.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Product)",
+        "Supporting docs disagree on package manager (`npm`, `pnpm`).",
+        "Open question: decide whether self-hosted deployments are in scope"
+      ]
+    },
+    "01-product/002-prd.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Product)",
+        "TODO: confirm the on-call escalation policy"
+      ]
+    },
+    "01-product/003-app-flow.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Flow)",
+        "Supporting docs disagree on package manager (`npm`, `pnpm`)."
+      ]
+    },
+    "02-architecture/007-architecture-compatibility.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Architecture)",
+        "Supporting docs disagree on runtime/framework (`fastapi`, `flask`)."
+      ]
+    },
+    "03-execution/008-implementation-plan.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Execution)",
+        "TBD: decide who approves release cutover"
+      ]
+    },
+    "04-memory/009-progress.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Memory)",
+        "Pending: finalize the migration retrospective template"
+      ]
+    },
+    "04-memory/010-lessons.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Memory)",
+        "Pending: finalize the migration retrospective template"
+      ]
+    }
   }
 }

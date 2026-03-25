@@ -12,10 +12,13 @@ if str(SCRIPT_ROOT) not in sys.path:
 
 from doc_for_agent_generator.analysis import analyze_repo
 from doc_for_agent_generator.builders import (
+    build_layered_app_flow,
     build_layered_architecture_compatibility,
     build_layered_core_goals,
     build_layered_implementation_plan,
     build_layered_lessons,
+    build_layered_prd,
+    build_layered_progress,
     build_workflows,
 )
 
@@ -145,6 +148,69 @@ class WorkflowGenerationTests(unittest.TestCase):
             self.assertIn("`docs/architecture/overview.md`", architecture)
             self.assertIn("`plan/roadmap.md`", plan)
             self.assertIn("`notes/status.md`", lessons)
+
+    def test_layered_docs_synthesize_confirmed_conflicting_and_unresolved_insights(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-synthesis-") as tmpdir:
+            root = Path(tmpdir) / "layered-synthesis"
+            (root / "docs/product").mkdir(parents=True)
+            (root / "docs/architecture").mkdir(parents=True)
+            (root / "specs").mkdir(parents=True)
+            (root / "plan").mkdir(parents=True)
+            (root / "notes").mkdir(parents=True)
+
+            (root / "README.md").write_text("# Layered Synthesis\n\nConflicting docs fixture.\n", encoding="utf-8")
+            (root / "docs/product/vision.md").write_text(
+                (
+                    "# Product Vision\n\n"
+                    "- Primary users are operations teams.\n"
+                    "- Package manager: npm.\n"
+                    "- Open question: decide whether self-hosted mode is in scope.\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "specs/prd.md").write_text(
+                (
+                    "# PRD\n\n"
+                    "- Primary users are operations teams.\n"
+                    "- Package manager: pnpm.\n"
+                    "- TODO: confirm escalation policy.\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "docs/architecture/runtime.md").write_text(
+                (
+                    "# Runtime\n\n"
+                    "- Runtime framework: FastAPI.\n"
+                    "- Runtime framework: Flask.\n"
+                    "- Conflict: runtime choice differs across architecture drafts.\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "plan/roadmap.md").write_text(
+                "- Run verification with npm run test before each release candidate.\n- TBD: decide who approves release cutover.\n",
+                encoding="utf-8",
+            )
+            (root / "notes/status.md").write_text(
+                "- Keep command names stable across docs and scripts.\n- Pending: finalize the migration retrospective template.\n",
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Layered Synthesis", doc_profile="layered")
+            core_goals = build_layered_core_goals(analysis)
+            prd = build_layered_prd(analysis)
+            app_flow = build_layered_app_flow(analysis)
+            architecture = build_layered_architecture_compatibility(analysis)
+            plan = build_layered_implementation_plan(analysis)
+            progress = build_layered_progress(analysis)
+            lessons = build_layered_lessons(analysis)
+
+            self.assertIn("Supporting docs disagree on package manager (`npm`, `pnpm`).", core_goals)
+            self.assertIn("Open question: decide whether self-hosted mode is in scope", prd)
+            self.assertIn("TODO: confirm escalation policy", app_flow)
+            self.assertIn("Supporting docs disagree on runtime/framework (`fastapi`, `flask`).", architecture)
+            self.assertIn("TBD: decide who approves release cutover", plan)
+            self.assertIn("Pending: finalize the migration retrospective template", progress)
+            self.assertIn("Pending: finalize the migration retrospective template", lessons)
 
 
 if __name__ == "__main__":
