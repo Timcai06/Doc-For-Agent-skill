@@ -21,6 +21,7 @@ class PlatformAdapterTests(unittest.TestCase):
         platforms = available_platforms()
         self.assertIn("codex", platforms)
         self.assertIn("claude", platforms)
+        self.assertIn("continue", platforms)
 
     def test_rendered_codex_adapter_uses_codex_paths(self) -> None:
         config = load_platform_config("codex")
@@ -39,9 +40,18 @@ class PlatformAdapterTests(unittest.TestCase):
             self.assertTrue((install_root / "scripts" / "init_agents_docs.py").exists())
             self.assertTrue((install_root / "references" / "agents-structure.md").exists())
             self.assertTrue((install_root / "agents" / "openai.yaml").exists())
+            self.assertTrue((install_root / "templates" / "platforms" / "codex.json").exists())
+            self.assertTrue((install_root / "installer" / "docagent.py").exists())
 
             skill_text = (install_root / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("python3 .claude/skills/doc-for-agent/scripts/init_agents_docs.py", skill_text)
+
+    def test_rendered_continue_adapter_uses_continue_paths(self) -> None:
+        config = load_platform_config("continue")
+        content = render_adapter(config)
+
+        self.assertIn("python3 .continue/skills/doc-for-agent/scripts/init_agents_docs.py", content)
+        self.assertIn("- Platform: Continue", content)
 
 
 if __name__ == "__main__":
