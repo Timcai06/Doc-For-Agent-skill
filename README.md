@@ -35,6 +35,13 @@ The generator is now more agent-first in three important ways:
 - it distinguishes confirmed facts from agent-facing inferences and open questions
 - it writes docs toward agent execution and handoff, not just human-oriented project summaries
 
+Recent quality improvements also make output more directly usable:
+
+- repo-type detection now treats `package.json` `bin` metadata as a first-class CLI signal
+- architecture docs now infer source-of-truth files based on repo type (workspace config, manifests, entrypoints, runtime roots)
+- workflows prefer executable fallback guidance over placeholder TODO lines
+- `--explain` now includes a suggested profile (`bootstrap` or `layered`) and a source-of-truth quick list
+
 ## Repository Layout
 
 ```text

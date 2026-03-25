@@ -83,6 +83,25 @@ class RepoClassificationTests(unittest.TestCase):
             analysis.classification.conflicting_signals,
         )
 
+    def test_package_bin_metadata_promotes_cli_tool_classification(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-package-bin-") as tmpdir:
+            root = Path(tmpdir) / "bin-only-cli"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text("# Bin CLI\n\nCLI distributed through package metadata.\n", encoding="utf-8")
+            (root / "package.json").write_text(
+                '{"name":"bin-only-cli","version":"1.0.0","bin":{"bin-only":"dist/cli.js"}}\n',
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Bin CLI")
+
+            self.assertEqual(analysis.repo_type, "cli-tool")
+            self.assertEqual(analysis.classification.confidence, "high")
+            self.assertIn(
+                "Package `bin` metadata indicates a CLI distribution surface.",
+                analysis.classification.reasons,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

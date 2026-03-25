@@ -18,6 +18,7 @@ from doc_for_agent_generator import (
     repo_type_label,
     write_file,
 )
+from doc_for_agent_generator.builders import infer_source_of_truth_lines
 
 __all__ = [
     "MANUAL_END",
@@ -65,6 +66,11 @@ def describe_dry_run(root: Path, mode: str, files: Dict[str, str]) -> None:
 
 
 def print_analysis_explanation(analysis) -> None:
+    suggested_profile = (
+        "layered"
+        if analysis.repo_type in {"web-app", "monorepo"} or (analysis.frontend_root and analysis.backend_root)
+        else "bootstrap"
+    )
     print(f"Analysis for: {analysis.root}")
     print(f"- Project name: {analysis.project_name}")
     print(f"- Repo type: `{analysis.repo_type}` ({repo_type_label(analysis.repo_type)})")
@@ -81,6 +87,12 @@ def print_analysis_explanation(analysis) -> None:
         else "- Backend root: not detected"
     )
     print(f"- Package manager: `{analysis.package_manager}`")
+    print(f"- Suggested profile: `{suggested_profile}`")
+    if suggested_profile != analysis.doc_profile:
+        print(f"- Note: current run requested profile `{analysis.doc_profile}`.")
+    print("Suggested source-of-truth files:")
+    for line in infer_source_of_truth_lines(analysis)[:6]:
+        print(f"- {line}")
 
     sections = [
         ("Reasons", analysis.classification.reasons),
