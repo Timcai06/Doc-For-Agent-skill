@@ -46,12 +46,28 @@ DocForAgent_skill/
     ├── SKILL.md
     ├── agents/
     │   └── openai.yaml
+    ├── scripts/
+    │   ├── init_agents_docs.py
+    │   └── doc_for_agent_generator/
+    │       ├── analysis.py
+    │       ├── builders.py
+    │       ├── markdown.py
+    │       ├── models.py
+    │       └── utils.py
     ├── tests/
     │   ├── fixtures/
+    │   │   ├── backend_service/
+    │   │   ├── cli_tool/
+    │   │   ├── hybrid_skill_cli/
+    │   │   ├── library_sdk/
+    │   │   ├── skill_meta/
+    │   │   └── web_app/
+    │   ├── unit/
+    │   │   ├── test_classification.py
+    │   │   ├── test_dry_run.py
+    │   │   └── test_markdown.py
     │   ├── snapshots.json
     │   └── verify_generator_snapshots.py
-    ├── scripts/
-    │   └── init_agents_docs.py
     └── references/
         └── agents-structure.md
 ```
@@ -60,7 +76,9 @@ Current structure on `main` is intentionally simple:
 
 - `doc-for-agent/` is the source of truth for the reusable Codex skill.
 - `doc-for-agent/agents/openai.yaml` is the skill manifest shipped with the adapter.
-- `doc-for-agent/tests/fixtures/` contains representative sample repositories used by the snapshot regression test.
+- `doc-for-agent/scripts/doc_for_agent_generator/` contains the modular generator core for analysis, content building, merge logic, and shared models.
+- `doc-for-agent/tests/fixtures/` contains six representative sample repositories used by the snapshot regression test.
+- `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, and CLI dry-run behavior.
 - Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
 - `src/doc_for_agent/` is currently treated as a local packaging experiment on `main`, not the canonical implementation tree.
 
@@ -116,6 +134,12 @@ Use `--mode init` if you want to be explicit about a brand new repository:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode init
 ```
 
+Preview the file plan without writing anything:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --dry-run
+```
+
 ## Design Goals
 
 - Keep agent-facing docs lean
@@ -129,13 +153,19 @@ python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode in
 
 ## Verify
 
-Run the generator regression checks against the bundled fixtures:
+Run the focused unit tests first:
+
+```bash
+python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py'
+```
+
+Then run the generator regression checks against the bundled fixtures:
 
 ```bash
 python3 doc-for-agent/tests/verify_generator_snapshots.py
 ```
 
-This verifies representative `skill-meta`, `web-app`, `cli-tool`, and `library-sdk` repository shapes and checks that `init` followed by `refresh` stays stable.
+This now verifies representative `skill-meta`, `hybrid skill + CLI`, `backend service`, `web-app`, `cli-tool`, and `library-sdk` repository shapes and checks that `init` followed by `refresh` stays stable.
 
 ## Publishing
 
