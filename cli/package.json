@@ -1,0 +1,9 @@
+{
+  "name": "doc-for-agent-cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal installer CLI for the doc-for-agent platformized skill repository.",
+  "bin": {
+    "docforagent": "./docforagent.py"
+  }
+}
