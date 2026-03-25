@@ -56,6 +56,27 @@ class MarkdownMergeTests(unittest.TestCase):
         self.assertIn("Custom Section", merged)
         self.assertIn("This note was written by a human and should stay.", merged)
 
+    def test_merge_markdown_refreshes_matching_generated_sections_without_markers(self) -> None:
+        existing = """# Architecture
+
+## Confirmed Facts
+
+- Old generated fact.
+- Another stale line.
+"""
+        generated = """# Architecture
+
+## Confirmed Facts
+
+- New generated fact.
+- Classification confidence: `high`.
+"""
+        merged = merge_markdown(existing, generated)
+
+        self.assertIn("- New generated fact.", merged)
+        self.assertIn("- Classification confidence: `high`.", merged)
+        self.assertNotIn("- Old generated fact.", merged)
+
 
 if __name__ == "__main__":
     unittest.main()

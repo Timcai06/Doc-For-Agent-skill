@@ -113,8 +113,6 @@ def merge_markdown(existing: str, generated: str) -> str:
         manual_blocks = extract_manual_blocks(existing_body)
         if manual_blocks:
             chosen = append_manual_blocks(body, manual_blocks)
-        elif is_manual_section(existing_body):
-            chosen = existing_body
         merged_lines.extend(["", heading, "", chosen or ""])
         seen.add(heading)
 

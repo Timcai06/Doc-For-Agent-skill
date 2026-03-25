@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Sequence
 
 from .models import RepoAnalysis
-from .utils import rel_path
+from .utils import find_files, rel_path
 
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:
@@ -30,6 +30,57 @@ def repo_type_label(repo_type: str) -> str:
         "unknown": "repository type not confidently classified",
     }
     return labels.get(repo_type, repo_type)
+
+
+def extend_unique(target: list[str], items: Sequence[str]) -> None:
+    for item in items:
+        if item not in target:
+            target.append(item)
+
+
+def detect_unittest_commands(root: Path) -> list[str]:
+    commands: list[str] = []
+    unit_dirs = []
+    for pattern in ("tests/unit", "*/tests/unit", "*/*/tests/unit"):
+        unit_dirs.extend(sorted(path for path in root.glob(pattern) if path.is_dir()))
+
+    seen = set()
+    for unit_dir in unit_dirs:
+        normalized = str(unit_dir.resolve())
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        commands.append(
+            f"python3 -m unittest discover -s {rel_path(unit_dir, root)} -p 'test_*.py'"
+        )
+    return commands
+
+
+def detect_verify_script_commands(root: Path) -> list[str]:
+    scripts = find_files(
+        root,
+        [
+            "tests/verify*.py",
+            "*/tests/verify*.py",
+            "*/*/tests/verify*.py",
+            "scripts/verify*.py",
+            "*/scripts/verify*.py",
+        ],
+        limit=8,
+    )
+    return [f"python3 {rel_path(path, root)}" for path in scripts]
+
+
+def detect_generator_script(root: Path) -> Path | None:
+    matches = find_files(
+        root,
+        [
+            "scripts/init_agents_docs.py",
+            "*/scripts/init_agents_docs.py",
+        ],
+        limit=1,
+    )
+    return matches[0] if matches else None
 
 
 def build_readme(analysis: RepoAnalysis) -> str:
@@ -530,16 +581,20 @@ def build_workflows(analysis: RepoAnalysis) -> str:
 
     if analysis.repo_type == "skill-meta":
         setup_lines.append("# skill repositories are usually installed by symlink or copied into a local skills directory")
-        skill_script = "doc-for-agent/scripts/init_agents_docs.py" if (analysis.root / "doc-for-agent/scripts/init_agents_docs.py").exists() else ""
+        skill_script = detect_generator_script(analysis.root)
         if skill_script:
-            run_lines.append(f"python3 {skill_script} --root /path/to/target-repo --mode refresh")
-            refresh_lines.append(f"python3 {skill_script} --root {analysis.root} --mode refresh")
+            skill_script_rel = rel_path(skill_script, analysis.root)
+            run_lines.append(f"python3 {skill_script_rel} --root /path/to/target-repo --mode refresh")
+            refresh_lines.append(f"python3 {skill_script_rel} --root {analysis.root} --mode refresh")
         refresh_lines.append(
             "Review generated `AGENTS/*.md` files and tighten any sections still marked as needing human confirmation."
         )
 
     if analysis.script_files:
-        run_lines.extend(f"./{script}" for script in analysis.script_files[:6])
+        extend_unique(run_lines, [f"./{script}" for script in analysis.script_files[:6]])
+
+    extend_unique(verify_lines, detect_unittest_commands(analysis.root))
+    extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
 
     if not setup_lines:
         setup_lines = ["# TODO: add repository setup commands"]
