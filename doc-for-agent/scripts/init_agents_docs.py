@@ -169,6 +169,15 @@ def print_analysis_explanation(analysis) -> None:
     print("Suggested source-of-truth files:")
     for line in infer_source_of_truth_lines(analysis)[:6]:
         print(f"- {line}")
+    print("Supporting-doc synthesis summary:")
+    for role in ("product", "architecture", "execution", "memory"):
+        role_insights = analysis.supporting_doc_insights.get(role, {})
+        confirmed_count = len(role_insights.get("confirmed", []))
+        conflicting_count = len(role_insights.get("conflicting", []))
+        unresolved_count = len(role_insights.get("unresolved", []))
+        print(
+            f"- {role}: confirmed={confirmed_count}, conflicting={conflicting_count}, unresolved={unresolved_count}"
+        )
 
     sections = [
         ("Reasons", analysis.classification.reasons),

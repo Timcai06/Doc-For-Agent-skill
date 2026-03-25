@@ -451,6 +451,169 @@ def discover_documentation_inventory(root: Path) -> DocumentationInventory:
     )
 
 
+def supporting_doc_roles(path: Path, root: Path) -> List[str]:
+    normalized = str(path.relative_to(root)).replace("\\", "/").lower()
+    roles: List[str] = []
+    if normalized == "readme.md" or normalized.startswith("docs/product/") or normalized.startswith("specs/"):
+        roles.append("product")
+    if (
+        normalized.startswith("docs/architecture/")
+        or "/architecture/" in normalized
+        or normalized.startswith("docs/adr")
+        or "adr" in path.name.lower()
+    ):
+        roles.append("architecture")
+    if normalized.startswith("plan/") or normalized.startswith("roadmap/") or "runbook" in path.name.lower():
+        roles.append("execution")
+    if any(token in normalized for token in ("progress", "lessons", "handoff", "status")):
+        roles.append("memory")
+    if not roles and normalized.startswith("docs/"):
+        roles.append("product")
+    return roles
+
+
+def normalize_snippet_key(text: str) -> str:
+    lowered = re.sub(r"[^a-z0-9\s]", " ", text.lower())
+    tokens = [token for token in lowered.split() if len(token) >= 3]
+    return " ".join(tokens[:8])
+
+
+def clean_doc_line(line: str) -> str:
+    line = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", line)
+    line = line.replace("`", "")
+    line = re.sub(r"\s+", " ", line.strip())
+    return line.rstrip(" .")
+
+
+def extract_supporting_doc_snippets(text: str) -> List[str]:
+    snippets: List[str] = []
+    in_code_block = False
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or not stripped:
+            continue
+
+        candidate = ""
+        if stripped.startswith("#"):
+            heading = stripped.lstrip("#").strip()
+            if len(heading.split()) >= 4:
+                candidate = heading
+        elif re.match(r"^[-*]\s+", stripped):
+            candidate = re.sub(r"^[-*]\s+", "", stripped).strip()
+        elif re.match(r"^\d+\.\s+", stripped):
+            candidate = re.sub(r"^\d+\.\s+", "", stripped).strip()
+        elif len(stripped) >= 24:
+            candidate = stripped
+
+        cleaned = clean_doc_line(candidate)
+        if not cleaned:
+            continue
+        snippets.append(cleaned)
+        if len(snippets) >= 12:
+            break
+    return snippets
+
+
+def summarize_sources(paths: Sequence[Path], root: Path) -> str:
+    labels: List[str] = []
+    for path in paths[:2]:
+        relative = str(path.relative_to(root)).replace("\\", "/")
+        labels.append(f"`{relative}`")
+    if not labels:
+        return ""
+    if len(paths) > 2:
+        return f"{', '.join(labels)} (+{len(paths) - 2} more)"
+    return ", ".join(labels)
+
+
+def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path]) -> Dict[str, List[str]]:
+    confirmed_groups: Dict[str, Tuple[str, List[Path]]] = {}
+    unresolved_groups: Dict[str, Tuple[str, List[Path]]] = {}
+    explicit_conflicts: Dict[str, Tuple[str, List[Path]]] = {}
+    aggregate_text = ""
+
+    unresolved_pattern = re.compile(r"\b(todo|tbd|pending|open question|unresolved|confirm|decide)\b|\?", re.IGNORECASE)
+    explicit_conflict_pattern = re.compile(r"\b(conflict|inconsistent|contradict|not aligned|vs\.?)\b", re.IGNORECASE)
+
+    for path in paths:
+        text = read_text(path)
+        aggregate_text += "\n" + text.lower()
+        snippets = extract_supporting_doc_snippets(text)
+        for snippet in snippets:
+            key = normalize_snippet_key(snippet)
+            if not key:
+                continue
+
+            target = confirmed_groups
+            if unresolved_pattern.search(snippet):
+                target = unresolved_groups
+            elif explicit_conflict_pattern.search(snippet):
+                target = explicit_conflicts
+
+            if key not in target:
+                target[key] = (snippet, [path])
+            else:
+                existing_text, existing_paths = target[key]
+                if len(snippet) < len(existing_text):
+                    existing_text = snippet
+                if path not in existing_paths:
+                    existing_paths.append(path)
+                target[key] = (existing_text, existing_paths)
+
+    conflicting: List[str] = []
+    package_managers = sorted(set(re.findall(r"\b(npm|pnpm|yarn)\b", aggregate_text)))
+    if len(package_managers) >= 2:
+        conflicting.append(
+            f"Supporting docs disagree on package manager ({', '.join(f'`{name}`' for name in package_managers)})."
+        )
+    runtimes = sorted(set(re.findall(r"\b(fastapi|flask|django|express|fastify|koa|nestjs)\b", aggregate_text)))
+    if len(runtimes) >= 2:
+        conflicting.append(
+            f"Supporting docs disagree on runtime/framework ({', '.join(f'`{name}`' for name in runtimes)})."
+        )
+
+    for snippet, snippet_paths in explicit_conflicts.values():
+        sources = summarize_sources(snippet_paths, root)
+        conflicting.append(f"{snippet} (sources: {sources})" if sources else snippet)
+
+    confirmed: List[str] = []
+    for snippet, snippet_paths in confirmed_groups.values():
+        sources = summarize_sources(snippet_paths, root)
+        confirmed.append(f"{snippet} (sources: {sources})" if sources else snippet)
+
+    unresolved: List[str] = []
+    for snippet, snippet_paths in unresolved_groups.values():
+        sources = summarize_sources(snippet_paths, root)
+        unresolved.append(f"{snippet} (sources: {sources})" if sources else snippet)
+
+    return {
+        "confirmed": confirmed[:6],
+        "conflicting": conflicting[:4],
+        "unresolved": unresolved[:5],
+    }
+
+
+def synthesize_supporting_doc_insights(root: Path, docs_inventory: DocumentationInventory) -> Dict[str, Dict[str, List[str]]]:
+    role_paths: Dict[str, List[Path]] = {
+        "product": [],
+        "architecture": [],
+        "execution": [],
+        "memory": [],
+    }
+    for path in docs_inventory.reference_only_docs:
+        roles = supporting_doc_roles(path, root)
+        for role in roles:
+            role_paths[role].append(path)
+
+    insights: Dict[str, Dict[str, List[str]]] = {}
+    for role, paths in role_paths.items():
+        insights[role] = synthesize_role_supporting_insights(root, sort_paths(paths))
+    return insights
+
+
 def detect_library_entrypoints(root: Path) -> List[Path]:
     return find_files(
         root,
@@ -822,6 +985,7 @@ def analyze_repo(
     frontend_stack, routes, components, frontend_scripts = describe_frontend(frontend_root)
     backend_stack, endpoints, storage_rules = detect_backend_stack(backend_root)
     docs_inventory = discover_documentation_inventory(root)
+    supporting_doc_insights = synthesize_supporting_doc_insights(root, docs_inventory)
 
     return RepoAnalysis(
         root=root,
@@ -850,4 +1014,5 @@ def analyze_repo(
         signals=signals,
         classification=classification,
         docs_inventory=docs_inventory,
+        supporting_doc_insights=supporting_doc_insights,
     )

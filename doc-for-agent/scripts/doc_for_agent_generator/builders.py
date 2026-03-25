@@ -25,6 +25,12 @@ def supporting_doc_lines(paths: Sequence[Path], root: Path) -> list[str]:
     return [f"`{rel_path(path, root)}`" for path in paths]
 
 
+def supporting_doc_insight_lines(analysis: RepoAnalysis, role: str, kind: str) -> list[str]:
+    role_insights = analysis.supporting_doc_insights.get(role, {})
+    values = role_insights.get(kind, [])
+    return [value for value in values if value]
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -119,7 +125,12 @@ def supporting_docs_for_role(analysis: RepoAnalysis, role: str) -> list[Path]:
     for path in analysis.docs_inventory.reference_only_docs:
         normalized = rel_path(path, analysis.root).lower()
         if role == "product":
-            if normalized == "readme.md" or normalized.startswith("docs/product/") or normalized.startswith("specs/"):
+            if (
+                normalized == "readme.md"
+                or normalized.startswith("docs/product/")
+                or normalized.startswith("specs/")
+                or normalized.startswith("docs/")
+            ):
                 role_paths.append(path)
         elif role == "architecture":
             if (
@@ -915,6 +926,9 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
     if analysis.classification.conflicting_signals:
         constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
     references = supporting_docs_for_role(analysis, "product")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
     return f"""# Core Goals
 
@@ -925,6 +939,20 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
 ## Constraints To Preserve
 
 {format_bullets(constraints, "Add repository-specific constraints.")}
+
+## Supporting Doc Synthesis (Product)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
 
 ## Referenced Repository Docs
 
@@ -957,6 +985,9 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
             [f"Agent surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
         )
     references = supporting_docs_for_role(analysis, "product")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
     return f"""# PRD
 
@@ -972,6 +1003,20 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
 ## Current Entry Surfaces
 
 {format_bullets(journeys, "No obvious user entry surfaces were detected automatically.")}
+
+## Supporting Doc Synthesis (Product)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
 
 ## Supporting Repository Docs
 
@@ -1005,6 +1050,9 @@ def build_layered_app_flow(analysis: RepoAnalysis) -> str:
         guidance.append("Preserve route semantics and component hierarchy before redesigning layout or navigation.")
     elif analysis.repo_type == "skill-meta":
         guidance.append("Treat install, invocation, and prompt surfaces as the equivalent of a frontend contract.")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
     return f"""# App Flow
 
@@ -1015,6 +1063,20 @@ def build_layered_app_flow(analysis: RepoAnalysis) -> str:
 ## Guidance
 
 {format_bullets(guidance, "Add repository-specific flow guidance.")}
+
+## Supporting Doc Synthesis (Flow)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear flow facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct flow conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved flow items were synthesized from supporting docs.")}
 """
 
 
@@ -1127,6 +1189,9 @@ def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
 def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     source_of_truth = infer_source_of_truth_lines(analysis)
     references = supporting_docs_for_role(analysis, "architecture")
+    confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
@@ -1144,6 +1209,20 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
 ## Source Of Truth
 
 {format_bullets(source_of_truth, "Needs human confirmation: add canonical source-of-truth files.")}
+
+## Supporting Doc Synthesis (Architecture)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
 
 ## Referenced Architecture Docs
 
@@ -1225,6 +1304,9 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     references = supporting_docs_for_role(analysis, "execution")
+    confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
 
     return f"""# Implementation Plan
 
@@ -1254,6 +1336,20 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
 {chr(10).join(verify_lines)}
 ```
 
+## Supporting Doc Synthesis (Execution)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+
 ## Supporting Execution Docs
 
 {format_bullets(supporting_doc_lines(references, analysis.root), "No additional execution docs were detected outside AGENTS/.")}
@@ -1277,6 +1373,9 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
         "Confirm the next milestone and keep this file updated with human-approved progress.",
     ]
     references = supporting_docs_for_role(analysis, "memory")
+    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
     return f"""# Progress
 
@@ -1287,6 +1386,20 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
 ## Current Focus
 
 {format_bullets(focus, "Add the current focus items.")}
+
+## Supporting Doc Synthesis (Memory)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear progress facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct memory conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved memory items were synthesized from supporting docs.")}
 
 ## Referenced Memory Docs
 
@@ -1305,12 +1418,29 @@ def build_layered_lessons(analysis: RepoAnalysis) -> str:
     if analysis.classification.conflicting_signals:
         lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
     references = supporting_docs_for_role(analysis, "memory")
+    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
     return f"""# Lessons
 
 ## Durable Lessons
 
 {format_bullets(lessons, "Add durable lessons that should survive session resets.")}
+
+## Supporting Doc Synthesis (Memory)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear historical lessons were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct historical conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved historical items were synthesized from supporting docs.")}
 
 ## Referenced Historical Docs
 
