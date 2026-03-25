@@ -75,6 +75,10 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("Repo type: `cli-tool`", result.stdout)
             self.assertIn("Repo type overridden via CLI: `cli-tool`.", result.stdout)
             self.assertIn("Automatic classification would have selected `skill-meta` instead.", result.stdout)
+            self.assertIn("Suggested profile: `bootstrap`", result.stdout)
+            self.assertIn("Suggested command: python3 doc-for-agent/scripts/init_agents_docs.py --root", result.stdout)
+            self.assertIn("Suggested source-of-truth files:", result.stdout)
+            self.assertIn("has package bin metadata: no", result.stdout)
             after_files = sorted(
                 str(path.relative_to(agents_root))
                 for path in agents_root.rglob("*")

@@ -38,9 +38,10 @@ The generator is now more agent-first in three important ways:
 Recent quality improvements also make output more directly usable:
 
 - repo-type detection now treats `package.json` `bin` metadata as a first-class CLI signal
+- repo-type detection now keeps strong app envelopes (`frontend + backend` / workspace) from being misclassified as CLI-only repos
 - architecture docs now infer source-of-truth files based on repo type (workspace config, manifests, entrypoints, runtime roots)
 - workflows prefer executable fallback guidance over placeholder TODO lines
-- `--explain` now includes a suggested profile (`bootstrap` or `layered`) and a source-of-truth quick list
+- `--explain` now includes a suggested profile (`bootstrap` or `layered`), a copyable refresh command, and a source-of-truth quick list
 
 ## Repository Layout
 

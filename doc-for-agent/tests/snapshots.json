@@ -8,7 +8,8 @@
     "product.md": {
       "contains": [
         "This repository is best understood as a `CLI/tool repository`.",
-        "Primary users are likely developers integrating or running the packaged tooling."
+        "Primary users are likely developers integrating or running the packaged tooling.",
+        "`cli/src/index.ts`"
       ]
     },
     "architecture.md": {
@@ -80,6 +81,11 @@
       "contains": [
         "Detected backend/runtime stack: FastAPI, Uvicorn.",
         "`GET /health`"
+      ]
+    },
+    "architecture.md": {
+      "contains": [
+        "`README.md` for stated project goals, setup expectations, and user-facing examples"
       ]
     },
     "workflows.md": {
@@ -188,6 +194,14 @@
       "contains": [
         "npm install",
         "uvicorn app.main:app --reload"
+      ],
+      "absent": [
+        "# TODO:"
+      ]
+    },
+    "02-architecture/007-architecture-compatibility.md": {
+      "contains": [
+        "`README.md` for stated project goals, setup expectations, and user-facing examples"
       ]
     },
     "04-memory/009-progress.md": {

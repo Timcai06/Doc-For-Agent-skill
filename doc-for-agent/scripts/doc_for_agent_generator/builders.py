@@ -112,6 +112,9 @@ def detect_package_metadata_paths(root: Path) -> list[Path]:
 
 def infer_source_of_truth_lines(analysis: RepoAnalysis) -> list[str]:
     lines: list[str] = []
+    readme_path = analysis.root / "README.md"
+    if readme_path.exists():
+        lines.append("`README.md` for stated project goals, setup expectations, and user-facing examples")
 
     if analysis.repo_type == "skill-meta":
         if analysis.skill_meta.skill_file:
@@ -201,6 +204,27 @@ def append_package_script_commands(lines: list[str], package_manager: str, scrip
             lines.append(command)
 
 
+def product_entry_point_lines(analysis: RepoAnalysis) -> list[str]:
+    if analysis.repo_type == "web-app" and analysis.routes:
+        return [f"`{route}`" for route in analysis.routes[:8]]
+    if analysis.repo_type == "backend-service" and analysis.endpoints:
+        return [f"`{endpoint}`" for endpoint in analysis.endpoints[:8]]
+    if analysis.repo_type == "cli-tool" and analysis.cli_entrypoints:
+        return [f"`{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:8]]
+    if analysis.repo_type == "library-sdk" and analysis.library_entrypoints:
+        return [f"`{rel_path(path, analysis.root)}`" for path in analysis.library_entrypoints[:8]]
+    if analysis.repo_type == "skill-meta":
+        lines: list[str] = []
+        if analysis.skill_meta.skill_file:
+            lines.append(f"`{rel_path(analysis.skill_meta.skill_file, analysis.root)}`")
+        lines.extend(f"`{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:6])
+        if lines:
+            return lines
+    if analysis.routes:
+        return [f"`{route}`" for route in analysis.routes[:8]]
+    return []
+
+
 def build_readme(analysis: RepoAnalysis) -> str:
     return f"""# AGENTS
 
@@ -227,8 +251,8 @@ def build_readme(analysis: RepoAnalysis) -> str:
 
 def build_product(analysis: RepoAnalysis) -> str:
     route_lines = format_bullets(
-        [f"`{route}`" for route in analysis.routes[:8]],
-        "No user-facing routes were detected automatically.",
+        product_entry_point_lines(analysis),
+        "No user-facing routes or invocation entrypoints were detected automatically.",
     )
     facts = []
     if analysis.summary:
@@ -1098,6 +1122,7 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     setup_lines = []
     run_lines = []
     verify_lines = []
+    root_package_scripts = detect_root_package_scripts(analysis.root)
 
     if analysis.frontend_root:
         frontend_prefix = (
@@ -1118,6 +1143,20 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
                     f"{analysis.package_manager} run dev" if analysis.package_manager != "yarn" else "yarn dev",
                 ]
             )
+    elif root_package_scripts:
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.append(install_cmd)
+        append_package_script_commands(run_lines, analysis.package_manager, root_package_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            root_package_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
     if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
         backend_prefix = (
             f"cd {rel_path(analysis.backend_root, analysis.root)}"
@@ -1132,11 +1171,11 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
 
     if not setup_lines:
-        setup_lines = ["# TODO: add repository setup commands"]
+        setup_lines = ["Review README setup steps and install dependencies with the repository's package manager."]
     if not run_lines:
-        run_lines = ["# TODO: add local run commands"]
+        run_lines = ["Run the primary local command from README examples (app start, CLI invocation, or generator refresh)."]
     if not verify_lines:
-        verify_lines = ["# TODO: add lint / test / build commands"]
+        verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
 
     return f"""# Implementation Plan
 
