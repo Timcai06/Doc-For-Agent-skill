@@ -2,6 +2,11 @@
 
 This page is for contributors and maintainers, not first-time product users.
 
+Related maintainer references:
+
+- [Worktree Collaboration Rules](/Users/tim/DocForAgent_skill/docs/worktree-collaboration.md)
+- [Worktree 协作规则](/Users/tim/DocForAgent_skill/docs/worktree-collaboration.zh.md)
+
 ## Repository Layout
 
 ```text
