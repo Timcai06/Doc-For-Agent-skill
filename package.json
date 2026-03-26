@@ -29,7 +29,7 @@
   "scripts": {
     "prepack": "python3 doc-for-agent/installer/sync_assets.py",
     "pack:dry-run": "npm pack --dry-run",
-    "quickstart": "node doc-for-agent/installer/node/docagent.js"
+    "quickstart": "node doc-for-agent/installer/node/docagent.js quickstart"
   },
   "engines": {
     "node": ">=18"

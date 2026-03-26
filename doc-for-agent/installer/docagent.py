@@ -165,6 +165,27 @@ def render_versions_report(target_root: Path, statuses: Iterable[PlatformDoctorS
     return "\n".join(lines)
 
 
+def render_quickstart(target_root: Path) -> str:
+    metadata = load_product_metadata()
+    lines = [
+        f"{metadata.product_name} quickstart",
+        "- Recommended entry by user type:",
+        "- Node users: `npx -y doc-for-agent`",
+        "- Python users: `pipx install .` or `python3 -m pip install .`",
+        "- Unified product command: `docagent`",
+        "- First commands:",
+        f"- `docagent doctor --target {target_root}`",
+        f"- `docagent all --target {target_root}`",
+        f"- `docagent versions --target {target_root}`",
+        "- Supported platforms:",
+    ]
+    for platform in available_platforms():
+        config = load_platform_config(platform)
+        install_root = platform_install_root(target_root, config)
+        lines.append(f"- {config.display_name} ({platform}): {install_root}")
+    return "\n".join(lines)
+
+
 def print_install_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
     metadata = load_product_metadata()
     print(f"{metadata.product_name} install")
@@ -267,6 +288,12 @@ def build_parser() -> argparse.ArgumentParser:
     refresh_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
     refresh_parser.add_argument("--explain", action="store_true")
 
+    quickstart_parser = subparsers.add_parser(
+        "quickstart",
+        help="Show recommended install and first-use commands for Node and Python users.",
+    )
+    quickstart_parser.add_argument("--target", default=".", help="Repository root for example install commands.")
+
     return parser
 
 
@@ -291,6 +318,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         target_root = resolve_target_root(args.target)
         platforms = available_platforms() if args.platform == "all" else [args.platform]
         print(render_versions_report(target_root, collect_doctor_statuses(target_root, platforms)))
+        return 0
+
+    if args.command == "quickstart":
+        target_root = resolve_target_root(args.target)
+        print(render_quickstart(target_root))
         return 0
 
     if args.command == "update":
