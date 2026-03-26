@@ -174,7 +174,6 @@ def render_quickstart(target_root: Path) -> str:
     lines = [
         f"{metadata.product_name} quickstart",
         "- Product flow: install -> init -> refresh",
-        f"- Current target root: {target_root}",
         "- Install:",
         "- Node users: `npm install -g doc-for-agent` or `npx -y doc-for-agent`",
         "- Python users: `pipx install doc-for-agent`",

@@ -33,18 +33,18 @@ npx -y doc-for-agent
 Pick one:
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target /path/to/repo
-docagent init --ai claude --target /path/to/repo
-docagent init --ai codex --target /path/to/repo
-docagent init --ai continue --target /path/to/repo
-docagent init --ai copilot --target /path/to/repo
-docagent init --ai all --target /path/to/repo
+docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
+docagent init --ai claude --target <repo-root>
+docagent init --ai codex --target <repo-root>
+docagent init --ai continue --target <repo-root>
+docagent init --ai copilot --target <repo-root>
+docagent init --ai all --target <repo-root>
 ```
 
 CodeBuddy users usually start with:
 
 ```bash
-docagent init --ai codex --target /path/to/repo
+docagent init --ai codex --target <repo-root>
 ```
 
 ## Refresh
@@ -52,26 +52,26 @@ docagent init --ai codex --target /path/to/repo
 Agent docs:
 
 ```bash
-docagent refresh --root /path/to/repo --output-mode agent
+docagent refresh --root <repo-root> --output-mode agent
 ```
 
 Human docs:
 
 ```bash
-docagent refresh --root /path/to/repo --output-mode human
+docagent refresh --root <repo-root> --output-mode human
 ```
 
 Both:
 
 ```bash
-docagent refresh --root /path/to/repo --output-mode dual
+docagent refresh --root <repo-root> --output-mode dual
 ```
 
 ## Verify
 
 ```bash
-docagent doctor --target /path/to/repo
-docagent versions --target /path/to/repo
+docagent doctor --target <repo-root>
+docagent versions --target <repo-root>
 ```
 
 See also:
