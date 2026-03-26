@@ -19,6 +19,18 @@ from docagent import collect_doctor_statuses, main, render_doctor_report, render
 
 
 class InstallerCliTests(unittest.TestCase):
+    def test_help_mentions_v1_primary_and_legacy_commands(self) -> None:
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            with self.assertRaises(SystemExit) as context:
+                main(["--help"])
+
+        self.assertEqual(context.exception.code, 0)
+        text = stdout.getvalue()
+        self.assertIn("Product CLI v1", text)
+        self.assertIn("primary commands: init, doctor, refresh, generate, update, versions", text)
+        self.assertIn("legacy compatibility: install, all", text)
+
     def test_collect_doctor_statuses_reports_install_targets(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-doctor-") as tmpdir:
             target_root = Path(tmpdir)
@@ -131,7 +143,7 @@ class InstallerCliTests(unittest.TestCase):
                 exit_code = main(["update", "--platform", "all", "--target", tmpdir])
 
             self.assertEqual(exit_code, 1)
-            self.assertIn("No installed platforms were detected", stdout.getvalue())
+            self.assertIn("Run `init --ai all` first", stdout.getvalue())
 
     def test_version_flag_prints_product_version(self) -> None:
         with self.assertRaises(SystemExit) as context:
@@ -175,7 +187,7 @@ class InstallerCliTests(unittest.TestCase):
         if agents_dir.exists():
             self.fail(f"Fixture unexpectedly contains AGENTS directory: {agents_dir}")
 
-        exit_code = main(["generate", "--root", str(fixture_root), "--dry-run"])
+        exit_code = main(["generate", "--root", str(fixture_root), "--dry-run", "--output-mode", "dual"])
 
         self.assertEqual(exit_code, 0)
         self.assertFalse(agents_dir.exists())
@@ -186,7 +198,7 @@ class InstallerCliTests(unittest.TestCase):
         if agents_dir.exists():
             self.fail(f"Fixture unexpectedly contains AGENTS directory: {agents_dir}")
 
-        exit_code = main(["refresh", "--root", str(fixture_root), "--dry-run"])
+        exit_code = main(["refresh", "--root", str(fixture_root), "--dry-run", "--output-mode", "agent"])
 
         self.assertEqual(exit_code, 0)
         self.assertFalse(agents_dir.exists())

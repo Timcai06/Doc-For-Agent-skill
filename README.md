@@ -177,25 +177,25 @@ docagent init --ai copilot --target /path/to/repo
 
 ### Unified Command Surface
 
-Primary product entry:
+Command surface v1 (primary path):
 
 ```bash
 docagent init --ai codex|claude|continue|copilot|all --target /path/to/repo
+docagent doctor --target /path/to/repo
+docagent refresh --root /path/to/repo --output-mode agent
+docagent generate --root /path/to/repo --mode refresh --output-mode human|agent|dual
+docagent update --target /path/to/repo
+docagent versions --target /path/to/repo
 ```
 
-Operations:
+Optional utility:
 
 ```bash
-docagent doctor --target /path/to/repo
-docagent versions --target /path/to/repo
-docagent update --target /path/to/repo
-docagent refresh --root /path/to/repo
-docagent generate --root /path/to/repo --mode refresh
 docagent quickstart --target /path/to/repo
 docagent --version
 ```
 
-Backward compatibility is preserved:
+Legacy compatibility (still supported, but no longer the recommended path):
 
 ```bash
 docagent install --platform codex --target /path/to/repo
@@ -228,7 +228,7 @@ Distribution relation:
 - Python package (`pipx` / `pip`) ships the core runtime bundle and full CLI.
 - npm package (`npm` / `npx`) is a thin wrapper that forwards to the bundled Python `docagent`.
 - Core engine logic stays in Python; Node is an adoption entrypoint, not a forked implementation.
-- Node and Python users see one shared product story: `docagent init --ai ...` first, then doctor/version/update/refresh.
+- Node and Python users see one shared product story: `docagent init --ai ...` first, then doctor/refresh/update/versions.
 
 ### Platform Matrix
 
@@ -254,8 +254,9 @@ npm pack --dry-run
 Recommended install flow:
 
 ```bash
+docagent init --ai all --target /path/to/repo
 docagent doctor --target /path/to/repo
-docagent all --target /path/to/repo
+docagent refresh --root /path/to/repo --output-mode agent
 docagent versions --target /path/to/repo
 docagent update --target /path/to/repo
 ```
