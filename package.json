@@ -1,7 +1,7 @@
 {
   "name": "doc-for-agent",
   "version": "0.2.0-dev.0",
-  "description": "Product installer surface for doc-for-agent (npm/npx wrapper + Python core).",
+  "description": "Unified docagent product entry for npm/npx users, forwarding to the Python core runtime.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
   ],
   "scripts": {
     "prepack": "python3 doc-for-agent/installer/sync_assets.py",
-    "pack:dry-run": "npm pack --dry-run"
+    "pack:dry-run": "npm pack --dry-run",
+    "quickstart": "node doc-for-agent/installer/node/docagent.js"
   },
   "engines": {
     "node": ">=18"
