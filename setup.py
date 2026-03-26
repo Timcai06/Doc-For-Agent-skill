@@ -6,7 +6,7 @@ from setuptools import setup
 setup(
     name="doc-for-agent",
     version="0.2.0.dev0",
-    description="Installable product surface for doc-for-agent platform adapters and AGENTS generation.",
+    description="Installable unified docagent CLI for platform init, install, and AGENTS generation flows.",
     python_requires=">=3.9",
     package_dir={"": "doc-for-agent"},
     packages=["installer"],

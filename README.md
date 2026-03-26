@@ -1,8 +1,9 @@
-# Doc For Agent Skill
+# doc-for-agent
 
-`doc-for-agent` is a reusable Codex skill for bootstrapping an `AGENTS/` documentation directory in a new or existing software repository.
+`doc-for-agent` is a product CLI for bootstrapping and maintaining repository documentation for coding agents.
 
-It is designed for teams who want every project to start with a clean, agent-facing documentation structure so coding agents can work against consistent product, architecture, workflow, and terminology docs.
+After install, users start from one global command surface: `docagent`.
+Node and Python distributions both converge on the same product flow (`docagent init --ai ...`).
 
 ## What It Does
 
@@ -141,56 +142,65 @@ This keeps the default branch easier to reason about before splitting work acros
 
 ## Install With the Product CLI
 
-If you are unsure which path to choose:
+`docagent` is the single product CLI. Install from either ecosystem, then use the same command surface.
 
-- Node users: start with `npx -y doc-for-agent`.
-- Python users: start with `pipx install .`.
+Recommended path by user type:
+
+- Node users: start with `npx -y doc-for-agent` (one-off) or `npm install -g doc-for-agent` (global).
+- Python users: start with `pipx install doc-for-agent`, then fallback to `python3 -m pip install doc-for-agent`.
 
 ### Install Matrix
 
-| User profile | Install path | First command |
+| User profile | Install path | Product first run |
 | --- | --- | --- |
-| Python-first / CI | `pipx install .` | `docagent doctor --target /path/to/repo` |
-| Python-first (venv/system) | `python3 -m pip install .` | `docagent doctor --target /path/to/repo` |
-| Node-first (global) | `npm install -g doc-for-agent` | `docagent doctor --target /path/to/repo` |
-| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent` (prints quickstart) |
+| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target /path/to/repo` |
+| Node-first (global) | `npm install -g doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
+| Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
+| Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
 
-Quick relation:
+### Product Quick Start
 
-- Python install gives the canonical runtime (`docagent`) directly.
-- npm/npx install gives a thin Node launcher that forwards to the same Python runtime bundle.
-- Both paths converge on one command surface: `docagent`.
-- If you launch from `npx -y doc-for-agent` with no args, it runs `docagent quickstart`.
+```bash
+docagent init --ai all --target /path/to/repo
+docagent doctor --target /path/to/repo
+docagent versions --target /path/to/repo
+```
 
-### Product Command Surface
+Single-platform onboarding:
 
-After installation (from either Python or npm), use `docagent` as the single product command:
+```bash
+docagent init --ai codex --target /path/to/repo
+docagent init --ai claude --target /path/to/repo
+docagent init --ai continue --target /path/to/repo
+docagent init --ai copilot --target /path/to/repo
+```
+
+### Unified Command Surface
+
+Primary product entry:
+
+```bash
+docagent init --ai codex|claude|continue|copilot|all --target /path/to/repo
+```
+
+Operations:
 
 ```bash
 docagent doctor --target /path/to/repo
-docagent install --platform codex --target /path/to/repo
-docagent install --platform claude --target /path/to/repo
-docagent install --platform continue --target /path/to/repo
-docagent install --platform copilot --target /path/to/repo
-docagent all --target /path/to/repo
 docagent versions --target /path/to/repo
 docagent update --target /path/to/repo
-docagent quickstart --target /path/to/repo
-docagent generate --root /path/to/repo --mode refresh
 docagent refresh --root /path/to/repo
+docagent generate --root /path/to/repo --mode refresh
+docagent quickstart --target /path/to/repo
 docagent --version
 ```
 
-Node-first one-off command shape mirrors the same surface:
+Backward compatibility is preserved:
 
 ```bash
-npx -y doc-for-agent
-npx -y doc-for-agent doctor --target /path/to/repo
-npx -y doc-for-agent all --target /path/to/repo
-npx -y doc-for-agent update --target /path/to/repo
+docagent install --platform codex --target /path/to/repo
+docagent all --target /path/to/repo
 ```
-
-`generate` and `refresh` are product-level wrappers over the bundled AGENTS generator, so users can stay on a single `docagent` command surface.
 
 ### Python vs Node Distribution
 
@@ -218,6 +228,7 @@ Distribution relation:
 - Python package (`pipx` / `pip`) ships the core runtime bundle and full CLI.
 - npm package (`npm` / `npx`) is a thin wrapper that forwards to the bundled Python `docagent`.
 - Core engine logic stays in Python; Node is an adoption entrypoint, not a forked implementation.
+- Node and Python users see one shared product story: `docagent init --ai ...` first, then doctor/version/update/refresh.
 
 ### Platform Matrix
 

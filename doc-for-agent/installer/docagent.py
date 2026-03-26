@@ -169,14 +169,21 @@ def render_quickstart(target_root: Path) -> str:
     metadata = load_product_metadata()
     lines = [
         f"{metadata.product_name} quickstart",
-        "- Recommended entry by user type:",
-        "- Node users: `npx -y doc-for-agent`",
-        "- Python users: `pipx install .` or `python3 -m pip install .`",
-        "- Unified product command: `docagent`",
-        "- First commands:",
+        "- Recommended install path by user type:",
+        "- Node users: `npx -y doc-for-agent` (one-off) or `npm install -g doc-for-agent` (global)",
+        "- Python users: `pipx install doc-for-agent` (recommended) or `python3 -m pip install doc-for-agent`",
+        "- Unified product command after install: `docagent`",
+        "- Product first run:",
+        f"- `docagent init --ai all --target {target_root}`",
+        "- Platform-specific first run:",
+        f"- `docagent init --ai codex --target {target_root}`",
+        f"- `docagent init --ai claude --target {target_root}`",
+        f"- `docagent init --ai continue --target {target_root}`",
+        f"- `docagent init --ai copilot --target {target_root}`",
+        "- Verify and maintain:",
         f"- `docagent doctor --target {target_root}`",
-        f"- `docagent all --target {target_root}`",
         f"- `docagent versions --target {target_root}`",
+        f"- `docagent update --target {target_root}`",
         "- Supported platforms:",
     ]
     for platform in available_platforms():
@@ -200,6 +207,22 @@ def print_install_summary(target_root: Path, platforms: Sequence[str], installed
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 
+def print_init_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
+    metadata = load_product_metadata()
+    print(f"{metadata.product_name} init")
+    print(f"- Version: {metadata.version}")
+    print(f"- Target root: {target_root}")
+    print(f"- Selected AI platforms: {', '.join(platforms)}")
+    print("Installed platform adapters:")
+    for path in installed_paths:
+        print(f"- {path}")
+    print("Recommended next commands:")
+    print(f"- `{metadata.installer_command} doctor --target {target_root}`")
+    print(f"- `{metadata.installer_command} versions --target {target_root}`")
+    print(f"- `{metadata.installer_command} refresh --root {target_root}`")
+    print("- Restart the relevant assistant so the new local skill bundle is loaded.")
+
+
 def print_update_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
     metadata = load_product_metadata()
     print(f"{metadata.product_name} update")
@@ -217,7 +240,10 @@ def print_update_summary(target_root: Path, platforms: Sequence[str], installed_
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
     parser = argparse.ArgumentParser(
-        description=f"Install {metadata.product_name} platform adapters into repository-local assistant folders."
+        description=(
+            f"Unified {metadata.product_name} product CLI. "
+            "Use `init` as the primary entry to install platform adapters."
+        )
     )
     parser.add_argument(
         "--version",
@@ -234,6 +260,18 @@ def build_parser() -> argparse.ArgumentParser:
         default="all",
         help="Limit doctor output to one platform.",
     )
+
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Primary product entrypoint: install adapters for one AI platform or all supported platforms.",
+    )
+    init_parser.add_argument(
+        "--ai",
+        choices=available_platforms() + ["all"],
+        default="all",
+        help="Select target AI platform (`all` installs every supported platform).",
+    )
+    init_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
 
     install_parser = subparsers.add_parser("install", help="Install one or more platform adapters.")
     install_parser.add_argument(
@@ -307,10 +345,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(render_doctor_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
 
+    if args.command == "init":
+        target_root = resolve_target_root(args.target)
+        platforms = available_platforms() if args.ai == "all" else [args.ai]
+        installed_paths = install_selected_platforms(target_root, platforms)
+        print_init_summary(target_root, platforms, installed_paths)
+        return 0
+
     if args.command in {"install", "all"}:
         target_root = resolve_target_root(args.target)
         platforms = available_platforms() if args.command == "all" or args.platform == "all" else [args.platform]
         installed_paths = install_selected_platforms(target_root, platforms)
+        print("Compatibility mode: `install`/`all` still work, but `init --ai ...` is now the recommended entrypoint.")
         print_install_summary(target_root, platforms, installed_paths)
         return 0
 

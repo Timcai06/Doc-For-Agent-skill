@@ -14,6 +14,7 @@
   "quick_reference": false,
   "script_relpath": ".github/prompts/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [
+    "Use `docagent init --ai copilot` as the recommended product entry for this platform.",
     "Reference this prompt from your Copilot workflow so project docs stay current.",
     "Keep the prompt in the repository for team-shared onboarding behavior."
   ]

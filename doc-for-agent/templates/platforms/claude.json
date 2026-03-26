@@ -17,6 +17,7 @@
   "quick_reference": false,
   "script_relpath": ".claude/skills/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [
+    "Use `docagent init --ai claude` as the recommended product entry for this platform.",
     "Restart Claude Code so the skill is reloaded in the next session.",
     "Use the repository-local install when you want the project to carry its own skill wrapper."
   ]

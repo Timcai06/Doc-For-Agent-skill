@@ -17,6 +17,7 @@
   "quick_reference": false,
   "script_relpath": ".codex/skills/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [
+    "Use `docagent init --ai codex` as the recommended product entry for this platform.",
     "Restart Codex so the new skill is discovered in a fresh session.",
     "Install into a repository root when you want project-local assistant behavior."
   ]
