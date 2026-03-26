@@ -18,14 +18,31 @@ DEFAULT_REQUIRED_DOCS = [
     "workflows.md",
     "glossary.md",
 ]
+DEFAULT_HUMAN_REQUIRED_DOCS = [
+    "docs/overview.md",
+    "docs/architecture.md",
+    "docs/workflows.md",
+    "docs/glossary.md",
+]
 
 MANUAL_START = "<!-- doc-for-agent:manual-start -->"
 MANUAL_END = "<!-- doc-for-agent:manual-end -->"
 
 
-def run_generator(generator: Path, root: Path, mode: str, profile: str = "bootstrap") -> None:
+def run_generator(generator: Path, root: Path, mode: str, profile: str = "bootstrap", output_mode: str = "agent") -> None:
     subprocess.run(
-        [sys.executable, str(generator), "--root", str(root), "--mode", mode, "--profile", profile],
+        [
+            sys.executable,
+            str(generator),
+            "--root",
+            str(root),
+            "--mode",
+            mode,
+            "--profile",
+            profile,
+            "--output-mode",
+            output_mode,
+        ],
         check=True,
         capture_output=True,
         text=True,
@@ -39,27 +56,45 @@ def read_text(path: Path) -> str:
 def verify_fixture(generator: Path, fixture_root: Path, expectations: dict) -> list[str]:
     failures: list[str] = []
     profile = expectations.get("__profile", "bootstrap")
-    required_docs = expectations.get("__required_docs", DEFAULT_REQUIRED_DOCS)
+    output_mode = expectations.get("__output_mode", "agent")
+    if output_mode == "human":
+        default_required = DEFAULT_HUMAN_REQUIRED_DOCS
+    elif output_mode == "dual":
+        default_required = DEFAULT_REQUIRED_DOCS + DEFAULT_HUMAN_REQUIRED_DOCS
+    else:
+        default_required = DEFAULT_REQUIRED_DOCS
+    required_docs = expectations.get("__required_docs", default_required)
+
+    def resolve_generated_path(path: str) -> str:
+        normalized = path.replace("\\", "/")
+        if normalized.startswith("AGENTS/") or normalized.startswith("docs/"):
+            return normalized
+        if output_mode in {"agent", "dual"}:
+            return f"AGENTS/{normalized}"
+        return normalized
+
     with tempfile.TemporaryDirectory(prefix="doc-for-agent-fixture-") as tmpdir:
         sandbox_root = Path(tmpdir) / fixture_root.name
         shutil.copytree(fixture_root, sandbox_root)
 
-        run_generator(generator, sandbox_root, "init", profile=profile)
+        run_generator(generator, sandbox_root, "init", profile=profile, output_mode=output_mode)
 
-        agents_dir = sandbox_root / "AGENTS"
         for filename in required_docs:
-            if not (agents_dir / filename).exists():
-                failures.append(f"{fixture_root.name}: missing AGENTS/{filename}")
+            generated_rel = resolve_generated_path(filename)
+            if not (sandbox_root / generated_rel).exists():
+                failures.append(f"{fixture_root.name}: missing {generated_rel}")
 
         outputs_after_init = {
-            str(path.relative_to(agents_dir)).replace("\\", "/"): read_text(path)
-            for path in sorted(agents_dir.rglob("*.md"))
+            resolve_generated_path(filename): read_text(sandbox_root / resolve_generated_path(filename))
+            for filename in required_docs
+            if (sandbox_root / resolve_generated_path(filename)).exists()
         }
 
-        run_generator(generator, sandbox_root, "refresh", profile=profile)
+        run_generator(generator, sandbox_root, "refresh", profile=profile, output_mode=output_mode)
         outputs_after_refresh = {
-            str(path.relative_to(agents_dir)).replace("\\", "/"): read_text(path)
-            for path in sorted(agents_dir.rglob("*.md"))
+            resolve_generated_path(filename): read_text(sandbox_root / resolve_generated_path(filename))
+            for filename in required_docs
+            if (sandbox_root / resolve_generated_path(filename)).exists()
         }
 
         if outputs_after_init != outputs_after_refresh:
@@ -68,9 +103,10 @@ def verify_fixture(generator: Path, fixture_root: Path, expectations: dict) -> l
         for filename, checks in expectations.items():
             if filename.startswith("__"):
                 continue
-            content = outputs_after_refresh.get(filename)
+            generated_rel = resolve_generated_path(filename)
+            content = outputs_after_refresh.get(generated_rel)
             if content is None:
-                failures.append(f"{fixture_root.name}: expected file {filename} was not generated")
+                failures.append(f"{fixture_root.name}: expected file {generated_rel} was not generated")
                 continue
 
             for needle in checks.get("contains", []):

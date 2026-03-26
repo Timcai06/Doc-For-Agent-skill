@@ -7,6 +7,7 @@ from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
+SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
 
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:
@@ -1480,3 +1481,205 @@ def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
     if analysis.doc_profile == "layered":
         return generate_layered_docs(analysis)
     return generate_bootstrap_docs(analysis)
+
+
+def build_human_overview(analysis: RepoAnalysis) -> str:
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+
+    core = []
+    if analysis.summary:
+        core.append(analysis.summary)
+    core.append(f"Current repo shape: `{repo_type_label(analysis.repo_type)}`.")
+    if analysis.frontend_root:
+        core.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
+    if analysis.backend_root:
+        core.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+
+    return f"""# Project Overview
+
+## What This Project Is
+
+{format_bullets(core, "Project overview should be confirmed with maintainers.")}
+
+## Key Entry Points
+
+{format_bullets(product_entry_point_lines(analysis), "No clear routes or invocation entrypoints were detected automatically.")}
+
+## Supporting Doc Synthesis
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
+"""
+
+
+def build_human_architecture(analysis: RepoAnalysis) -> str:
+    confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+
+    return f"""# Architecture
+
+## Source Of Truth
+
+{format_bullets(infer_source_of_truth_lines(analysis), "No canonical source-of-truth files were detected automatically.")}
+
+## Detected Signals
+
+{format_bullets(list(analysis.repo_type_reasons), "No strong repo-type signals were detected automatically.")}
+
+## Supporting Doc Synthesis
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+"""
+
+
+def build_human_workflows(analysis: RepoAnalysis) -> str:
+    setup_lines = []
+    run_lines = []
+    verify_lines = []
+    root_package_scripts = detect_root_package_scripts(analysis.root)
+    confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+
+    if analysis.frontend_root:
+        frontend_prefix = (
+            f"cd {rel_path(analysis.frontend_root, analysis.root)}"
+            if analysis.frontend_root != analysis.root
+            else "# already at repo root"
+        )
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.extend([frontend_prefix, install_cmd])
+        append_package_script_commands(run_lines, analysis.package_manager, analysis.frontend_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            analysis.frontend_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
+    elif root_package_scripts:
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.append(install_cmd)
+        append_package_script_commands(run_lines, analysis.package_manager, root_package_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            root_package_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
+
+    if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
+        backend_prefix = (
+            f"cd {rel_path(analysis.backend_root, analysis.root)}"
+            if analysis.backend_root != analysis.root
+            else "# backend at repo root"
+        )
+        setup_lines.extend([backend_prefix, "python3 -m pip install -r requirements.txt"])
+        if (analysis.backend_root / "app").exists():
+            run_lines.extend([backend_prefix, "uvicorn app.main:app --reload"])
+
+    extend_unique(verify_lines, detect_unittest_commands(analysis.root))
+    extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
+
+    if not setup_lines:
+        setup_lines = ["Review README setup steps and install dependencies with the repository's package manager."]
+    if not run_lines:
+        run_lines = ["Run the main local command from README examples."]
+    if not verify_lines:
+        verify_lines = ["Run verification commands from CI or README (lint/test/build equivalents)."]
+
+    return f"""# Workflows
+
+## Setup
+
+```bash
+{chr(10).join(setup_lines)}
+```
+
+## Run
+
+```bash
+{chr(10).join(run_lines)}
+```
+
+## Verify
+
+```bash
+{chr(10).join(verify_lines)}
+```
+
+## Supporting Doc Synthesis
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+"""
+
+
+def build_human_glossary(analysis: RepoAnalysis) -> str:
+    terms = list(analysis.glossary_entries)
+    if analysis.skill_meta.skill_name:
+        terms.append(f"- `skill`: `{analysis.skill_meta.skill_name}`")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
+
+    return f"""# Glossary
+
+## Confirmed Terms
+
+{chr(10).join(terms) if terms else "- No canonical terms were detected automatically."}
+
+## Naming Rules
+
+- Keep user-facing names, commands, and labels consistent across docs and scripts.
+- Prefer canonical project terms over ad-hoc synonyms.
+
+## Unresolved Terminology Items
+
+{format_bullets(unresolved, "No unresolved terminology or memory items were synthesized from supporting docs.")}
+"""
+
+
+def generate_human_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+    return {
+        "docs/overview.md": build_human_overview(analysis),
+        "docs/architecture.md": build_human_architecture(analysis),
+        "docs/workflows.md": build_human_workflows(analysis),
+        "docs/glossary.md": build_human_glossary(analysis),
+    }
