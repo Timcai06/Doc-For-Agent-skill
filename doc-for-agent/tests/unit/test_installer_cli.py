@@ -50,7 +50,22 @@ class InstallerCliTests(unittest.TestCase):
             self.assertTrue((install_root / "installer" / "docagent.py").exists())
             self.assertTrue((install_root / "INSTALLATION.json").exists())
             self.assertIn(str(install_root), stdout.getvalue())
+            self.assertIn("Compatibility mode", stdout.getvalue())
             self.assertIn("Next steps:", stdout.getvalue())
+
+    def test_init_command_installs_selected_platform(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-init-") as tmpdir:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["init", "--ai", "claude", "--target", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            install_root = Path(tmpdir) / ".claude" / "skills" / "doc-for-agent"
+            self.assertTrue((install_root / "SKILL.md").exists())
+            text = stdout.getvalue()
+            self.assertIn("doc-for-agent init", text)
+            self.assertIn("Selected AI platforms: claude", text)
+            self.assertIn("Recommended next commands:", text)
 
     def test_doctor_command_prints_summary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
@@ -150,7 +165,8 @@ class InstallerCliTests(unittest.TestCase):
             text = stdout.getvalue()
             self.assertIn("doc-for-agent quickstart", text)
             self.assertIn("Node users: `npx -y doc-for-agent`", text)
-            self.assertIn("Python users: `pipx install .`", text)
+            self.assertIn("Python users: `pipx install doc-for-agent`", text)
+            self.assertIn("docagent init --ai all", text)
             self.assertIn("GitHub Copilot (copilot)", text)
 
     def test_generate_command_executes_generator_dry_run(self) -> None:

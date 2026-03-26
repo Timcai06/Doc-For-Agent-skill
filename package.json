@@ -1,7 +1,7 @@
 {
   "name": "doc-for-agent",
   "version": "0.2.0-dev.0",
-  "description": "Unified docagent product entry for npm/npx users, forwarding to the Python core runtime.",
+  "description": "Unified docagent CLI entry for npm/npx users with init-first onboarding.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,6 +11,8 @@
   "keywords": [
     "agents",
     "documentation",
+    "cli",
+    "npx",
     "installer",
     "codex",
     "claude",
@@ -29,7 +31,9 @@
   "scripts": {
     "prepack": "python3 doc-for-agent/installer/sync_assets.py",
     "pack:dry-run": "npm pack --dry-run",
-    "quickstart": "node doc-for-agent/installer/node/docagent.js quickstart"
+    "quickstart": "node doc-for-agent/installer/node/docagent.js quickstart",
+    "init:all": "node doc-for-agent/installer/node/docagent.js init --ai all",
+    "help": "node doc-for-agent/installer/node/docagent.js --help"
   },
   "engines": {
     "node": ">=18"
