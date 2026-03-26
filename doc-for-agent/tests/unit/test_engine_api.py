@@ -16,11 +16,19 @@ from doc_for_agent_generator.engine import (  # noqa: E402
     EngineRequest,
     build_analysis_explanation_lines,
     build_generation_plan,
+    effective_profile_for_mode,
     execute_engine_request,
+    write_strategy_for_mode,
 )
 
 
 class EngineApiTests(unittest.TestCase):
+    def test_mode_semantics_helpers_are_stable(self) -> None:
+        self.assertEqual(write_strategy_for_mode("refresh"), "refresh")
+        self.assertEqual(write_strategy_for_mode("generate"), "init")
+        self.assertEqual(effective_profile_for_mode("migrate", "bootstrap"), "layered")
+        self.assertEqual(effective_profile_for_mode("refresh", "bootstrap"), "bootstrap")
+
     def test_dual_plan_exposes_agents_and_human_outputs(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-") as tmpdir:
             sandbox_root = Path(tmpdir) / "dual_mode_app"
@@ -58,8 +66,35 @@ class EngineApiTests(unittest.TestCase):
             )
 
             self.assertEqual(result.plan.write_mode, "refresh")
+            self.assertEqual(result.plan.request.profile, "layered")
             self.assertIn("Dry run: would migrate AGENTS docs", result.summary)
             self.assertTrue(any("AGENTS/00-entry/AGENTS.md" in line for line in result.planned_actions))
+
+    def test_refresh_and_generate_share_outputs_but_different_write_strategy(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-mode-compare-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            refresh_plan = build_generation_plan(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="dual",
+                    profile="layered",
+                )
+            )
+            generate_plan = build_generation_plan(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="dual",
+                    profile="layered",
+                )
+            )
+
+            self.assertEqual(set(refresh_plan.files.keys()), set(generate_plan.files.keys()))
+            self.assertEqual(refresh_plan.write_mode, "refresh")
+            self.assertEqual(generate_plan.write_mode, "init")
 
     def test_execute_engine_request_writes_outputs(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-apply-") as tmpdir:

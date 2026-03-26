@@ -19,7 +19,12 @@ from .models import RepoAnalysis
 from .utils import infer_project_name, read_text, write_file
 
 SUPPORTED_ENGINE_ACTIONS = ("init", "refresh", "migrate", "generate")
-MERGE_ACTIONS = {"refresh", "migrate"}
+ACTION_WRITE_STRATEGY = {
+    "init": "init",
+    "generate": "init",
+    "refresh": "refresh",
+    "migrate": "refresh",
+}
 
 LEGACY_FLAT_TO_LAYERED_TARGETS = {
     "README.md": ("00-entry/AGENTS.md",),
@@ -53,7 +58,7 @@ class GenerationPlan:
 
     @property
     def write_mode(self) -> str:
-        return "refresh" if self.request.mode in MERGE_ACTIONS else "init"
+        return write_strategy_for_mode(self.request.mode)
 
 
 @dataclass(frozen=True)
@@ -64,13 +69,24 @@ class EngineExecutionResult:
     planned_actions: list[str]
 
 
+def effective_profile_for_mode(mode: str, profile: str) -> str:
+    if mode == "migrate":
+        return "layered"
+    return profile
+
+
+def write_strategy_for_mode(mode: str) -> str:
+    return ACTION_WRITE_STRATEGY.get(mode, "refresh")
+
+
 def normalize_engine_request(request: EngineRequest) -> EngineRequest:
     root = request.root.expanduser().resolve()
     if request.mode not in SUPPORTED_ENGINE_ACTIONS:
         raise ValueError(f"Unsupported mode `{request.mode}`. Supported: {', '.join(SUPPORTED_ENGINE_ACTIONS)}")
     if request.output_mode not in SUPPORTED_OUTPUT_MODES:
         raise ValueError(f"Unsupported output mode `{request.output_mode}`. Supported: {', '.join(SUPPORTED_OUTPUT_MODES)}")
-    if request.profile not in SUPPORTED_DOC_PROFILES:
+    effective_profile = effective_profile_for_mode(request.mode, request.profile)
+    if effective_profile not in SUPPORTED_DOC_PROFILES:
         raise ValueError(f"Unsupported profile `{request.profile}`. Supported: {', '.join(SUPPORTED_DOC_PROFILES)}")
     if request.repo_type_override and request.repo_type_override not in SUPPORTED_REPO_TYPES:
         raise ValueError(
@@ -81,7 +97,7 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         root=root,
         mode=request.mode,
         output_mode=request.output_mode,
-        profile=request.profile,
+        profile=effective_profile,
         project_name=project_name,
         repo_type_override=request.repo_type_override,
     )
