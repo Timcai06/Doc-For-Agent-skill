@@ -10,9 +10,11 @@ from doc_for_agent_generator import (
     MANUAL_END,
     MANUAL_START,
     SUPPORTED_DOC_PROFILES,
+    SUPPORTED_OUTPUT_MODES,
     SUPPORTED_REPO_TYPES,
     analyze_repo,
     generate_docs as generate_docs_from_analysis,
+    generate_human_docs,
     infer_project_name,
     merge_markdown,
     read_text,
@@ -117,11 +119,23 @@ def archive_legacy_flat_files(analysis) -> None:
         path.unlink()
 
 
-def describe_dry_run(agents_dir: Path, mode: str, files: Dict[str, str], archive_candidates: Iterable[Path]) -> None:
-    print(f"Dry run: would {mode} AGENTS docs in: {agents_dir}")
+def describe_dry_run(
+    root: Path,
+    mode: str,
+    output_mode: str,
+    files: Dict[str, str],
+    archive_candidates: Iterable[Path],
+    agents_dir: Optional[Path],
+) -> None:
+    if output_mode == "agent":
+        print(f"Dry run: would {mode} AGENTS docs in: {agents_dir}")
+    elif output_mode == "human":
+        print(f"Dry run: would {mode} human docs in: {root / 'docs'}")
+    else:
+        print(f"Dry run: would {mode} AGENTS + human docs in: {agents_dir} and {root / 'docs'}")
 
-    for name, generated in files.items():
-        path = agents_dir / name
+    for target_path, generated in files.items():
+        path = Path(target_path)
         resolved = resolve_output_content(path, generated, mode)
         if not path.exists():
             action = "create"
@@ -129,12 +143,35 @@ def describe_dry_run(agents_dir: Path, mode: str, files: Dict[str, str], archive
             action = "unchanged"
         else:
             action = "update"
-        print(f"- {action} AGENTS/{name}")
+        try:
+            display_path = path.relative_to(root)
+        except ValueError:
+            display_path = path
+        print(f"- {action} {display_path}")
     for path in archive_candidates:
         print(f"- archive {path.name} -> AGENTS/_archive/flat/{path.name}")
 
 
-def print_analysis_explanation(analysis) -> None:
+def collect_output_plan(root: Path, analysis, output_mode: str) -> tuple[Dict[str, str], list[Path]]:
+    planned: Dict[str, str] = {}
+    archive_candidates: list[Path] = []
+
+    if output_mode in {"agent", "dual"}:
+        agent_files = apply_layered_migration_overlays(analysis, generate_docs_from_analysis(analysis))
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        for name, content in agent_files.items():
+            planned[str(agents_dir / name)] = content
+        archive_candidates = list(analysis.docs_inventory.archive_candidates)
+
+    if output_mode in {"human", "dual"}:
+        human_files = generate_human_docs(analysis)
+        for name, content in human_files.items():
+            planned[str(root / name)] = content
+
+    return planned, archive_candidates
+
+
+def print_analysis_explanation(analysis, output_mode: str) -> None:
     suggested_profile = (
         "layered"
         if analysis.repo_type in {"web-app", "monorepo"} or (analysis.frontend_root and analysis.backend_root)
@@ -164,7 +201,7 @@ def print_analysis_explanation(analysis) -> None:
         print(f"- Note: current run requested profile `{analysis.doc_profile}`.")
     print(
         "Suggested command: "
-        f"python3 doc-for-agent/scripts/init_agents_docs.py --root {analysis.root} --mode refresh --profile {suggested_profile}"
+        f"python3 doc-for-agent/scripts/init_agents_docs.py --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {output_mode}"
     )
     print("Suggested source-of-truth files:")
     for line in infer_source_of_truth_lines(analysis)[:6]:
@@ -224,7 +261,7 @@ def print_analysis_explanation(analysis) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Initialize or refresh an AGENTS documentation directory.")
+    parser = argparse.ArgumentParser(description="Initialize or refresh documentation outputs for AGENTS and/or docs.")
     parser.add_argument("--root", required=True, help="Repository root where AGENTS/ should be created or refreshed.")
     parser.add_argument("--project-name", help="Optional explicit project name.")
     parser.add_argument("--mode", choices=["init", "refresh"], default="refresh", help="Whether to initialize or refresh AGENTS docs.")
@@ -245,6 +282,12 @@ def main() -> None:
         default="bootstrap",
         help="Select the AGENTS documentation topology to generate.",
     )
+    parser.add_argument(
+        "--output-mode",
+        choices=SUPPORTED_OUTPUT_MODES,
+        default="agent",
+        help="Choose which documentation system to generate: agent, human, or dual.",
+    )
     args = parser.parse_args()
 
     root = Path(args.root).expanduser().resolve()
@@ -255,25 +298,36 @@ def main() -> None:
         repo_type_override=args.repo_type,
         doc_profile=args.profile,
     )
-    files = apply_layered_migration_overlays(analysis, generate_docs_from_analysis(analysis))
+    files, archive_candidates = collect_output_plan(root, analysis, args.output_mode)
 
     if args.explain:
-        print_analysis_explanation(analysis)
+        print_analysis_explanation(analysis, args.output_mode)
 
     if args.dry_run:
         agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
-        describe_dry_run(agents_dir, args.mode, files, analysis.docs_inventory.archive_candidates)
+        describe_dry_run(root, args.mode, args.output_mode, files, archive_candidates, agents_dir)
         return
 
-    agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
-    agents_dir.mkdir(parents=True, exist_ok=True)
-    archive_legacy_flat_files(analysis)
+    if args.output_mode in {"agent", "dual"}:
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        agents_dir.mkdir(parents=True, exist_ok=True)
+        archive_legacy_flat_files(analysis)
+    if args.output_mode in {"human", "dual"}:
+        (root / "docs").mkdir(parents=True, exist_ok=True)
 
     for name, content in files.items():
-        path = agents_dir / name
+        path = Path(name)
+        path.parent.mkdir(parents=True, exist_ok=True)
         write_file(path, resolve_output_content(path, content, args.mode))
 
-    print(f"{args.mode.capitalize()}ed AGENTS docs in: {agents_dir}")
+    if args.output_mode == "agent":
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        print(f"{args.mode.capitalize()}ed AGENTS docs in: {agents_dir}")
+    elif args.output_mode == "human":
+        print(f"{args.mode.capitalize()}ed human docs in: {root / 'docs'}")
+    else:
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        print(f"{args.mode.capitalize()}ed AGENTS + human docs in: {agents_dir} and {root / 'docs'}")
 
 
 if __name__ == "__main__":

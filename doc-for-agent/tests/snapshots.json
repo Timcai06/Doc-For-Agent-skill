@@ -270,5 +270,44 @@
         "Pending: finalize the migration retrospective template"
       ]
     }
+  },
+  "dual_mode_app": {
+    "__profile": "layered",
+    "__output_mode": "dual",
+    "__required_docs": [
+      "AGENTS/00-entry/AGENTS.md",
+      "AGENTS/01-product/001-core-goals.md",
+      "AGENTS/02-architecture/007-architecture-compatibility.md",
+      "AGENTS/03-execution/008-implementation-plan.md",
+      "AGENTS/04-memory/009-progress.md",
+      "docs/overview.md",
+      "docs/architecture.md",
+      "docs/workflows.md",
+      "docs/glossary.md"
+    ],
+    "AGENTS/01-product/001-core-goals.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Product)",
+        "Open question: decide whether on-prem deployment is required"
+      ]
+    },
+    "AGENTS/03-execution/008-implementation-plan.md": {
+      "contains": [
+        "Supporting Doc Synthesis (Execution)",
+        "Run npm run test before merging release candidates"
+      ]
+    },
+    "docs/overview.md": {
+      "contains": [
+        "# Project Overview",
+        "Supporting Doc Synthesis"
+      ]
+    },
+    "docs/workflows.md": {
+      "contains": [
+        "# Workflows",
+        "## Supporting Doc Synthesis"
+      ]
+    }
   }
 }

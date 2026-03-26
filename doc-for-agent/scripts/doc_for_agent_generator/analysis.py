@@ -37,6 +37,12 @@ FLAT_AGENTS_FILENAMES = {
     "glossary.md",
 }
 LAYERED_AGENTS_PREFIXES = ("00-entry", "01-product", "02-architecture", "03-execution", "04-memory")
+GENERATED_HUMAN_DOC_PATHS = {
+    "docs/overview.md",
+    "docs/architecture.md",
+    "docs/workflows.md",
+    "docs/glossary.md",
+}
 
 
 def load_package_metadata(package_path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -427,7 +433,17 @@ def discover_documentation_inventory(root: Path) -> DocumentationInventory:
         "roadmap/**/*.md",
     ]
     supporting_docs = sort_paths(find_files(root, supporting_patterns, limit=20))
-    reference_only_docs = [path for path in supporting_docs if root_agents_dir not in path.parents]
+    reference_only_docs = []
+    for path in supporting_docs:
+        if root_agents_dir in path.parents:
+            continue
+        try:
+            normalized = str(path.relative_to(root)).replace("\\", "/")
+        except ValueError:
+            normalized = str(path).replace("\\", "/")
+        if normalized in GENERATED_HUMAN_DOC_PATHS:
+            continue
+        reference_only_docs.append(path)
 
     if layered_agent_files and flat_agent_files:
         detected_state = "migrate"

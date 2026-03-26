@@ -247,6 +247,18 @@ Generate the BDI-style layered topology for long-lived or phase-driven projects:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --profile layered
 ```
 
+Generate human-oriented project docs only:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --output-mode human
+```
+
+Generate both AGENTS docs and human docs in one run:
+
+```bash
+python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode refresh --output-mode dual
+```
+
 Render the current platform adapter scaffold into a project-local assistant folder:
 
 ```bash
