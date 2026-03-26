@@ -47,6 +47,7 @@ Recent quality improvements also make output more directly usable:
 - human docs generation now emits `overview/architecture/workflows/glossary` with the same synthesis model plus explicit provenance sections
 - human docs now include maintainer-facing structure (audience, system map, operational notes, documentation gaps) so low-doc repos still get actionable baseline docs
 - human docs now separate `confirmed / inferred / unresolved` signals and add a maintenance workflow + bootstrap backlog section so teams can keep docs alive after first generation
+- human docs now express evidence as a natural `Knowledge Status` section and include explicit `Update Triggers`, reducing template feel while improving long-term maintainability
 
 ## Repository Layout
 

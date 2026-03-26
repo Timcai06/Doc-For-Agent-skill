@@ -300,10 +300,12 @@
     "docs/overview.md": {
       "contains": [
         "# Project Overview",
-        "Supporting Doc Synthesis",
-        "### Inferred",
+        "## Knowledge Status",
+        "### Inferred Signals",
+        "### Open Questions",
         "## Intended Audience",
         "## Synthesis Summary",
+        "## Update Triggers",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)",
         "## Provenance"
@@ -312,8 +314,10 @@
     "docs/architecture.md": {
       "contains": [
         "# Architecture",
-        "## Supporting Doc Synthesis",
-        "### Inferred",
+        "## Knowledge Status",
+        "### Inferred Signals",
+        "### Conflict Watchlist",
+        "## Update Triggers",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)"
       ]
@@ -321,9 +325,11 @@
     "docs/workflows.md": {
       "contains": [
         "# Workflows",
-        "## Supporting Doc Synthesis",
-        "### Inferred",
+        "## Knowledge Status",
+        "### Inferred Signals",
+        "### Open Questions",
         "## Operational Notes",
+        "## Update Triggers",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)",
         "## Provenance"
@@ -350,8 +356,10 @@
       "contains": [
         "# Project Overview",
         "Current repo shape:",
-        "### Inferred",
+        "### Inferred Signals",
+        "### Open Questions",
         "## Current Priorities",
+        "## Update Triggers",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)",
         "No supporting docs matched this role; content below is inferred from repository structure and code signals."

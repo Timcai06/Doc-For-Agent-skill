@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Dict, Sequence
 
@@ -159,6 +160,70 @@ def human_bootstrap_backlog_lines(role: str, has_supporting_provenance: bool) ->
         "Note deprecated or ambiguous terms and map them to preferred wording.",
         "Review docs for vocabulary drift each sprint.",
     ]
+
+
+def human_update_trigger_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    lines: list[str] = []
+    if role == "product":
+        lines.append("When new user-facing routes, commands, or APIs are added, update scope and audience notes.")
+        lines.append("When priorities change in release planning, update the project overview and open decision list.")
+    elif role == "architecture":
+        lines.append("When source-of-truth files, service boundaries, or runtime dependencies change, update this page.")
+        lines.append("When integration contracts change (routes/endpoints/storage), refresh architecture notes in the same PR.")
+    elif role == "execution":
+        lines.append("When setup/run/verify commands change, update this runbook immediately.")
+        lines.append("When CI checks or release gates change, sync the Verify and Operational Notes sections.")
+    elif role == "memory":
+        lines.append("When teams introduce new domain terms, add canonical definitions and preferred wording.")
+        lines.append("When old terms are deprecated, keep migration aliases until docs and code are fully aligned.")
+
+    if not analysis.supporting_doc_provenance.get(role):
+        lines.append("No supporting docs were found for this role; prioritize adding one maintainer-verified baseline note.")
+    return lines
+
+
+def normalize_evidence_line(line: str) -> str:
+    without_sources = re.sub(r"\s*\(sources:\s*.*\)$", "", line).strip().lower()
+    return re.sub(r"[^a-z0-9]+", " ", without_sources).strip()
+
+
+def compact_human_evidence(
+    confirmed: Sequence[str],
+    inferred: Sequence[str],
+    unresolved: Sequence[str],
+    conflicting: Sequence[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    confirmed_out: list[str] = []
+    inferred_out: list[str] = []
+    unresolved_out: list[str] = []
+    conflicting_out: list[str] = []
+    seen: set[str] = set()
+
+    for line in confirmed:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            confirmed_out.append(line)
+            seen.add(key)
+
+    for line in inferred:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            inferred_out.append(line)
+            seen.add(key)
+
+    for line in unresolved:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            unresolved_out.append(line)
+            seen.add(key)
+
+    for line in conflicting:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            conflicting_out.append(line)
+            seen.add(key)
+
+    return confirmed_out, inferred_out, unresolved_out, conflicting_out
 
 
 def repo_type_label(repo_type: str) -> str:
@@ -1617,6 +1682,12 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
     inferred = human_inferred_lines(analysis, "product")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
@@ -1640,6 +1711,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     if not documentation_gaps:
         documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
     maintenance = human_maintenance_lines(analysis, "product", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "product")
     bootstrap_backlog = human_bootstrap_backlog_lines("product", bool(provenance))
 
     return f"""# Project Overview
@@ -1660,23 +1732,23 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(synthesis_summary, "No synthesis summary available.")}
 
-## Supporting Doc Synthesis
+## Knowledge Status
 
-### Confirmed
+### Confirmed Signals
 
 {format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
 
-### Inferred
+### Inferred Signals
 
 {format_bullets(inferred, "No additional inferred product signals were detected from repository structure.")}
 
-### Conflicting
-
-{format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
-
-### Unresolved
+### Open Questions
 
 {format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
 
 ## Current Priorities
 
@@ -1685,6 +1757,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ## Documentation Gaps To Close
 
 {format_bullets(documentation_gaps, "No explicit product documentation gaps were detected.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
 
 ## Maintenance Workflow
 
@@ -1705,6 +1781,12 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
     inferred = human_inferred_lines(analysis, "architecture")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
     boundaries = [
@@ -1721,6 +1803,7 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     if analysis.endpoints:
         system_map.append(f"Endpoint coverage detected: {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:4])}")
     maintenance = human_maintenance_lines(analysis, "architecture", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "architecture")
     bootstrap_backlog = human_bootstrap_backlog_lines("architecture", bool(provenance))
 
     return f"""# Architecture
@@ -1741,27 +1824,31 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 {format_bullets(synthesis_summary, "No synthesis summary available.")}
 
-## Supporting Doc Synthesis
+## Knowledge Status
 
-### Confirmed
+### Confirmed Signals
 
 {format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
 
-### Inferred
+### Inferred Signals
 
 {format_bullets(inferred, "No additional inferred architecture signals were detected from repository structure.")}
 
-### Conflicting
-
-{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
-
-### Unresolved
+### Open Questions
 
 {format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
 
 ## Stability Boundaries
 
 {format_bullets(boundaries, "No architecture boundaries were inferred automatically.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
 
 ## Maintenance Workflow
 
@@ -1786,6 +1873,12 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
     inferred = human_inferred_lines(analysis, "execution")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "execution")
     synthesis_summary = synthesis_summary_lines(analysis, "execution")
 
@@ -1850,6 +1943,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     if not operational_notes:
         operational_notes.append("Keep command examples in this file aligned with CI and README instructions.")
     maintenance = human_maintenance_lines(analysis, "execution", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "execution")
     bootstrap_backlog = human_bootstrap_backlog_lines("execution", bool(provenance))
 
     return f"""# Workflows
@@ -1876,27 +1970,31 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 {format_bullets(synthesis_summary, "No synthesis summary available.")}
 
-## Supporting Doc Synthesis
+## Knowledge Status
 
-### Confirmed
+### Confirmed Signals
 
 {format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
 
-### Inferred
+### Inferred Signals
 
 {format_bullets(inferred, "No additional inferred execution signals were detected from repository structure.")}
 
-### Conflicting
-
-{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
-
-### Unresolved
+### Open Questions
 
 {format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
 
 ## Operational Notes
 
 {format_bullets(operational_notes, "No additional operational notes were inferred automatically.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
 
 ## Maintenance Workflow
 
@@ -1913,12 +2011,18 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 
 def build_human_glossary(analysis: RepoAnalysis) -> str:
-    terms = list(analysis.glossary_entries)
+    terms = [re.sub(r"^[-*]\s+", "", entry).strip() for entry in analysis.glossary_entries if entry.strip()]
     if analysis.skill_meta.skill_name:
-        terms.append(f"- `skill`: `{analysis.skill_meta.skill_name}`")
+        terms.append(f"`skill`: `{analysis.skill_meta.skill_name}`")
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
     conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
     inferred = human_inferred_lines(analysis, "memory")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        terms,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "memory")
     synthesis_summary = synthesis_summary_lines(analysis, "memory")
     candidate_terms = []
@@ -1929,13 +2033,14 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
     if not candidate_terms:
         candidate_terms.append("- No additional term candidates were inferred from routes/endpoints.")
     maintenance = human_maintenance_lines(analysis, "memory", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "memory")
     bootstrap_backlog = human_bootstrap_backlog_lines("memory", bool(provenance))
 
     return f"""# Glossary
 
 ## Confirmed Terms
 
-{chr(10).join(terms) if terms else "- No canonical terms were detected automatically."}
+{format_bullets(confirmed, "No canonical terms were detected automatically.")}
 
 ## Naming Rules
 
@@ -1961,6 +2066,10 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 ## Conflicting Terminology Signals
 
 {format_bullets(conflicting, "No conflicting terminology signals were synthesized from supporting docs.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
 
 ## Maintenance Workflow
 
