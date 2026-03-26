@@ -46,6 +46,7 @@ Recent quality improvements also make output more directly usable:
 - layered generation now synthesizes supporting docs into agent-facing `confirmed / conflicting / unresolved` guidance instead of only listing reference paths
 - human docs generation now emits `overview/architecture/workflows/glossary` with the same synthesis model plus explicit provenance sections
 - human docs now include maintainer-facing structure (audience, system map, operational notes, documentation gaps) so low-doc repos still get actionable baseline docs
+- human docs now separate `confirmed / inferred / unresolved` signals and add a maintenance workflow + bootstrap backlog section so teams can keep docs alive after first generation
 
 ## Repository Layout
 
