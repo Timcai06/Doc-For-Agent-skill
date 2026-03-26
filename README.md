@@ -127,6 +127,11 @@ Current structure on `main` is intentionally simple:
 - Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
 - `src/doc_for_agent/` is currently treated as a local packaging experiment on `main`, not the canonical implementation tree.
 
+Two structure notes are worth keeping explicit:
+
+- root packaging files such as `pyproject.toml`, `setup.py`, and `MANIFEST.in` belong to the product-distribution layer, not the AGENTS-generation engine itself
+- `doc-for-agent/installer/assets/` is a packaged runtime mirror for installed `docagent` builds; day-to-day source changes should still start from `scripts/`, `templates/`, `references/`, and `agents/`
+
 This keeps the default branch easier to reason about before splitting work across multiple `git worktree` directories.
 
 ## Install With the Product CLI
