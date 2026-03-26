@@ -153,14 +153,14 @@ If you are unsure which path to choose:
 | Python-first / CI | `pipx install .` | `docagent doctor --target /path/to/repo` |
 | Python-first (venv/system) | `python3 -m pip install .` | `docagent doctor --target /path/to/repo` |
 | Node-first (global) | `npm install -g doc-for-agent` | `docagent doctor --target /path/to/repo` |
-| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent doctor --target /path/to/repo` |
+| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent` (prints quickstart) |
 
 Quick relation:
 
 - Python install gives the canonical runtime (`docagent`) directly.
 - npm/npx install gives a thin Node launcher that forwards to the same Python runtime bundle.
 - Both paths converge on one command surface: `docagent`.
-- If you launch from `npx -y doc-for-agent` with no args, it prints a quickstart and then shows unified CLI help.
+- If you launch from `npx -y doc-for-agent` with no args, it runs `docagent quickstart`.
 
 ### Product Command Surface
 
@@ -175,6 +175,7 @@ docagent install --platform copilot --target /path/to/repo
 docagent all --target /path/to/repo
 docagent versions --target /path/to/repo
 docagent update --target /path/to/repo
+docagent quickstart --target /path/to/repo
 docagent generate --root /path/to/repo --mode refresh
 docagent refresh --root /path/to/repo
 docagent --version
@@ -183,6 +184,7 @@ docagent --version
 Node-first one-off command shape mirrors the same surface:
 
 ```bash
+npx -y doc-for-agent
 npx -y doc-for-agent doctor --target /path/to/repo
 npx -y doc-for-agent all --target /path/to/repo
 npx -y doc-for-agent update --target /path/to/repo
