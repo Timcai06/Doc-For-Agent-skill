@@ -33,6 +33,7 @@ npx -y doc-for-agent
 Pick one:
 
 ```bash
+docagent init --ai <claude|codex|continue|copilot|all> --target /path/to/repo
 docagent init --ai claude --target /path/to/repo
 docagent init --ai codex --target /path/to/repo
 docagent init --ai continue --target /path/to/repo
@@ -77,4 +78,3 @@ See also:
 
 - [Platform Guide](platforms.md)
 - [Maintainer Guide](maintainers.md)
-

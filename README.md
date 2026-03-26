@@ -25,7 +25,7 @@ pipx install doc-for-agent
 Start in a repository:
 
 ```bash
-docagent init --ai claude --target /path/to/repo
+docagent init --ai <claude|codex|continue|copilot|all> --target /path/to/repo
 docagent refresh --root /path/to/repo --output-mode agent
 ```
 
@@ -54,7 +54,7 @@ docagent refresh --root /path/to/repo --output-mode agent
 Primary commands:
 
 ```bash
-docagent init --ai codex|claude|continue|copilot|all --target /path/to/repo
+docagent init --ai <claude|codex|continue|copilot|all> --target /path/to/repo
 docagent doctor --target /path/to/repo
 docagent refresh --root /path/to/repo --output-mode agent|human|dual
 docagent generate --root /path/to/repo --mode refresh --output-mode agent|human|dual
