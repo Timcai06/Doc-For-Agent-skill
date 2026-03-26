@@ -3,8 +3,22 @@
   "version": "0.2.0-dev.0",
   "description": "Product installer surface for doc-for-agent (npm/npx wrapper + Python core).",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timcai06/Doc-For-Agent-skill.git"
+  },
+  "homepage": "https://github.com/Timcai06/Doc-For-Agent-skill#readme",
+  "keywords": [
+    "agents",
+    "documentation",
+    "installer",
+    "codex",
+    "claude",
+    "copilot"
+  ],
   "bin": {
-    "docagent": "doc-for-agent/installer/node/docagent.js"
+    "docagent": "doc-for-agent/installer/node/docagent.js",
+    "doc-for-agent": "doc-for-agent/installer/node/docagent.js"
   },
   "files": [
     "doc-for-agent/installer/node",
@@ -12,6 +26,10 @@
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "prepack": "python3 doc-for-agent/installer/sync_assets.py",
+    "pack:dry-run": "npm pack --dry-run"
+  },
   "engines": {
     "node": ">=18"
   }

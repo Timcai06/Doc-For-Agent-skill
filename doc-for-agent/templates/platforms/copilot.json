@@ -1,0 +1,20 @@
+{
+  "platform": "copilot",
+  "display_name": "GitHub Copilot",
+  "install_type": "prompt",
+  "adapter_kind": "workflow",
+  "folder_structure": {
+    "root": ".github",
+    "skill_path": "prompts/doc-for-agent",
+    "filename": "PROMPT.md"
+  },
+  "frontmatter": {},
+  "default_title": "doc-for-agent prompt",
+  "default_description": "Repository documentation bootstrap prompt for Copilot users. Generates or refreshes AGENTS documentation from real project structure.",
+  "quick_reference": false,
+  "script_relpath": ".github/prompts/doc-for-agent/scripts/init_agents_docs.py",
+  "post_install_notes": [
+    "Reference this prompt from your Copilot workflow so project docs stay current.",
+    "Keep the prompt in the repository for team-shared onboarding behavior."
+  ]
+}
