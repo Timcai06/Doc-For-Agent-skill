@@ -1,13 +1,100 @@
 # doc-for-agent
 
-`doc-for-agent` is a product CLI for bootstrapping and maintaining repository documentation for coding agents.
+`doc-for-agent` is a product CLI for people who work inside coding-agent terminals such as Claude Code, Codex, CodeBuddy, Continue, and similar CLI-first agent workflows.
 
-After install, users start from one global command surface: `docagent`.
-Node and Python distributions both converge on the same product flow (`docagent init --ai ...`).
+It helps a repository grow a documentation system that both humans and agents can use:
+
+- `AGENTS/` for coding-agent execution, handoff, and repo guidance
+- `docs/` for maintainers and teammates who need a durable project map
+
+After install, every user starts from one global command surface: `docagent`.
+Node and Python distributions both converge on the same product flow: `docagent init --ai ...`.
+
+## Quick Start
+
+### Install Once
+
+Node users:
+
+```bash
+npm install -g doc-for-agent
+```
+
+Python users:
+
+```bash
+pipx install doc-for-agent
+```
+
+### Start In 30 Seconds
+
+Pick your coding agent, then run one command:
+
+```bash
+docagent init --ai claude --target /path/to/repo
+docagent init --ai codex --target /path/to/repo
+docagent init --ai copilot --target /path/to/repo
+docagent init --ai continue --target /path/to/repo
+docagent init --ai all --target /path/to/repo
+```
+
+Then refresh the repository docs:
+
+```bash
+docagent refresh --root /path/to/repo --output-mode agent
+```
+
+If you do not want a global install:
+
+```bash
+npx -y doc-for-agent
+```
+
+That opens the same `docagent` product flow through the Node entrypoint.
+
+## Choose Your Agent
+
+Use the same product CLI, but start from the platform you actually use:
+
+| If you use... | Start with... |
+| --- | --- |
+| Claude Code | `docagent init --ai claude --target /path/to/repo` |
+| Codex | `docagent init --ai codex --target /path/to/repo` |
+| Continue | `docagent init --ai continue --target /path/to/repo` |
+| GitHub Copilot | `docagent init --ai copilot --target /path/to/repo` |
+| Multiple assistants | `docagent init --ai all --target /path/to/repo` |
+
+## What You Get
+
+After `init` and `refresh`, the repository can gain:
+
+- `AGENTS/` for coding-agent execution, repo guidance, handoff, and working rules
+- `docs/` for maintainers who need overview, architecture, workflows, and glossary docs
+
+This is especially useful when a repo has:
+
+- no project docs yet
+- thin or outdated docs
+- scattered docs across `README`, `docs/`, `specs/`, `plan/`, or `notes/`
+- old flat `AGENTS` that should be migrated into a better structure
+
+## Who It Is For
+
+`doc-for-agent` is built for repository owners who:
+
+- use coding agents from a terminal or CLI workflow
+- want a repeatable project-doc setup for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar tools
+- need help when a repo has no docs, thin docs, messy docs, or old flat `AGENTS`
+- want one CLI to install platform adapters and keep docs refreshed over time
 
 ## What It Does
 
-This skill creates or refreshes an `AGENTS/` directory with:
+At its core, `docagent` does two jobs:
+
+1. Install the right assistant-facing adapter for your chosen platform.
+2. Generate or refresh a documentation system for the target repository.
+
+On the agent side, it creates or refreshes an `AGENTS/` directory with:
 
 - `AGENTS/README.md`
 - `AGENTS/product.md`
@@ -17,7 +104,14 @@ This skill creates or refreshes an `AGENTS/` directory with:
 - `AGENTS/workflows.md`
 - `AGENTS/glossary.md`
 
-The generated files are prefilled from the actual repository structure, routes, scripts, and backend contract clues, then intended to be refined further where needed.
+On the maintainer side, it can also generate a minimal `docs/` set:
+
+- `docs/overview.md`
+- `docs/architecture.md`
+- `docs/workflows.md`
+- `docs/glossary.md`
+
+The generated files are prefilled from the actual repository structure, routes, scripts, backend contract clues, and supporting docs, then intended to be refined further where needed.
 
 When run in `refresh` mode, the generator now merges by section and tries to preserve useful existing manual content instead of blindly overwriting whole files.
 For long-lived notes, you can explicitly protect a block inside any section with:
@@ -50,187 +144,62 @@ Recent quality improvements also make output more directly usable:
 - human docs now separate `confirmed / inferred / unresolved` signals and add a maintenance workflow + bootstrap backlog section so teams can keep docs alive after first generation
 - human docs now express evidence as a natural `Knowledge Status` section and include explicit `Update Triggers`, reducing template feel while improving long-term maintainability
 
-## Repository Layout
+## Core Workflow
 
-```text
-DocForAgent_skill/
-├── README.md
-├── LICENSE
-├── pyproject.toml
-├── setup.py
-├── MANIFEST.in
-├── package.json
-├── .gitignore
-└── doc-for-agent/
-    ├── SKILL.md
-    ├── agents/
-    │   └── openai.yaml
-    ├── scripts/
-    │   ├── init_agents_docs.py
-    │   ├── render_platform_adapter.py
-    │   └── doc_for_agent_generator/
-    │       ├── analysis.py
-    │       ├── builders.py
-    │       ├── markdown.py
-    │       ├── models.py
-    │       └── utils.py
-    ├── installer/
-    │   ├── __init__.py
-    │   ├── __main__.py
-    │   ├── docagent.py
-    │   ├── sync_assets.py
-    │   ├── node/
-    │   │   └── docagent.js
-    │   └── assets/
-    │       ├── scripts/
-    │       ├── templates/
-    │       ├── references/
-    │       └── agents/
-    ├── templates/
-    │   ├── base/
-    │   │   ├── skill-content.md
-    │   │   └── workflow-content.md
-    │   ├── product.json
-    │   └── platforms/
-    │       ├── claude.json
-    │       ├── codex.json
-    │       ├── continue.json
-    │       └── copilot.json
-    ├── tests/
-    │   ├── fixtures/
-    │   │   ├── backend_service/
-    │   │   ├── cli_tool/
-    │   │   ├── hybrid_skill_cli/
-    │   │   ├── library_sdk/
-    │   │   ├── skill_meta/
-    │   │   └── web_app/
-    │   ├── unit/
-    │   │   ├── test_classification.py
-    │   │   ├── test_dry_run.py
-    │   │   └── test_markdown.py
-    │   ├── snapshots.json
-    │   └── verify_generator_snapshots.py
-    └── references/
-        ├── agent-doc-migration-blueprint.md
-        ├── agents-structure.md
-        ├── layered-agents-blueprint.md
-        └── multi-platform-distribution-blueprint.md
-```
-
-Current structure on `main` is intentionally simple:
-
-- `doc-for-agent/` is the source of truth for the reusable Codex skill.
-- `doc-for-agent/agents/openai.yaml` is the manifest shipped with installed adapters.
-- `doc-for-agent/scripts/doc_for_agent_generator/` contains the modular generator core for analysis, content building, merge logic, and shared models.
-- `doc-for-agent/installer/docagent.py` is the product CLI entrypoint (`docagent`) for install, doctor, update, and generation flows.
-- `doc-for-agent/installer/node/docagent.js` is the npm/npx thin wrapper for Node-first installation paths.
-- `doc-for-agent/installer/assets/` is the packaged runtime bundle used when `docagent` is installed from wheel/sdist.
-- `doc-for-agent/installer/sync_assets.py` syncs source-of-truth runtime files into `installer/assets/` before packaging/release.
-- `doc-for-agent/templates/product.json` carries product metadata used by the installer and install receipts.
-- `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, Continue, and Copilot.
-- `doc-for-agent/tests/fixtures/` contains eight representative sample repositories used by the snapshot regression test.
-- `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, dry-run behavior, platform adapters, and installer CLI behavior.
-- Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
-- `src/doc_for_agent/` is currently treated as a local packaging experiment on `main`, not the canonical implementation tree.
-
-Two structure notes are worth keeping explicit:
-
-- root packaging files such as `pyproject.toml`, `setup.py`, and `MANIFEST.in` belong to the product-distribution layer, not the AGENTS-generation engine itself
-- `doc-for-agent/installer/assets/` is a packaged runtime mirror for installed `docagent` builds; day-to-day source changes should still start from `scripts/`, `templates/`, `references/`, and `agents/`
-
-This keeps the default branch easier to reason about before splitting work across multiple `git worktree` directories.
-
-## Install With the Product CLI
-
-`docagent` is the single product CLI. Install from either ecosystem, then use the same command surface.
-
-Recommended path by user type:
-
-- Node users: start with `npx -y doc-for-agent` (one-off) or `npm install -g doc-for-agent` (global).
-- Python users: start with `pipx install doc-for-agent`, then fallback to `python3 -m pip install doc-for-agent`.
-
-### Install Matrix
-
-| User profile | Install path | Product first run |
-| --- | --- | --- |
-| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target /path/to/repo` |
-| Node-first (global) | `npm install -g doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
-| Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
-| Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
-
-### Product Quick Start
-
-```bash
-docagent init --ai all --target /path/to/repo
-docagent doctor --target /path/to/repo
-docagent versions --target /path/to/repo
-```
-
-Single-platform onboarding:
-
-```bash
-docagent init --ai codex --target /path/to/repo
-docagent init --ai claude --target /path/to/repo
-docagent init --ai continue --target /path/to/repo
-docagent init --ai copilot --target /path/to/repo
-```
-
-### Unified Command Surface
-
-Command surface v1 (primary path):
+Most users only need three commands:
 
 ```bash
 docagent init --ai codex|claude|continue|copilot|all --target /path/to/repo
 docagent doctor --target /path/to/repo
-docagent refresh --root /path/to/repo --output-mode agent
-docagent generate --root /path/to/repo --mode refresh --output-mode human|agent|dual
-docagent update --target /path/to/repo
-docagent versions --target /path/to/repo
+docagent refresh --root /path/to/repo --output-mode agent|human|dual
 ```
 
-Optional utility:
+That maps to a simple lifecycle:
 
-```bash
-docagent quickstart --target /path/to/repo
-docagent --version
-```
+- `init`: install the right platform adapter into the repository
+- `doctor`: verify what is installed and where
+- `refresh`: generate or update repository docs from the current codebase and existing docs
 
-Legacy compatibility (still supported, but no longer the recommended path):
+Use `generate` when you want more explicit control over mode, profile, and output shape.
 
-```bash
-docagent install --platform codex --target /path/to/repo
-docagent all --target /path/to/repo
-```
+## Why It Is Different
 
-### Python vs Node Distribution
+`doc-for-agent` is not just a platform installer.
 
-Each install writes a self-contained bundle under the platform's hidden folder:
+It combines:
 
-- Codex: `.codex/skills/doc-for-agent/`
-- Claude Code: `.claude/skills/doc-for-agent/`
-- Continue: `.continue/skills/doc-for-agent/`
-- Copilot: `.github/prompts/doc-for-agent/`
+- platform setup for coding-agent tools
+- repository analysis
+- doc migration (`initialize / migrate / refresh`)
+- dual output for both `AGENTS/` and maintainers' `docs/`
 
-The installed bundle includes:
+That means the product is useful both when a repo already has messy documentation and when a repo barely has any documentation at all.
 
-- the rendered `SKILL.md`
-- generator scripts
-- platform templates
-- references
-- agent manifests
-- the installer itself
-- an `INSTALLATION.json` receipt with platform and version metadata
+## Maintainer Docs
 
-The current product metadata lives in `doc-for-agent/templates/product.json`, so the installer and the installed bundle share one version source.
+If you want the repository internals rather than the product entry flow, use:
 
-Distribution relation:
+- [Quickstart](/Users/tim/DocForAgent_skill/docs/quickstart.md)
+- [Platform Guide](/Users/tim/DocForAgent_skill/docs/platforms.md)
+- [Maintainer Guide](/Users/tim/DocForAgent_skill/docs/maintainers.md)
 
-- Python package (`pipx` / `pip`) ships the core runtime bundle and full CLI.
-- npm package (`npm` / `npx`) is a thin wrapper that forwards to the bundled Python `docagent`.
-- Core engine logic stays in Python; Node is an adoption entrypoint, not a forked implementation.
-- Node and Python users see one shared product story: `docagent init --ai ...` first, then doctor/refresh/update/versions.
+## Install Paths
 
-### Platform Matrix
+Use the path that matches how you normally work:
+
+| User profile | Install path | Start command |
+| --- | --- | --- |
+| Node-first (global) | `npm install -g doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
+| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target /path/to/repo` |
+| Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
+| Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target /path/to/repo` |
+
+Detailed guides:
+
+- [Quickstart](/Users/tim/DocForAgent_skill/docs/quickstart.md)
+- [Platform Guide](/Users/tim/DocForAgent_skill/docs/platforms.md)
+
+## Platform Targets
 
 | Platform | Adapter type | Install target |
 | --- | --- | --- |
@@ -239,9 +208,44 @@ Distribution relation:
 | Continue | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
 | GitHub Copilot | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
 
-### Release Prep
+## Product CLI v1
 
-Before publishing to PyPI/npm, run:
+Primary commands:
+
+```bash
+docagent init --ai codex|claude|continue|copilot|all --target /path/to/repo
+docagent doctor --target /path/to/repo
+docagent refresh --root /path/to/repo --output-mode agent|human|dual
+docagent generate --root /path/to/repo --mode refresh --output-mode human|agent|dual
+docagent update --target /path/to/repo
+docagent versions --target /path/to/repo
+```
+
+Utility command:
+
+```bash
+docagent quickstart --target /path/to/repo
+```
+
+Legacy compatibility commands are still available, but they are no longer the main path:
+
+```bash
+docagent install --platform codex --target /path/to/repo
+docagent all --target /path/to/repo
+```
+
+## Packaging Model
+
+The product is intentionally distributed through two user-facing paths:
+
+- Python package: canonical runtime and full CLI
+- npm package: thin Node launcher for Node-first users
+
+Both converge on the same product command surface: `docagent`.
+
+## Release Checklist
+
+Before publishing to PyPI or npm:
 
 ```bash
 python3 doc-for-agent/installer/sync_assets.py
@@ -251,51 +255,13 @@ python3 -m pip wheel . -w /tmp/docagent-wheel-check
 npm pack --dry-run
 ```
 
-Recommended install flow:
-
-```bash
-docagent init --ai all --target /path/to/repo
-docagent doctor --target /path/to/repo
-docagent refresh --root /path/to/repo --output-mode agent
-docagent versions --target /path/to/repo
-docagent update --target /path/to/repo
-```
-
 Source checkout fallback (without package install) is still available:
 
 ```bash
 python3 doc-for-agent/installer/docagent.py doctor --target /path/to/repo
 ```
 
-When updating source files under `scripts/`, `templates/`, `references/`, or `agents/`, sync the packaged runtime bundle with:
-
-```bash
-python3 doc-for-agent/installer/sync_assets.py
-```
-
-## Install As a Codex Skill
-
-If you already use Codex local skills and want a manual install into `~/.codex/skills/`, symlinking still works:
-
-```bash
-ln -sfn /absolute/path/to/doc-for-agent /Users/$USER/.codex/skills/doc-for-agent
-```
-
-After installation, restart Codex so the skill is discovered in a new session.
-
-## Install From GitHub
-
-If you want to install this skill from the published repository, use the Codex skill installer against this repo path:
-
-```bash
-python3 ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
-  --repo Timcai06/Doc-For-Agent-skill \
-  --path doc-for-agent
-```
-
-After installation, restart Codex so the new skill is loaded in future sessions.
-
-## Use
+## Advanced Use
 
 Ask Codex something like:
 
