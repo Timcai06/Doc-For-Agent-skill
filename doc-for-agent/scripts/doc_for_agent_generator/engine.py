@@ -1,0 +1,235 @@
+from __future__ import annotations
+
+import shutil
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterable, Optional
+
+from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
+from .builders import SUPPORTED_DOC_PROFILES, SUPPORTED_OUTPUT_MODES, generate_docs, generate_human_docs
+from .markdown import MANUAL_END, MANUAL_START, merge_markdown
+from .models import RepoAnalysis
+from .utils import infer_project_name, read_text, write_file
+
+SUPPORTED_ENGINE_ACTIONS = ("init", "refresh", "migrate", "generate")
+MERGE_ACTIONS = {"refresh", "migrate"}
+
+LEGACY_FLAT_TO_LAYERED_TARGETS = {
+    "README.md": ("00-entry/AGENTS.md",),
+    "product.md": ("01-product/002-prd.md",),
+    "architecture.md": ("02-architecture/007-architecture-compatibility.md",),
+    "frontend.md": ("02-architecture/005-frontend-guidelines.md",),
+    "backend.md": ("02-architecture/006-backend-structure.md",),
+    "workflows.md": ("03-execution/008-implementation-plan.md",),
+    "glossary.md": ("00-entry/AGENTS.md",),
+}
+
+
+@dataclass(frozen=True)
+class EngineRequest:
+    root: Path
+    mode: str = "refresh"
+    output_mode: str = "agent"
+    profile: str = "bootstrap"
+    project_name: str = ""
+    repo_type_override: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class GenerationPlan:
+    request: EngineRequest
+    analysis: RepoAnalysis
+    files: Dict[str, str]
+    archive_candidates: list[Path]
+    agents_dir: Path
+    docs_dir: Path
+
+    @property
+    def write_mode(self) -> str:
+        return "refresh" if self.request.mode in MERGE_ACTIONS else "init"
+
+
+def normalize_engine_request(request: EngineRequest) -> EngineRequest:
+    root = request.root.expanduser().resolve()
+    if request.mode not in SUPPORTED_ENGINE_ACTIONS:
+        raise ValueError(f"Unsupported mode `{request.mode}`. Supported: {', '.join(SUPPORTED_ENGINE_ACTIONS)}")
+    if request.output_mode not in SUPPORTED_OUTPUT_MODES:
+        raise ValueError(f"Unsupported output mode `{request.output_mode}`. Supported: {', '.join(SUPPORTED_OUTPUT_MODES)}")
+    if request.profile not in SUPPORTED_DOC_PROFILES:
+        raise ValueError(f"Unsupported profile `{request.profile}`. Supported: {', '.join(SUPPORTED_DOC_PROFILES)}")
+    if request.repo_type_override and request.repo_type_override not in SUPPORTED_REPO_TYPES:
+        raise ValueError(
+            f"Unsupported repo type `{request.repo_type_override}`. Supported: {', '.join(SUPPORTED_REPO_TYPES)}"
+        )
+    project_name = infer_project_name(root, request.project_name)
+    return EngineRequest(
+        root=root,
+        mode=request.mode,
+        output_mode=request.output_mode,
+        profile=request.profile,
+        project_name=project_name,
+        repo_type_override=request.repo_type_override,
+    )
+
+
+def resolve_output_content(path: Path, generated: str, write_mode: str) -> str:
+    if write_mode == "refresh" and path.exists():
+        return merge_markdown(read_text(path), generated)
+    return generated
+
+
+def append_legacy_migration_notes(content: str, source_label: str, source_text: str) -> str:
+    body = source_text.strip()
+    if not body:
+        return content
+    section = "\n".join(
+        [
+            "## Migrated Notes",
+            "",
+            f"- Legacy source: `{source_label}`",
+            "",
+            MANUAL_START,
+            body,
+            MANUAL_END,
+        ]
+    )
+    return content.rstrip() + "\n\n" + section + "\n"
+
+
+def apply_layered_migration_overlays(analysis: RepoAnalysis, files: Dict[str, str]) -> Dict[str, str]:
+    if analysis.doc_profile != "layered":
+        return files
+
+    migrated = dict(files)
+    canonical_root = analysis.docs_inventory.canonical_agents_root or (analysis.root / "AGENTS")
+    for path in analysis.docs_inventory.flat_agent_files:
+        targets = LEGACY_FLAT_TO_LAYERED_TARGETS.get(path.name, ())
+        if not targets:
+            continue
+        source_text = read_text(path)
+        if not source_text.strip():
+            continue
+        try:
+            source_label = str(path.relative_to(canonical_root)).replace("\\", "/")
+        except ValueError:
+            source_label = path.name
+        for target in targets:
+            if target not in migrated:
+                continue
+            migrated[target] = append_legacy_migration_notes(migrated[target], f"AGENTS/{source_label}", source_text)
+    return migrated
+
+
+def collect_output_plan(root: Path, analysis: RepoAnalysis, output_mode: str) -> tuple[Dict[str, str], list[Path]]:
+    planned: Dict[str, str] = {}
+    archive_candidates: list[Path] = []
+
+    if output_mode in {"agent", "dual"}:
+        agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis))
+        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        for name, content in agent_files.items():
+            planned[str(agents_dir / name)] = content
+        archive_candidates = list(analysis.docs_inventory.archive_candidates)
+
+    if output_mode in {"human", "dual"}:
+        human_files = generate_human_docs(analysis)
+        for name, content in human_files.items():
+            planned[str(root / name)] = content
+
+    return planned, archive_candidates
+
+
+def build_generation_plan(request: EngineRequest) -> GenerationPlan:
+    normalized_request = normalize_engine_request(request)
+    analysis = analyze_repo(
+        normalized_request.root,
+        normalized_request.project_name,
+        repo_type_override=normalized_request.repo_type_override,
+        doc_profile=normalized_request.profile,
+    )
+    files, archive_candidates = collect_output_plan(normalized_request.root, analysis, normalized_request.output_mode)
+    agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
+    docs_dir = normalized_request.root / "docs"
+    return GenerationPlan(
+        request=normalized_request,
+        analysis=analysis,
+        files=files,
+        archive_candidates=archive_candidates,
+        agents_dir=agents_dir,
+        docs_dir=docs_dir,
+    )
+
+
+def archive_legacy_flat_files(plan: GenerationPlan) -> None:
+    if plan.analysis.doc_profile != "layered":
+        return
+    canonical_root = plan.analysis.docs_inventory.canonical_agents_root or (plan.analysis.root / "AGENTS")
+    archive_root = canonical_root / "_archive" / "flat"
+    for path in plan.archive_candidates:
+        if not path.exists():
+            continue
+        destination = archive_root / path.name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+        path.unlink()
+
+
+def ensure_output_directories(plan: GenerationPlan) -> None:
+    if plan.request.output_mode in {"agent", "dual"}:
+        plan.agents_dir.mkdir(parents=True, exist_ok=True)
+    if plan.request.output_mode in {"human", "dual"}:
+        plan.docs_dir.mkdir(parents=True, exist_ok=True)
+
+
+def apply_generation_plan(plan: GenerationPlan) -> None:
+    ensure_output_directories(plan)
+    if plan.request.output_mode in {"agent", "dual"}:
+        archive_legacy_flat_files(plan)
+
+    for target, generated in plan.files.items():
+        path = Path(target)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_file(path, resolve_output_content(path, generated, plan.write_mode))
+
+
+def plan_dry_run_actions(plan: GenerationPlan) -> list[str]:
+    lines: list[str] = []
+    for target_path, generated in plan.files.items():
+        path = Path(target_path)
+        resolved = resolve_output_content(path, generated, plan.write_mode)
+        if not path.exists():
+            action = "create"
+        elif read_text(path) == resolved:
+            action = "unchanged"
+        else:
+            action = "update"
+        try:
+            display_path = path.relative_to(plan.request.root)
+        except ValueError:
+            display_path = path
+        lines.append(f"- {action} {display_path}")
+    for path in plan.archive_candidates:
+        lines.append(f"- archive {path.name} -> AGENTS/_archive/flat/{path.name}")
+    return lines
+
+
+def plan_title(plan: GenerationPlan, dry_run: bool = False) -> str:
+    mode = plan.request.mode
+    if dry_run:
+        if plan.request.output_mode == "agent":
+            return f"Dry run: would {mode} AGENTS docs in: {plan.agents_dir}"
+        if plan.request.output_mode == "human":
+            return f"Dry run: would {mode} human docs in: {plan.docs_dir}"
+        return f"Dry run: would {mode} AGENTS + human docs in: {plan.agents_dir} and {plan.docs_dir}"
+
+    past_tense = {
+        "init": "Initialized",
+        "refresh": "Refreshed",
+        "migrate": "Migrated",
+        "generate": "Generated",
+    }.get(mode, f"{mode.capitalize()}ed")
+    if plan.request.output_mode == "agent":
+        return f"{past_tense} AGENTS docs in: {plan.agents_dir}"
+    if plan.request.output_mode == "human":
+        return f"{past_tense} human docs in: {plan.docs_dir}"
+    return f"{past_tense} AGENTS + human docs in: {plan.agents_dir} and {plan.docs_dir}"
