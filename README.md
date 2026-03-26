@@ -140,6 +140,11 @@ This keeps the default branch easier to reason about before splitting work acros
 
 ## Install With the Product CLI
 
+If you are unsure which path to choose:
+
+- Node users: start with `npx -y doc-for-agent`.
+- Python users: start with `pipx install .`.
+
 ### Install Matrix
 
 | User profile | Install path | First command |
@@ -154,6 +159,7 @@ Quick relation:
 - Python install gives the canonical runtime (`docagent`) directly.
 - npm/npx install gives a thin Node launcher that forwards to the same Python runtime bundle.
 - Both paths converge on one command surface: `docagent`.
+- If you launch from `npx -y doc-for-agent` with no args, it prints a quickstart and then shows unified CLI help.
 
 ### Product Command Surface
 
@@ -171,6 +177,14 @@ docagent update --target /path/to/repo
 docagent generate --root /path/to/repo --mode refresh
 docagent refresh --root /path/to/repo
 docagent --version
+```
+
+Node-first one-off command shape mirrors the same surface:
+
+```bash
+npx -y doc-for-agent doctor --target /path/to/repo
+npx -y doc-for-agent all --target /path/to/repo
+npx -y doc-for-agent update --target /path/to/repo
 ```
 
 `generate` and `refresh` are product-level wrappers over the bundled AGENTS generator, so users can stay on a single `docagent` command surface.

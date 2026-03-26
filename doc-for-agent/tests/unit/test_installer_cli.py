@@ -133,11 +133,13 @@ class InstallerCliTests(unittest.TestCase):
         self.assertEqual(payload["bin"]["docagent"], "doc-for-agent/installer/node/docagent.js")
         self.assertEqual(payload["bin"]["doc-for-agent"], "doc-for-agent/installer/node/docagent.js")
         self.assertEqual(payload["scripts"]["prepack"], "python3 doc-for-agent/installer/sync_assets.py")
+        self.assertEqual(payload["scripts"]["quickstart"], "node doc-for-agent/installer/node/docagent.js")
         self.assertTrue((repo_root / payload["bin"]["docagent"]).exists())
 
         wrapper_text = (repo_root / payload["bin"]["docagent"]).read_text(encoding="utf-8")
         self.assertIn('if (forwardedArgs.length === 0)', wrapper_text)
         self.assertIn('forwardedArgs.push("--help")', wrapper_text)
+        self.assertIn('console.error("[docagent] Quick start (Node entry):")', wrapper_text)
 
     def test_generate_command_executes_generator_dry_run(self) -> None:
         fixture_root = TEST_ROOT / "fixtures" / "backend_service"

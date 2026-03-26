@@ -44,6 +44,14 @@ function runPython(cliScript, args) {
   return 2;
 }
 
+function printQuickStart() {
+  console.error("[docagent] Quick start (Node entry):");
+  console.error("  npx -y doc-for-agent doctor --target /path/to/repo");
+  console.error("  npx -y doc-for-agent all --target /path/to/repo");
+  console.error("  npx -y doc-for-agent --help");
+  console.error("[docagent] All entry paths converge on the same `docagent` product CLI.");
+}
+
 function main() {
   const cliScript = resolveCliScript();
   if (!cliScript) {
@@ -55,6 +63,7 @@ function main() {
   }
   const forwardedArgs = process.argv.slice(2);
   if (forwardedArgs.length === 0) {
+    printQuickStart();
     forwardedArgs.push("--help");
   } else if (forwardedArgs[0] === "help") {
     forwardedArgs[0] = "--help";
