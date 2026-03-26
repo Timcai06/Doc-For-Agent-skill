@@ -86,3 +86,4 @@ class RepoAnalysis:
     classification: RepoClassification = field(default_factory=lambda: RepoClassification(primary_type="unknown"))
     docs_inventory: DocumentationInventory = field(default_factory=DocumentationInventory)
     supporting_doc_insights: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
+    supporting_doc_provenance: Dict[str, List[str]] = field(default_factory=dict)

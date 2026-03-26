@@ -149,7 +149,39 @@ class DryRunTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "docs/architecture.md").exists())
             self.assertTrue((sandbox_root / "docs/workflows.md").exists())
             self.assertTrue((sandbox_root / "docs/glossary.md").exists())
+            overview = (sandbox_root / "docs/overview.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "docs/workflows.md").read_text(encoding="utf-8")
+            self.assertIn("## Provenance", overview)
+            self.assertIn("## Provenance", workflows)
             self.assertFalse((sandbox_root / "AGENTS").exists())
+
+    def test_human_output_mode_still_generates_docs_when_repo_has_no_existing_docs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-human-no-docs-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "human_no_docs"
+            shutil.copytree(TEST_ROOT / "fixtures" / "human_no_docs", sandbox_root)
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--output-mode",
+                    "human",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertTrue((sandbox_root / "docs/overview.md").exists())
+            self.assertTrue((sandbox_root / "docs/architecture.md").exists())
+            self.assertTrue((sandbox_root / "docs/workflows.md").exists())
+            self.assertTrue((sandbox_root / "docs/glossary.md").exists())
+            architecture = (sandbox_root / "docs/architecture.md").read_text(encoding="utf-8")
+            self.assertIn("## Source Of Truth", architecture)
 
     def test_dual_output_mode_dry_run_reports_agents_and_human_paths(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dual-mode-") as tmpdir:

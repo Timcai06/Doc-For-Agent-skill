@@ -44,6 +44,7 @@ Recent quality improvements also make output more directly usable:
 - workflows prefer executable fallback guidance over placeholder TODO lines
 - `--explain` now includes a suggested profile (`bootstrap` or `layered`), a copyable refresh command, and a source-of-truth quick list
 - layered generation now synthesizes supporting docs into agent-facing `confirmed / conflicting / unresolved` guidance instead of only listing reference paths
+- human docs generation now emits `overview/architecture/workflows/glossary` with the same synthesis model plus explicit provenance sections
 
 ## Repository Layout
 

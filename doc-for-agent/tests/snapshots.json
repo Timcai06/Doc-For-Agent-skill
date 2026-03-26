@@ -300,13 +300,50 @@
     "docs/overview.md": {
       "contains": [
         "# Project Overview",
-        "Supporting Doc Synthesis"
+        "Supporting Doc Synthesis",
+        "## Provenance"
       ]
     },
     "docs/workflows.md": {
       "contains": [
         "# Workflows",
-        "## Supporting Doc Synthesis"
+        "## Supporting Doc Synthesis",
+        "## Provenance"
+      ]
+    }
+  },
+  "human_no_docs": {
+    "__output_mode": "human",
+    "__required_docs": [
+      "docs/overview.md",
+      "docs/architecture.md",
+      "docs/workflows.md",
+      "docs/glossary.md"
+    ],
+    "docs/overview.md": {
+      "contains": [
+        "# Project Overview",
+        "Current repo shape:",
+        "## Current Priorities"
+      ]
+    },
+    "docs/architecture.md": {
+      "contains": [
+        "# Architecture",
+        "## Source Of Truth",
+        "## Provenance"
+      ]
+    },
+    "docs/workflows.md": {
+      "contains": [
+        "# Workflows",
+        "python3 -m pip install -r requirements.txt"
+      ]
+    },
+    "docs/glossary.md": {
+      "contains": [
+        "# Glossary",
+        "## Naming Rules"
       ]
     }
   }
