@@ -1,68 +1,80 @@
 # doc-for-agent Quickstart
 
-`doc-for-agent` is designed for CLI coding-agent workflows.
+This page is for first-time product users.
 
-The normal flow is:
+Use one mental model:
 
-1. install the product CLI
-2. choose your assistant
-3. refresh repository docs
+1. install
+2. init
+3. refresh
 
-## Fastest Start
+## Install
 
-Node users:
+Node:
 
 ```bash
 npm install -g doc-for-agent
-docagent init --ai codex --target /path/to/repo
-docagent refresh --root /path/to/repo --output-mode agent
 ```
 
-Python users:
+Python:
 
 ```bash
 pipx install doc-for-agent
-docagent init --ai claude --target /path/to/repo
-docagent refresh --root /path/to/repo --output-mode agent
 ```
 
-## One-Off Start
-
-If you do not want a global install:
+One-off Node run:
 
 ```bash
 npx -y doc-for-agent
-npx -y doc-for-agent init --ai all --target /path/to/repo
 ```
 
-## Common Flows
+## Init
 
-Install all supported assistant adapters:
+Pick one:
 
 ```bash
+docagent init --ai claude --target /path/to/repo
+docagent init --ai codex --target /path/to/repo
+docagent init --ai continue --target /path/to/repo
+docagent init --ai copilot --target /path/to/repo
 docagent init --ai all --target /path/to/repo
 ```
 
-Verify install state:
+CodeBuddy users usually start with:
 
 ```bash
-docagent doctor --target /path/to/repo
+docagent init --ai codex --target /path/to/repo
 ```
 
-Refresh agent docs only:
+## Refresh
+
+Agent docs:
 
 ```bash
 docagent refresh --root /path/to/repo --output-mode agent
 ```
 
-Generate human docs only:
+Human docs:
 
 ```bash
-docagent generate --root /path/to/repo --mode refresh --output-mode human
+docagent refresh --root /path/to/repo --output-mode human
 ```
 
-Generate both human and agent docs:
+Both:
 
 ```bash
 docagent refresh --root /path/to/repo --output-mode dual
 ```
+
+## Verify
+
+```bash
+docagent doctor --target /path/to/repo
+docagent versions --target /path/to/repo
+```
+
+See also:
+
+- [Platform Guide](platforms.md)
+- [Maintainer Guide](maintainers.md)
+

@@ -166,6 +166,7 @@ class InstallerCliTests(unittest.TestCase):
         wrapper_text = (repo_root / payload["bin"]["docagent"]).read_text(encoding="utf-8")
         self.assertIn('if (forwardedArgs.length === 0)', wrapper_text)
         self.assertIn('forwardedArgs.push("quickstart")', wrapper_text)
+        self.assertIn('npm install -g doc-for-agent', wrapper_text)
 
     def test_quickstart_command_prints_unified_entry_guidance(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-quickstart-") as tmpdir:
@@ -176,9 +177,10 @@ class InstallerCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             text = stdout.getvalue()
             self.assertIn("doc-for-agent quickstart", text)
-            self.assertIn("Node users: `npx -y doc-for-agent`", text)
+            self.assertIn("Node users: `npm install -g doc-for-agent`", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai all", text)
+            self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("GitHub Copilot (copilot)", text)
 
     def test_generate_command_executes_generator_dry_run(self) -> None:

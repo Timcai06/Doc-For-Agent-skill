@@ -172,23 +172,24 @@ def render_quickstart(target_root: Path) -> str:
     metadata = load_product_metadata()
     lines = [
         f"{metadata.product_name} quickstart",
-        "- Recommended install path by user type:",
-        "- Node users: `npx -y doc-for-agent` (one-off) or `npm install -g doc-for-agent` (global)",
-        "- Python users: `pipx install doc-for-agent` (recommended) or `python3 -m pip install doc-for-agent`",
-        "- Unified product command after install: `docagent`",
-        "- Product first run:",
+        "- Product flow: install -> init -> refresh",
+        "- Install:",
+        "- Node users: `npm install -g doc-for-agent` or `npx -y doc-for-agent`",
+        "- Python users: `pipx install doc-for-agent`",
+        "- Init:",
         f"- `docagent init --ai all --target {target_root}`",
-        "- Platform-specific first run:",
+        "- Pick your agent:",
         f"- `docagent init --ai codex --target {target_root}`",
         f"- `docagent init --ai claude --target {target_root}`",
         f"- `docagent init --ai continue --target {target_root}`",
         f"- `docagent init --ai copilot --target {target_root}`",
-        "- Verify and maintain:",
-        f"- `docagent doctor --target {target_root}`",
+        "- CodeBuddy users usually start with `--ai codex`.",
+        "- Refresh:",
         f"- `docagent refresh --root {target_root} --output-mode agent`",
-        f"- `docagent generate --root {target_root} --mode refresh --output-mode dual`",
+        "- Optional modes: `--output-mode human` or `--output-mode dual`",
+        "- Verify:",
+        f"- `docagent doctor --target {target_root}`",
         f"- `docagent versions --target {target_root}`",
-        f"- `docagent update --target {target_root}`",
         "- Supported platforms:",
     ]
     for platform in available_platforms():
@@ -222,9 +223,9 @@ def print_init_summary(target_root: Path, platforms: Sequence[str], installed_pa
     for path in installed_paths:
         print(f"- {path}")
     print("Recommended next commands:")
+    print(f"- `{metadata.installer_command} refresh --root {target_root} --output-mode agent`")
     print(f"- `{metadata.installer_command} doctor --target {target_root}`")
     print(f"- `{metadata.installer_command} versions --target {target_root}`")
-    print(f"- `{metadata.installer_command} refresh --root {target_root}`")
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 

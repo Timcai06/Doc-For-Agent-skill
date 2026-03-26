@@ -1,50 +1,40 @@
 # doc-for-agent Platform Guide
 
-Use `docagent init --ai ...` as the primary setup command.
+Use `docagent init --ai ...` to choose your platform entrypoint.
 
-## Supported Platforms
+## Platform Matrix
 
-| Platform | Adapter type | Install target |
-| --- | --- | --- |
-| Codex | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| Claude Code | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
-| Continue | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
-| GitHub Copilot | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
+| Platform | First command | Adapter type | Install target |
+| --- | --- | --- | --- |
+| Claude Code | `docagent init --ai claude --target /path/to/repo` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
+| Codex | `docagent init --ai codex --target /path/to/repo` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
+| Continue | `docagent init --ai continue --target /path/to/repo` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
+| GitHub Copilot | `docagent init --ai copilot --target /path/to/repo` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
 
-## Start Commands
+CodeBuddy users: start with `--ai codex`.
+
+## Multi-Agent Setup
 
 ```bash
-docagent init --ai codex --target /path/to/repo
-docagent init --ai claude --target /path/to/repo
-docagent init --ai continue --target /path/to/repo
-docagent init --ai copilot --target /path/to/repo
 docagent init --ai all --target /path/to/repo
 ```
 
-## Packaging Model
+## Distribution Model
 
-`doc-for-agent` currently uses one product story across two ecosystems:
+- Python package: canonical runtime and full CLI.
+- npm package: thin Node launcher for Node-first users.
+- Both paths converge to the same command surface: `docagent`.
 
-- Python package: canonical runtime and full CLI
-- npm package: thin Node launcher for Node-first users
+## Next Command
 
-Both paths converge on:
+After init:
 
 ```bash
-docagent init --ai ...
-docagent doctor ...
-docagent refresh ...
+docagent refresh --root /path/to/repo --output-mode agent
 ```
 
-## Installed Bundle
+See also:
 
-Each install writes a self-contained bundle under the platform's hidden folder.
+- [Quickstart](quickstart.md)
+- [Maintainer Guide](maintainers.md)
 
-That bundle includes:
-
-- the rendered skill or prompt entry file
-- generator scripts
-- references
-- platform templates
-- manifests
-- an installation receipt with version metadata
