@@ -6,7 +6,14 @@ from pathlib import Path
 from typing import Dict, Iterable, Optional
 
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
-from .builders import SUPPORTED_DOC_PROFILES, SUPPORTED_OUTPUT_MODES, generate_docs, generate_human_docs
+from .builders import (
+    SUPPORTED_DOC_PROFILES,
+    SUPPORTED_OUTPUT_MODES,
+    generate_docs,
+    generate_human_docs,
+    infer_source_of_truth_lines,
+    repo_type_label,
+)
 from .markdown import MANUAL_END, MANUAL_START, merge_markdown
 from .models import RepoAnalysis
 from .utils import infer_project_name, read_text, write_file
@@ -47,6 +54,14 @@ class GenerationPlan:
     @property
     def write_mode(self) -> str:
         return "refresh" if self.request.mode in MERGE_ACTIONS else "init"
+
+
+@dataclass(frozen=True)
+class EngineExecutionResult:
+    plan: GenerationPlan
+    dry_run: bool
+    summary: str
+    planned_actions: list[str]
 
 
 def normalize_engine_request(request: EngineRequest) -> EngineRequest:
@@ -233,3 +248,102 @@ def plan_title(plan: GenerationPlan, dry_run: bool = False) -> str:
     if plan.request.output_mode == "human":
         return f"{past_tense} human docs in: {plan.docs_dir}"
     return f"{past_tense} AGENTS + human docs in: {plan.agents_dir} and {plan.docs_dir}"
+
+
+def suggest_profile(analysis: RepoAnalysis) -> str:
+    return (
+        "layered"
+        if analysis.repo_type in {"web-app", "monorepo"} or (analysis.frontend_root and analysis.backend_root)
+        else "bootstrap"
+    )
+
+
+def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "python3 doc-for-agent/scripts/init_agents_docs.py") -> list[str]:
+    analysis = plan.analysis
+    suggested_profile = suggest_profile(analysis)
+    lines = [
+        f"Analysis for: {analysis.root}",
+        f"- Project name: {analysis.project_name}",
+        f"- Repo type: `{analysis.repo_type}` ({repo_type_label(analysis.repo_type)})",
+        f"- Doc profile: `{analysis.doc_profile}`",
+        f"- Confidence: `{analysis.classification.confidence}`",
+        f"- Frontend root: `{analysis.frontend_root}`" if analysis.frontend_root else "- Frontend root: not detected",
+        f"- Backend root: `{analysis.backend_root}`" if analysis.backend_root else "- Backend root: not detected",
+        f"- Package manager: `{analysis.package_manager}`",
+        f"- Suggested profile: `{suggested_profile}`",
+        f"- Documentation state: `{analysis.docs_inventory.detected_state}`",
+    ]
+    if analysis.docs_inventory.canonical_agents_root:
+        lines.append(f"- Canonical AGENTS root: `{analysis.docs_inventory.canonical_agents_root}`")
+    if suggested_profile != analysis.doc_profile:
+        lines.append(f"- Note: current run requested profile `{analysis.doc_profile}`.")
+    lines.append(
+        "Suggested command: "
+        f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {plan.request.output_mode}"
+    )
+    lines.append("Suggested source-of-truth files:")
+    lines.extend([f"- {line}" for line in infer_source_of_truth_lines(analysis)[:6]])
+    lines.append("Supporting-doc synthesis summary:")
+    for role in ("product", "architecture", "execution", "memory"):
+        role_insights = analysis.supporting_doc_insights.get(role, {})
+        role_sources = analysis.supporting_doc_provenance.get(role, [])
+        confirmed_count = len(role_insights.get("confirmed", []))
+        conflicting_count = len(role_insights.get("conflicting", []))
+        unresolved_count = len(role_insights.get("unresolved", []))
+        lines.append(
+            f"- {role}: confirmed={confirmed_count}, conflicting={conflicting_count}, unresolved={unresolved_count}, sources={len(role_sources)}"
+        )
+    sections = [
+        ("Reasons", analysis.classification.reasons),
+        ("Secondary traits", analysis.classification.secondary_traits),
+        ("Conflicting signals", analysis.classification.conflicting_signals),
+        ("Open questions", analysis.classification.open_questions),
+        (
+            "Documentation inventory",
+            [
+                f"detected state: {analysis.docs_inventory.detected_state}",
+                f"agent roots: {len(analysis.docs_inventory.agent_roots)}",
+                f"flat agent files: {len(analysis.docs_inventory.flat_agent_files)}",
+                f"layered agent files: {len(analysis.docs_inventory.layered_agent_files)}",
+                f"supporting docs: {len(analysis.docs_inventory.supporting_docs)}",
+                f"archive candidates: {len(analysis.docs_inventory.archive_candidates)}",
+            ],
+        ),
+        (
+            "Signals",
+            [
+                f"top-level dirs: {', '.join(analysis.signals.top_level_dirs) or '(none)'}",
+                f"has skill file: {'yes' if analysis.signals.has_skill_file else 'no'}",
+                f"has agent manifests: {'yes' if analysis.signals.has_agent_manifests else 'no'}",
+                f"has workspace layout: {'yes' if analysis.signals.has_workspace_layout else 'no'}",
+                f"has package.json: {'yes' if analysis.signals.has_package_json else 'no'}",
+                f"has package bin metadata: {'yes' if analysis.signals.has_package_bin else 'no'}",
+                f"has Python packaging: {'yes' if analysis.signals.has_python_packaging else 'no'}",
+                f"CLI entrypoints: {len(analysis.signals.cli_entrypoints)}",
+                f"library entrypoints: {len(analysis.signals.library_entrypoints)}",
+            ],
+        ),
+    ]
+    for heading, items in sections:
+        lines.append(f"{heading}:")
+        if items:
+            lines.extend([f"- {item}" for item in items])
+        else:
+            lines.append("- none")
+    if analysis.docs_inventory.reference_only_docs:
+        lines.append("Reference-only docs:")
+        lines.extend([f"- {path}" for path in analysis.docs_inventory.reference_only_docs[:6]])
+    return lines
+
+
+def execute_engine_request(request: EngineRequest, dry_run: bool = False) -> EngineExecutionResult:
+    plan = build_generation_plan(request)
+    actions = plan_dry_run_actions(plan)
+    if not dry_run:
+        apply_generation_plan(plan)
+    return EngineExecutionResult(
+        plan=plan,
+        dry_run=dry_run,
+        summary=plan_title(plan, dry_run=dry_run),
+        planned_actions=actions,
+    )
