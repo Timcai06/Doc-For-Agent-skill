@@ -301,17 +301,40 @@
       "contains": [
         "# Project Overview",
         "Supporting Doc Synthesis",
+        "### Inferred",
         "## Intended Audience",
         "## Synthesis Summary",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)",
         "## Provenance"
+      ]
+    },
+    "docs/architecture.md": {
+      "contains": [
+        "# Architecture",
+        "## Supporting Doc Synthesis",
+        "### Inferred",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)"
       ]
     },
     "docs/workflows.md": {
       "contains": [
         "# Workflows",
         "## Supporting Doc Synthesis",
+        "### Inferred",
         "## Operational Notes",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)",
         "## Provenance"
+      ]
+    },
+    "docs/glossary.md": {
+      "contains": [
+        "# Glossary",
+        "## Inferred Terminology Signals",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)"
       ]
     }
   },
@@ -327,7 +350,10 @@
       "contains": [
         "# Project Overview",
         "Current repo shape:",
+        "### Inferred",
         "## Current Priorities",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)",
         "No supporting docs matched this role; content below is inferred from repository structure and code signals."
       ]
     },
@@ -343,7 +369,9 @@
       "contains": [
         "# Workflows",
         "python3 -m pip install -r requirements.txt",
-        "## Synthesis Summary"
+        "## Synthesis Summary",
+        "## Maintenance Workflow",
+        "## Bootstrap Backlog (When Docs Are Thin)"
       ]
     },
     "docs/glossary.md": {

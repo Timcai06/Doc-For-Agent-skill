@@ -68,6 +68,99 @@ def human_audience_lines(analysis: RepoAnalysis) -> list[str]:
     return lines
 
 
+def human_inferred_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    lines: list[str] = []
+    if role == "product":
+        if analysis.summary:
+            lines.append(f"Project intent inferred from README/code signals: {analysis.summary}")
+        if analysis.classification.reasons:
+            lines.append(f"Repo type inferred as `{repo_type_label(analysis.repo_type)}` from: {analysis.classification.reasons[0]}")
+        if analysis.routes:
+            lines.append(f"User-facing flow likely includes routes such as {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
+        if analysis.endpoints:
+            lines.append(f"Service-facing flow likely includes endpoints such as {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
+    elif role == "architecture":
+        if analysis.frontend_root and analysis.backend_root:
+            lines.append("Architecture is likely split between a frontend surface and a backend/runtime surface.")
+        elif analysis.frontend_root:
+            lines.append("Architecture appears frontend-led with runtime behavior inferred from package scripts and routes.")
+        elif analysis.backend_root:
+            lines.append("Architecture appears backend-led with runtime behavior inferred from service files and endpoints.")
+        if analysis.routes:
+            lines.append(f"Routing structure suggests primary interface paths under {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
+        if analysis.endpoints:
+            lines.append(f"Endpoint decorators suggest service contract anchors at {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
+    elif role == "execution":
+        package_manager_label = analysis.package_manager or "npm"
+        lines.append(f"Primary command workflow is inferred around `{package_manager_label}` package scripts and repository-local verify commands.")
+        if analysis.frontend_scripts:
+            lines.append(
+                f"Frontend workflows likely depend on scripts: {', '.join(f'`{name}`' for name in list(analysis.frontend_scripts.keys())[:4])}."
+            )
+        if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
+            lines.append("Backend setup likely requires Python dependency installation from `requirements.txt`.")
+    elif role == "memory":
+        if analysis.glossary_entries:
+            lines.append("Canonical terminology can be seeded from detected glossary entries and then curated by maintainers.")
+        if analysis.routes:
+            lines.append("Route names are useful term candidates for product and operations vocabulary alignment.")
+        if analysis.endpoints:
+            lines.append("Endpoint labels are useful term candidates for integration and runbook language.")
+    return lines
+
+
+def human_maintenance_lines(analysis: RepoAnalysis, role: str, unresolved_count: int, conflicting_count: int) -> list[str]:
+    lines: list[str] = [
+        "Assign one maintainer owner for this document and update it in the same pull request as behavior changes.",
+        "Review this document at least once per sprint or before each release cut.",
+    ]
+    if role == "product":
+        lines.append("Update after roadmap, target user, or feature scope decisions.")
+    elif role == "architecture":
+        lines.append("Update after boundary, dependency, or interface contract changes.")
+    elif role == "execution":
+        lines.append("Update after setup/run/verify command changes or CI workflow updates.")
+    elif role == "memory":
+        lines.append("Update when terminology, handoff language, or project status vocabulary changes.")
+
+    if conflicting_count:
+        lines.append("Prioritize resolving conflicting statements before treating this document as canonical.")
+    if unresolved_count:
+        lines.append("Track unresolved items as named decisions with owner and due date.")
+    if unresolved_count == 0 and conflicting_count == 0:
+        lines.append("No major synthesis conflicts were detected; focus on keeping this page current with implementation changes.")
+    return lines
+
+
+def human_bootstrap_backlog_lines(role: str, has_supporting_provenance: bool) -> list[str]:
+    if has_supporting_provenance:
+        return ["Supporting docs were found; continue consolidating them into this page and archive stale duplicates."]
+
+    if role == "product":
+        return [
+            "Write a one-paragraph project mission and a one-release priority list.",
+            "Record primary users and success signals in concrete terms.",
+            "Capture top open product decisions with owner + target date.",
+        ]
+    if role == "architecture":
+        return [
+            "Document top-level system boundaries (frontend/backend/services) in 5-8 bullets.",
+            "List canonical files that define runtime behavior and public contracts.",
+            "Create an initial decision backlog for unresolved architecture tradeoffs.",
+        ]
+    if role == "execution":
+        return [
+            "Verify setup/run/verify commands from a clean environment and keep only working commands.",
+            "Define a minimum release checklist shared by maintainers.",
+            "Record failure recovery steps for the most common local/CI breakages.",
+        ]
+    return [
+        "Promote repeated domain terms into canonical glossary entries.",
+        "Note deprecated or ambiguous terms and map them to preferred wording.",
+        "Review docs for vocabulary drift each sprint.",
+    ]
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -1523,6 +1616,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+    inferred = human_inferred_lines(analysis, "product")
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
@@ -1545,6 +1639,8 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     documentation_gaps = list(unresolved)
     if not documentation_gaps:
         documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
+    maintenance = human_maintenance_lines(analysis, "product", len(unresolved), len(conflicting))
+    bootstrap_backlog = human_bootstrap_backlog_lines("product", bool(provenance))
 
     return f"""# Project Overview
 
@@ -1570,6 +1666,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
 
+### Inferred
+
+{format_bullets(inferred, "No additional inferred product signals were detected from repository structure.")}
+
 ### Conflicting
 
 {format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
@@ -1586,6 +1686,14 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(documentation_gaps, "No explicit product documentation gaps were detected.")}
 
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
+
 ## Provenance
 
 {format_bullets(provenance, "No supporting product documents were discovered outside generated outputs.")}
@@ -1596,6 +1704,7 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+    inferred = human_inferred_lines(analysis, "architecture")
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
     boundaries = [
@@ -1611,6 +1720,8 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
         system_map.append(f"Route coverage detected: {', '.join(f'`{route}`' for route in analysis.routes[:4])}")
     if analysis.endpoints:
         system_map.append(f"Endpoint coverage detected: {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:4])}")
+    maintenance = human_maintenance_lines(analysis, "architecture", len(unresolved), len(conflicting))
+    bootstrap_backlog = human_bootstrap_backlog_lines("architecture", bool(provenance))
 
     return f"""# Architecture
 
@@ -1636,6 +1747,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
 
+### Inferred
+
+{format_bullets(inferred, "No additional inferred architecture signals were detected from repository structure.")}
+
 ### Conflicting
 
 {format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
@@ -1647,6 +1762,14 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Stability Boundaries
 
 {format_bullets(boundaries, "No architecture boundaries were inferred automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
 
 ## Provenance
 
@@ -1662,6 +1785,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+    inferred = human_inferred_lines(analysis, "execution")
     provenance = supporting_doc_provenance_lines(analysis, "execution")
     synthesis_summary = synthesis_summary_lines(analysis, "execution")
 
@@ -1725,6 +1849,8 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
         operational_notes.append("Assign owners for unresolved runbook items to prevent drift in release operations.")
     if not operational_notes:
         operational_notes.append("Keep command examples in this file aligned with CI and README instructions.")
+    maintenance = human_maintenance_lines(analysis, "execution", len(unresolved), len(conflicting))
+    bootstrap_backlog = human_bootstrap_backlog_lines("execution", bool(provenance))
 
     return f"""# Workflows
 
@@ -1756,6 +1882,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
 
+### Inferred
+
+{format_bullets(inferred, "No additional inferred execution signals were detected from repository structure.")}
+
 ### Conflicting
 
 {format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
@@ -1767,6 +1897,14 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Operational Notes
 
 {format_bullets(operational_notes, "No additional operational notes were inferred automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
 
 ## Provenance
 
@@ -1780,6 +1918,7 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
         terms.append(f"- `skill`: `{analysis.skill_meta.skill_name}`")
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
     conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    inferred = human_inferred_lines(analysis, "memory")
     provenance = supporting_doc_provenance_lines(analysis, "memory")
     synthesis_summary = synthesis_summary_lines(analysis, "memory")
     candidate_terms = []
@@ -1789,6 +1928,8 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
         candidate_terms.extend(f"- `endpoint:{endpoint}`" for endpoint in analysis.endpoints[:4])
     if not candidate_terms:
         candidate_terms.append("- No additional term candidates were inferred from routes/endpoints.")
+    maintenance = human_maintenance_lines(analysis, "memory", len(unresolved), len(conflicting))
+    bootstrap_backlog = human_bootstrap_backlog_lines("memory", bool(provenance))
 
     return f"""# Glossary
 
@@ -1809,6 +1950,10 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 {chr(10).join(candidate_terms)}
 
+## Inferred Terminology Signals
+
+{format_bullets(inferred, "No additional inferred terminology signals were detected from repository structure.")}
+
 ## Unresolved Terminology Items
 
 {format_bullets(unresolved, "No unresolved terminology or memory items were synthesized from supporting docs.")}
@@ -1816,6 +1961,14 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 ## Conflicting Terminology Signals
 
 {format_bullets(conflicting, "No conflicting terminology signals were synthesized from supporting docs.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
 
 ## Provenance
 

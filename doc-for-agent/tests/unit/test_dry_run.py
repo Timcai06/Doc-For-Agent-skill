@@ -154,11 +154,17 @@ class DryRunTests(unittest.TestCase):
             workflows = (sandbox_root / "docs/workflows.md").read_text(encoding="utf-8")
             glossary = (sandbox_root / "docs/glossary.md").read_text(encoding="utf-8")
             self.assertIn("## Provenance", overview)
+            self.assertIn("### Inferred", overview)
             self.assertIn("## Intended Audience", overview)
             self.assertIn("## System Map", architecture)
+            self.assertIn("### Inferred", architecture)
+            self.assertIn("## Maintenance Workflow", architecture)
             self.assertIn("## Provenance", workflows)
+            self.assertIn("### Inferred", workflows)
             self.assertIn("## Operational Notes", workflows)
+            self.assertIn("## Maintenance Workflow", workflows)
             self.assertIn("## Candidate Terms From Code Signals", glossary)
+            self.assertIn("## Inferred Terminology Signals", glossary)
             self.assertFalse((sandbox_root / "AGENTS").exists())
 
     def test_human_output_mode_still_generates_docs_when_repo_has_no_existing_docs(self) -> None:
@@ -188,8 +194,12 @@ class DryRunTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "docs/glossary.md").exists())
             architecture = (sandbox_root / "docs/architecture.md").read_text(encoding="utf-8")
             overview = (sandbox_root / "docs/overview.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "docs/workflows.md").read_text(encoding="utf-8")
             self.assertIn("## Source Of Truth", architecture)
+            self.assertIn("## Bootstrap Backlog (When Docs Are Thin)", architecture)
             self.assertIn("No supporting docs matched this role; content below is inferred from repository structure and code signals.", overview)
+            self.assertIn("## Bootstrap Backlog (When Docs Are Thin)", overview)
+            self.assertIn("## Maintenance Workflow", workflows)
 
     def test_dual_output_mode_dry_run_reports_agents_and_human_paths(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dual-mode-") as tmpdir:
