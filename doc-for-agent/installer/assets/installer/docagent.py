@@ -170,26 +170,28 @@ def render_versions_report(target_root: Path, statuses: Iterable[PlatformDoctorS
 
 def render_quickstart(target_root: Path) -> str:
     metadata = load_product_metadata()
+    repo_placeholder = "<repo-root>"
     lines = [
         f"{metadata.product_name} quickstart",
         "- Product flow: install -> init -> refresh",
+        f"- Current target root: {target_root}",
         "- Install:",
         "- Node users: `npm install -g doc-for-agent` or `npx -y doc-for-agent`",
         "- Python users: `pipx install doc-for-agent`",
         "- Init:",
-        f"- `docagent init --ai all --target {target_root}`",
+        f"- `docagent init --ai all --target {repo_placeholder}`",
         "- Pick your agent:",
-        f"- `docagent init --ai codex --target {target_root}`",
-        f"- `docagent init --ai claude --target {target_root}`",
-        f"- `docagent init --ai continue --target {target_root}`",
-        f"- `docagent init --ai copilot --target {target_root}`",
+        f"- `docagent init --ai codex --target {repo_placeholder}`",
+        f"- `docagent init --ai claude --target {repo_placeholder}`",
+        f"- `docagent init --ai continue --target {repo_placeholder}`",
+        f"- `docagent init --ai copilot --target {repo_placeholder}`",
         "- CodeBuddy users usually start with `--ai codex`.",
         "- Refresh:",
-        f"- `docagent refresh --root {target_root} --output-mode agent`",
+        f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
         "- Optional modes: `--output-mode human` or `--output-mode dual`",
         "- Verify:",
-        f"- `docagent doctor --target {target_root}`",
-        f"- `docagent versions --target {target_root}`",
+        f"- `docagent doctor --target {repo_placeholder}`",
+        f"- `docagent versions --target {repo_placeholder}`",
         "- Supported platforms:",
     ]
     for platform in available_platforms():
@@ -256,7 +258,10 @@ def build_parser() -> argparse.ArgumentParser:
             "Product CLI v1:\n"
             f"  primary commands: {primary_commands}\n"
             "  legacy compatibility: install, all\n"
-            f"  generate/refresh output modes: {output_modes}"
+            f"  generate/refresh output modes: {output_modes}\n"
+            "30-second start:\n"
+            "  docagent init --ai claude --target <repo-root>\n"
+            "  docagent refresh --root <repo-root> --output-mode agent"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

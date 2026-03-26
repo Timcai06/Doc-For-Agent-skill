@@ -75,18 +75,8 @@ docagent install --platform codex --target /path/to/repo
 docagent all --target /path/to/repo
 ```
 
-## Supported Platforms
-
-| Platform | Adapter type | Install target |
-| --- | --- | --- |
-| Codex | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| Claude Code | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
-| Continue | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
-| GitHub Copilot | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
-
 ## Docs
 
 - [Quickstart](docs/quickstart.md)
 - [Platform Guide](docs/platforms.md)
 - [Maintainer Guide](docs/maintainers.md)
-

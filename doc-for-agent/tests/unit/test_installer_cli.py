@@ -30,6 +30,8 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn("Product CLI v1", text)
         self.assertIn("primary commands: init, doctor, refresh, generate, update, versions", text)
         self.assertIn("legacy compatibility: install, all", text)
+        self.assertIn("30-second start:", text)
+        self.assertIn("docagent init --ai claude --target <repo-root>", text)
 
     def test_collect_doctor_statuses_reports_install_targets(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-doctor-") as tmpdir:
@@ -180,6 +182,8 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("Node users: `npm install -g doc-for-agent`", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai all", text)
+            self.assertIn("Current target root:", text)
+            self.assertIn("<repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("GitHub Copilot (copilot)", text)
 
