@@ -133,29 +133,12 @@ This keeps the default branch easier to reason about before splitting work acros
 
 ### Install Matrix
 
-Python entry (recommended for maintainers and CI):
-
-```bash
-pipx install .
-```
-
-or:
-
-```bash
-python3 -m pip install .
-```
-
-Node entry (recommended for Node-first users):
-
-```bash
-npm install -g doc-for-agent
-```
-
-or:
-
-```bash
-npx -y doc-for-agent doctor --target /path/to/repo
-```
+| User profile | Install path | First command |
+| --- | --- | --- |
+| Python-first / CI | `pipx install .` | `docagent doctor --target /path/to/repo` |
+| Python-first (venv/system) | `python3 -m pip install .` | `docagent doctor --target /path/to/repo` |
+| Node-first (global) | `npm install -g doc-for-agent` | `docagent doctor --target /path/to/repo` |
+| Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent doctor --target /path/to/repo` |
 
 Quick relation:
 
@@ -212,10 +195,24 @@ Distribution relation:
 
 ### Platform Matrix
 
-- Codex: local skill adapter (`SKILL.md`)
-- Claude Code: local skill adapter (`SKILL.md`)
-- Continue: local skill adapter (`SKILL.md`)
-- GitHub Copilot: prompt adapter (`PROMPT.md`)
+| Platform | Adapter type | Install target |
+| --- | --- | --- |
+| Codex | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
+| Claude Code | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
+| Continue | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
+| GitHub Copilot | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
+
+### Release Prep
+
+Before publishing to PyPI/npm, run:
+
+```bash
+python3 doc-for-agent/installer/sync_assets.py
+python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py'
+python3 doc-for-agent/tests/verify_generator_snapshots.py
+python3 -m pip wheel . -w /tmp/docagent-wheel-check
+npm pack --dry-run
+```
 
 Recommended install flow:
 

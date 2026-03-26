@@ -53,7 +53,13 @@ function main() {
     console.error("  - doc-for-agent/installer/docagent.py");
     return 2;
   }
-  return runPython(cliScript, process.argv.slice(2));
+  const forwardedArgs = process.argv.slice(2);
+  if (forwardedArgs.length === 0) {
+    forwardedArgs.push("--help");
+  } else if (forwardedArgs[0] === "help") {
+    forwardedArgs[0] = "--help";
+  }
+  return runPython(cliScript, forwardedArgs);
 }
 
 process.exit(main());
