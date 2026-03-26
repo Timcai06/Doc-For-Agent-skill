@@ -8,10 +8,9 @@ Use `docagent init --ai ...` to choose your platform entrypoint.
 | --- | --- | --- | --- |
 | Claude Code | `docagent init --ai claude --target /path/to/repo` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
 | Codex | `docagent init --ai codex --target /path/to/repo` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
+| CodeBuddy | `docagent init --ai codex --target /path/to/repo` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
 | Continue | `docagent init --ai continue --target /path/to/repo` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
 | GitHub Copilot | `docagent init --ai copilot --target /path/to/repo` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
-
-CodeBuddy users: start with `--ai codex`.
 
 ## Multi-Agent Setup
 
@@ -37,4 +36,3 @@ See also:
 
 - [Quickstart](quickstart.md)
 - [Maintainer Guide](maintainers.md)
-

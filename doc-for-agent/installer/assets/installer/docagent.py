@@ -179,7 +179,7 @@ def render_quickstart(target_root: Path) -> str:
         "- Node users: `npm install -g doc-for-agent` or `npx -y doc-for-agent`",
         "- Python users: `pipx install doc-for-agent`",
         "- Init:",
-        f"- `docagent init --ai all --target {repo_placeholder}`",
+        f"- `docagent init --ai <claude|codex|continue|copilot|all> --target {repo_placeholder}`",
         "- Pick your agent:",
         f"- `docagent init --ai codex --target {repo_placeholder}`",
         f"- `docagent init --ai claude --target {repo_placeholder}`",
@@ -192,12 +192,9 @@ def render_quickstart(target_root: Path) -> str:
         "- Verify:",
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",
-        "- Supported platforms:",
+        "- Supported `--ai` values: claude, codex, continue, copilot, all",
+        "- More details: see docs/platforms.md",
     ]
-    for platform in available_platforms():
-        config = load_platform_config(platform)
-        install_root = platform_install_root(target_root, config)
-        lines.append(f"- {config.display_name} ({platform}): {install_root}")
     return "\n".join(lines)
 
 
@@ -260,7 +257,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  legacy compatibility: install, all\n"
             f"  generate/refresh output modes: {output_modes}\n"
             "30-second start:\n"
-            "  docagent init --ai claude --target <repo-root>\n"
+            "  docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>\n"
             "  docagent refresh --root <repo-root> --output-mode agent"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
