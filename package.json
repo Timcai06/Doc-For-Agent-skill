@@ -1,7 +1,7 @@
 {
   "name": "doc-for-agent",
   "version": "0.2.0-dev.0",
-  "description": "Unified docagent CLI entry for npm/npx users with init-first onboarding.",
+  "description": "Unified docagent CLI for Claude/Codex/CodeBuddy-style terminal agent workflows.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
     "npx",
     "installer",
     "codex",
+    "codebuddy",
     "claude",
     "copilot"
   ],
