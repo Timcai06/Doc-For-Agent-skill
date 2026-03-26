@@ -28,6 +28,7 @@ class PlatformAdapterTests(unittest.TestCase):
         self.assertIn("codex", platforms)
         self.assertIn("claude", platforms)
         self.assertIn("continue", platforms)
+        self.assertIn("copilot", platforms)
 
     def test_rendered_codex_adapter_uses_codex_paths(self) -> None:
         config = load_platform_config("codex")
@@ -65,6 +66,14 @@ class PlatformAdapterTests(unittest.TestCase):
 
         self.assertIn("python3 .continue/skills/doc-for-agent/scripts/init_agents_docs.py", content)
         self.assertIn("- Platform: Continue", content)
+
+    def test_rendered_copilot_adapter_uses_prompt_paths(self) -> None:
+        config = load_platform_config("copilot")
+        content = render_adapter(config)
+
+        self.assertIn("python3 .github/prompts/doc-for-agent/scripts/init_agents_docs.py", content)
+        self.assertIn("- Platform: GitHub Copilot", content)
+        self.assertIn("- Adapter type: prompt", content)
 
 
 if __name__ == "__main__":

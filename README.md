@@ -88,7 +88,8 @@ DocForAgent_skill/
     │   └── platforms/
     │       ├── claude.json
     │       ├── codex.json
-    │       └── continue.json
+    │       ├── continue.json
+    │       └── copilot.json
     ├── tests/
     │   ├── fixtures/
     │   │   ├── backend_service/
@@ -120,7 +121,7 @@ Current structure on `main` is intentionally simple:
 - `doc-for-agent/installer/assets/` is the packaged runtime bundle used when `docagent` is installed from wheel/sdist.
 - `doc-for-agent/installer/sync_assets.py` syncs source-of-truth runtime files into `installer/assets/` before packaging/release.
 - `doc-for-agent/templates/product.json` carries product metadata used by the installer and install receipts.
-- `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, and Continue.
+- `doc-for-agent/templates/platforms/*.json` defines the platform-specific install surface for Codex, Claude Code, Continue, and Copilot.
 - `doc-for-agent/tests/fixtures/` contains eight representative sample repositories used by the snapshot regression test.
 - `doc-for-agent/tests/unit/` contains focused unit tests for classification, markdown merge behavior, dry-run behavior, platform adapters, and installer CLI behavior.
 - Root `AGENTS/`, `dist/`, and `*.egg-info` outputs are local/generated artifacts and are ignored.
@@ -132,7 +133,7 @@ This keeps the default branch easier to reason about before splitting work acros
 
 ### Install Matrix
 
-Python product install (recommended for maintainers and CI):
+Python entry (recommended for maintainers and CI):
 
 ```bash
 pipx install .
@@ -144,7 +145,7 @@ or:
 python3 -m pip install .
 ```
 
-npm/npx thin wrapper install (recommended for Node-first users):
+Node entry (recommended for Node-first users):
 
 ```bash
 npm install -g doc-for-agent
@@ -156,6 +157,12 @@ or:
 npx -y doc-for-agent doctor --target /path/to/repo
 ```
 
+Quick relation:
+
+- Python install gives the canonical runtime (`docagent`) directly.
+- npm/npx install gives a thin Node launcher that forwards to the same Python runtime bundle.
+- Both paths converge on one command surface: `docagent`.
+
 ### Product Command Surface
 
 After installation (from either Python or npm), use `docagent` as the single product command:
@@ -165,6 +172,7 @@ docagent doctor --target /path/to/repo
 docagent install --platform codex --target /path/to/repo
 docagent install --platform claude --target /path/to/repo
 docagent install --platform continue --target /path/to/repo
+docagent install --platform copilot --target /path/to/repo
 docagent all --target /path/to/repo
 docagent versions --target /path/to/repo
 docagent update --target /path/to/repo
@@ -182,6 +190,7 @@ Each install writes a self-contained bundle under the platform's hidden folder:
 - Codex: `.codex/skills/doc-for-agent/`
 - Claude Code: `.claude/skills/doc-for-agent/`
 - Continue: `.continue/skills/doc-for-agent/`
+- Copilot: `.github/prompts/doc-for-agent/`
 
 The installed bundle includes:
 
@@ -200,6 +209,13 @@ Distribution relation:
 - Python package (`pipx` / `pip`) ships the core runtime bundle and full CLI.
 - npm package (`npm` / `npx`) is a thin wrapper that forwards to the bundled Python `docagent`.
 - Core engine logic stays in Python; Node is an adoption entrypoint, not a forked implementation.
+
+### Platform Matrix
+
+- Codex: local skill adapter (`SKILL.md`)
+- Claude Code: local skill adapter (`SKILL.md`)
+- Continue: local skill adapter (`SKILL.md`)
+- GitHub Copilot: prompt adapter (`PROMPT.md`)
 
 Recommended install flow:
 

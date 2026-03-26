@@ -5,6 +5,7 @@
   "python_package": "doc-for-agent",
   "npm_package": "doc-for-agent",
   "cli_command": "docagent",
+  "npm_bin_command": "doc-for-agent",
   "installer_command": "docagent",
   "install_receipt_filename": "INSTALLATION.json"
 }

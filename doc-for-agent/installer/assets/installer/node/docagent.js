@@ -6,8 +6,16 @@ const fs = require("fs");
 const path = require("path");
 
 function resolveCliScript() {
-  const candidate = path.resolve(__dirname, "..", "assets", "installer", "docagent.py");
-  return fs.existsSync(candidate) ? candidate : null;
+  const candidates = [
+    path.resolve(__dirname, "..", "assets", "installer", "docagent.py"),
+    path.resolve(__dirname, "..", "docagent.py")
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 function runPython(cliScript, args) {
@@ -40,7 +48,9 @@ function main() {
   const cliScript = resolveCliScript();
   if (!cliScript) {
     console.error("[docagent] Packaged runtime assets are missing.");
-    console.error("[docagent] Expected script: doc-for-agent/installer/assets/installer/docagent.py");
+    console.error("[docagent] Expected one of:");
+    console.error("  - doc-for-agent/installer/assets/installer/docagent.py");
+    console.error("  - doc-for-agent/installer/docagent.py");
     return 2;
   }
   return runPython(cliScript, process.argv.slice(2));

@@ -73,7 +73,8 @@ class InstallerCliTests(unittest.TestCase):
             self.assertTrue((Path(tmpdir) / ".codex" / "skills" / "doc-for-agent" / "SKILL.md").exists())
             self.assertTrue((Path(tmpdir) / ".claude" / "skills" / "doc-for-agent" / "SKILL.md").exists())
             self.assertTrue((Path(tmpdir) / ".continue" / "skills" / "doc-for-agent" / "SKILL.md").exists())
-            self.assertIn("Platforms: claude, codex, continue", stdout.getvalue())
+            self.assertTrue((Path(tmpdir) / ".github" / "prompts" / "doc-for-agent" / "PROMPT.md").exists())
+            self.assertIn("Platforms: claude, codex, continue, copilot", stdout.getvalue())
 
     def test_versions_report_reads_installed_receipt(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
@@ -130,6 +131,7 @@ class InstallerCliTests(unittest.TestCase):
 
         payload = json.loads(package_json.read_text(encoding="utf-8"))
         self.assertEqual(payload["bin"]["docagent"], "doc-for-agent/installer/node/docagent.js")
+        self.assertEqual(payload["bin"]["doc-for-agent"], "doc-for-agent/installer/node/docagent.js")
         self.assertTrue((repo_root / payload["bin"]["docagent"]).exists())
 
     def test_generate_command_executes_generator_dry_run(self) -> None:
