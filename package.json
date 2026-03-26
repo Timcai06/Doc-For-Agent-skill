@@ -33,6 +33,7 @@
     "pack:dry-run": "npm pack --dry-run",
     "quickstart": "node doc-for-agent/installer/node/docagent.js quickstart",
     "init:all": "node doc-for-agent/installer/node/docagent.js init --ai all",
+    "refresh:agent": "node doc-for-agent/installer/node/docagent.js refresh --output-mode agent",
     "help": "node doc-for-agent/installer/node/docagent.js --help"
   },
   "engines": {

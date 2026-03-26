@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "doc-for-agent"
 version = "0.2.0.dev0"
-description = "Installable unified docagent CLI for platform init, install, and AGENTS generation flows."
+description = "Installable unified docagent CLI v1: init, doctor, refresh, generate, update, versions."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

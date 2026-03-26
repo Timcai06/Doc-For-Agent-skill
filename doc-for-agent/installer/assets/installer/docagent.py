@@ -38,6 +38,9 @@ from render_platform_adapter import (  # noqa: E402
 from init_agents_docs import SUPPORTED_DOC_PROFILES, SUPPORTED_REPO_TYPES  # noqa: E402
 
 
+SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
+
+
 @dataclass(frozen=True)
 class PlatformDoctorStatus:
     platform: str
@@ -182,6 +185,8 @@ def render_quickstart(target_root: Path) -> str:
         f"- `docagent init --ai copilot --target {target_root}`",
         "- Verify and maintain:",
         f"- `docagent doctor --target {target_root}`",
+        f"- `docagent refresh --root {target_root} --output-mode agent`",
+        f"- `docagent generate --root {target_root} --mode refresh --output-mode dual`",
         f"- `docagent versions --target {target_root}`",
         f"- `docagent update --target {target_root}`",
         "- Supported platforms:",
@@ -239,11 +244,20 @@ def print_update_summary(target_root: Path, platforms: Sequence[str], installed_
 
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
+    primary_commands = "init, doctor, refresh, generate, update, versions"
+    output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
         description=(
             f"Unified {metadata.product_name} product CLI. "
             "Use `init` as the primary entry to install platform adapters."
-        )
+        ),
+        epilog=(
+            "Product CLI v1:\n"
+            f"  primary commands: {primary_commands}\n"
+            "  legacy compatibility: install, all\n"
+            f"  generate/refresh output modes: {output_modes}"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "--version",
@@ -252,18 +266,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    doctor_parser = subparsers.add_parser("doctor", help="Inspect the target repository and install destinations.")
-    doctor_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
-    doctor_parser.add_argument(
-        "--platform",
-        choices=available_platforms() + ["all"],
-        default="all",
-        help="Limit doctor output to one platform.",
-    )
-
     init_parser = subparsers.add_parser(
         "init",
-        help="Primary product entrypoint: install adapters for one AI platform or all supported platforms.",
+        help="Primary v1: install adapters for one AI platform or all supported platforms.",
     )
     init_parser.add_argument(
         "--ai",
@@ -273,28 +278,54 @@ def build_parser() -> argparse.ArgumentParser:
     )
     init_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
 
-    install_parser = subparsers.add_parser("install", help="Install one or more platform adapters.")
-    install_parser.add_argument(
-        "--platform",
-        choices=available_platforms() + ["all"],
-        required=True,
-        help="Platform adapter to install.",
-    )
-    install_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
-
-    all_parser = subparsers.add_parser("all", help="Install all supported platform adapters.")
-    all_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
-
-    versions_parser = subparsers.add_parser("versions", help="Show source and installed platform versions.")
-    versions_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
-    versions_parser.add_argument(
+    doctor_parser = subparsers.add_parser("doctor", help="Primary v1: inspect install state for target platform(s).")
+    doctor_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+    doctor_parser.add_argument(
         "--platform",
         choices=available_platforms() + ["all"],
         default="all",
-        help="Limit version output to one platform.",
+        help="Limit doctor output to one platform.",
     )
 
-    update_parser = subparsers.add_parser("update", help="Refresh installed platform adapters to the current source version.")
+    refresh_parser = subparsers.add_parser(
+        "refresh",
+        help="Primary v1: refresh docs (`generate --mode refresh`).",
+    )
+    refresh_parser.add_argument("--root", default=".", help="Repository root where docs should be generated.")
+    refresh_parser.add_argument("--project-name", help="Optional explicit project name.")
+    refresh_parser.add_argument("--dry-run", action="store_true")
+    refresh_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
+    refresh_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
+    refresh_parser.add_argument(
+        "--output-mode",
+        choices=SUPPORTED_OUTPUT_MODES,
+        default="agent",
+        help="Output docs mode: agent, human, or dual.",
+    )
+    refresh_parser.add_argument("--explain", action="store_true")
+
+    generate_parser = subparsers.add_parser(
+        "generate",
+        help="Primary v1: run docs generation with explicit mode/profile/output settings.",
+    )
+    generate_parser.add_argument("--root", default=".", help="Repository root where docs should be generated.")
+    generate_parser.add_argument("--project-name", help="Optional explicit project name.")
+    generate_parser.add_argument("--mode", choices=["init", "refresh"], default="refresh")
+    generate_parser.add_argument("--dry-run", action="store_true")
+    generate_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
+    generate_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
+    generate_parser.add_argument(
+        "--output-mode",
+        choices=SUPPORTED_OUTPUT_MODES,
+        default="agent",
+        help="Output docs mode: agent, human, or dual.",
+    )
+    generate_parser.add_argument("--explain", action="store_true")
+
+    update_parser = subparsers.add_parser(
+        "update",
+        help="Primary v1: refresh installed platform adapters to the current source version.",
+    )
     update_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
     update_parser.add_argument(
         "--platform",
@@ -303,34 +334,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Update one installed platform or all installed platforms.",
     )
 
-    generate_parser = subparsers.add_parser(
-        "generate",
-        help="Run the bundled AGENTS generator through a product CLI surface.",
+    versions_parser = subparsers.add_parser("versions", help="Primary v1: show source and installed platform versions.")
+    versions_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+    versions_parser.add_argument(
+        "--platform",
+        choices=available_platforms() + ["all"],
+        default="all",
+        help="Limit version output to one platform.",
     )
-    generate_parser.add_argument("--root", default=".", help="Repository root where AGENTS docs should be generated.")
-    generate_parser.add_argument("--project-name", help="Optional explicit project name.")
-    generate_parser.add_argument("--mode", choices=["init", "refresh"], default="refresh")
-    generate_parser.add_argument("--dry-run", action="store_true")
-    generate_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
-    generate_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
-    generate_parser.add_argument("--explain", action="store_true")
-
-    refresh_parser = subparsers.add_parser(
-        "refresh",
-        help="Shortcut for `generate --mode refresh`.",
-    )
-    refresh_parser.add_argument("--root", default=".", help="Repository root where AGENTS docs should be generated.")
-    refresh_parser.add_argument("--project-name", help="Optional explicit project name.")
-    refresh_parser.add_argument("--dry-run", action="store_true")
-    refresh_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
-    refresh_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
-    refresh_parser.add_argument("--explain", action="store_true")
 
     quickstart_parser = subparsers.add_parser(
         "quickstart",
         help="Show recommended install and first-use commands for Node and Python users.",
     )
     quickstart_parser.add_argument("--target", default=".", help="Repository root for example install commands.")
+
+    install_parser = subparsers.add_parser("install", help="Legacy compatibility: install one or more platform adapters.")
+    install_parser.add_argument(
+        "--platform",
+        choices=available_platforms() + ["all"],
+        required=True,
+        help="Platform adapter to install.",
+    )
+    install_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+
+    all_parser = subparsers.add_parser("all", help="Legacy compatibility: install all supported platform adapters.")
+    all_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
 
     return parser
 
@@ -376,11 +405,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         platforms = resolve_update_platforms(target_root, args.platform)
         if not platforms:
             if args.platform == "all":
-                print("No installed platforms were detected. Run `install` or `all` first.")
+                print("No installed platforms were detected. Run `init --ai all` first.")
             else:
                 print(
                     f"Platform `{args.platform}` is not currently installed in {target_root}. "
-                    "Run `install` first."
+                    f"Run `init --ai {args.platform}` first."
                 )
             return 1
         installed_paths = install_selected_platforms(target_root, platforms)
@@ -396,6 +425,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             generator_args.extend(["--repo-type", args.repo_type])
         if args.profile:
             generator_args.extend(["--profile", args.profile])
+        if args.output_mode:
+            generator_args.extend(["--output-mode", args.output_mode])
         if args.dry_run:
             generator_args.append("--dry-run")
         if args.explain:
