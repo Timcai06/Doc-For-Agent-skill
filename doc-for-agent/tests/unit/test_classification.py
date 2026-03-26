@@ -44,6 +44,7 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
             self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
+            self.assertIn("unified CLI surface", architecture_confirmed[0])
             self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
 
     def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
@@ -74,6 +75,7 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(execution_confirmed)
             self.assertIn("docagent init --ai codex", execution_confirmed[0])
             self.assertTrue(any("docagent refresh --output-mode dual" in line for line in execution_confirmed))
+            self.assertFalse(any("broad project context" in line for line in execution_confirmed))
 
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")

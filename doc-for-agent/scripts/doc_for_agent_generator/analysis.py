@@ -608,6 +608,7 @@ def extract_execution_command_snippets(text: str) -> List[str]:
 
 def extract_distribution_snippets(text: str, role: str) -> List[str]:
     snippets: List[str] = []
+    in_code_block = False
     role_tokens = {
         "product": ("human", "agent", "dual", "workflow", "users", "maintainer"),
         "architecture": ("platform", "adapter", "distribution", "cli", "entry", "python", "npm", "npx"),
@@ -616,7 +617,10 @@ def extract_distribution_snippets(text: str, role: str) -> List[str]:
     tokens = role_tokens.get(role, ()) + shared_tokens
     for raw_line in text.splitlines():
         stripped = raw_line.strip()
-        if not stripped or stripped.startswith("```"):
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or not stripped:
             continue
         plain = re.sub(r"^[-*]\s+", "", stripped)
         lowered = plain.lower()
@@ -632,6 +636,47 @@ def extract_distribution_snippets(text: str, role: str) -> List[str]:
     return snippets
 
 
+def snippet_priority(role: str, snippet: str) -> int:
+    lowered = snippet.lower()
+    score = 0
+    if "source of truth" in lowered:
+        score += 4
+    if "docagent" in lowered:
+        score += 3
+    if any(token in lowered for token in ("codex", "claude", "continue", "copilot", "coding-agent")):
+        score += 3
+    if role == "execution":
+        if snippet.startswith("Run `"):
+            score += 6
+        if any(token in lowered for token in ("verify", "test", "lint", "build", "quickstart", "workflow")):
+            score += 2
+    if role == "architecture":
+        if any(token in lowered for token in ("platform", "distribution", "adapter", "cli", "entrypoint", "entrypoint", "source of truth")):
+            score += 2
+    if role == "product":
+        if any(token in lowered for token in ("human", "agent", "dual", "users", "maintainer", "workflow")):
+            score += 2
+    if any(token in lowered for token in ("this repository", "documentation notes", "broad project context")):
+        score -= 2
+    return score
+
+
+def is_low_value_snippet(role: str, snippet: str) -> bool:
+    lowered = snippet.lower()
+    if role == "execution" and snippet.startswith("Run `"):
+        return False
+    low_value_prefixes = (
+        "this repository contains",
+        "additional documentation context",
+        "another long descriptive line",
+        "yet another descriptive",
+        "final descriptive line",
+    )
+    if any(lowered.startswith(prefix) for prefix in low_value_prefixes):
+        return True
+    return False
+
+
 def summarize_sources(paths: Sequence[Path], root: Path) -> str:
     labels: List[str] = []
     for path in paths[:2]:
@@ -645,9 +690,9 @@ def summarize_sources(paths: Sequence[Path], root: Path) -> str:
 
 
 def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role: str) -> Dict[str, List[str]]:
-    confirmed_groups: Dict[str, Tuple[str, List[Path]]] = {}
-    unresolved_groups: Dict[str, Tuple[str, List[Path]]] = {}
-    explicit_conflicts: Dict[str, Tuple[str, List[Path]]] = {}
+    confirmed_groups: Dict[str, Tuple[str, List[Path], int]] = {}
+    unresolved_groups: Dict[str, Tuple[str, List[Path], int]] = {}
+    explicit_conflicts: Dict[str, Tuple[str, List[Path], int]] = {}
     aggregate_text = ""
 
     unresolved_pattern = re.compile(r"\b(todo|tbd|pending|open question|unresolved|confirm|decide)\b|\?", re.IGNORECASE)
@@ -664,9 +709,12 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         secondary_snippets = extract_supporting_doc_snippets(text)
         snippets = primary_snippets + secondary_snippets
         for snippet in snippets:
+            if is_low_value_snippet(role, snippet):
+                continue
             key = normalize_snippet_key(snippet)
             if not key:
                 continue
+            score = snippet_priority(role, snippet)
 
             target = confirmed_groups
             if unresolved_pattern.search(snippet):
@@ -675,14 +723,15 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
                 target = explicit_conflicts
 
             if key not in target:
-                target[key] = (snippet, [path])
+                target[key] = (snippet, [path], score)
             else:
-                existing_text, existing_paths = target[key]
-                if len(snippet) < len(existing_text):
+                existing_text, existing_paths, existing_score = target[key]
+                if score > existing_score or (score == existing_score and len(snippet) < len(existing_text)):
                     existing_text = snippet
+                    existing_score = score
                 if path not in existing_paths:
                     existing_paths.append(path)
-                target[key] = (existing_text, existing_paths)
+                target[key] = (existing_text, existing_paths, existing_score)
 
     conflicting: List[str] = []
     package_managers = sorted(set(re.findall(r"\b(npm|pnpm|yarn)\b", aggregate_text)))
@@ -696,17 +745,17 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
             f"Supporting docs disagree on runtime/framework ({', '.join(f'`{name}`' for name in runtimes)})."
         )
 
-    for snippet, snippet_paths in explicit_conflicts.values():
+    for snippet, snippet_paths, _ in sorted(explicit_conflicts.values(), key=lambda item: (-item[2], len(item[0]))):
         sources = summarize_sources(snippet_paths, root)
         conflicting.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
     confirmed: List[str] = []
-    for snippet, snippet_paths in confirmed_groups.values():
+    for snippet, snippet_paths, _ in sorted(confirmed_groups.values(), key=lambda item: (-item[2], len(item[0]))):
         sources = summarize_sources(snippet_paths, root)
         confirmed.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
     unresolved: List[str] = []
-    for snippet, snippet_paths in unresolved_groups.values():
+    for snippet, snippet_paths, _ in sorted(unresolved_groups.values(), key=lambda item: (-item[2], len(item[0]))):
         sources = summarize_sources(snippet_paths, root)
         unresolved.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
