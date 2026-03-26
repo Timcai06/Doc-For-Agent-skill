@@ -17,6 +17,35 @@ from doc_for_agent_generator.analysis import analyze_repo
 
 
 class RepoClassificationTests(unittest.TestCase):
+    def test_supporting_doc_synthesis_extracts_quickstart_commands_and_platform_facts(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-supporting-synthesis-") as tmpdir:
+            root = Path(tmpdir) / "doc-system-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Doc System Repo\n\n"
+                    "This project supports human, agent, and dual documentation workflows.\n\n"
+                    "## Quickstart\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex\n"
+                    "docagent refresh --output-mode dual\n"
+                    "```\n\n"
+                    "## Platform Coverage\n\n"
+                    "- Supports Codex, Claude Code, Continue, and Copilot through a unified CLI surface.\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Doc System Repo")
+            execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
+            product_confirmed = analysis.supporting_doc_insights.get("product", {}).get("confirmed", [])
+            architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
+
+            self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
+            self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
+            self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
+            self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
+
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")
 

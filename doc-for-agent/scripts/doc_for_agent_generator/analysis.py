@@ -472,6 +472,9 @@ def supporting_doc_roles(path: Path, root: Path) -> List[str]:
     roles: List[str] = []
     if normalized == "readme.md" or normalized.startswith("docs/product/") or normalized.startswith("specs/"):
         roles.append("product")
+    if normalized == "readme.md":
+        roles.append("execution")
+        roles.append("architecture")
     if (
         normalized.startswith("docs/architecture/")
         or "/architecture/" in normalized
@@ -479,7 +482,14 @@ def supporting_doc_roles(path: Path, root: Path) -> List[str]:
         or "adr" in path.name.lower()
     ):
         roles.append("architecture")
-    if normalized.startswith("plan/") or normalized.startswith("roadmap/") or "runbook" in path.name.lower():
+    if (
+        normalized.startswith("plan/")
+        or normalized.startswith("roadmap/")
+        or "runbook" in path.name.lower()
+        or "quickstart" in path.name.lower()
+        or "getting-started" in path.name.lower()
+        or "platform" in path.name.lower()
+    ):
         roles.append("execution")
     if any(token in normalized for token in ("progress", "lessons", "handoff", "status")):
         roles.append("memory")
@@ -533,6 +543,82 @@ def extract_supporting_doc_snippets(text: str) -> List[str]:
     return snippets
 
 
+def extract_execution_command_snippets(text: str) -> List[str]:
+    commands: List[str] = []
+    in_code_block = False
+    code_lang = ""
+    command_prefixes = (
+        "docagent",
+        "python",
+        "python3",
+        "pipx",
+        "pip ",
+        "npm",
+        "pnpm",
+        "yarn",
+        "npx",
+        "uv ",
+        "pytest",
+    )
+
+    def add_command(raw: str) -> None:
+        candidate = raw.strip()
+        if candidate.startswith("$"):
+            candidate = candidate[1:].strip()
+        if not candidate:
+            return
+        if not any(candidate.startswith(prefix) for prefix in command_prefixes):
+            return
+        formatted = f"Run `{candidate}`"
+        if formatted not in commands:
+            commands.append(formatted)
+
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        if stripped.startswith("```"):
+            if not in_code_block:
+                in_code_block = True
+                code_lang = stripped[3:].strip().lower()
+            else:
+                in_code_block = False
+                code_lang = ""
+            continue
+        if not in_code_block:
+            continue
+        if code_lang and code_lang not in {"bash", "sh", "zsh", "shell", "console"}:
+            continue
+        add_command(stripped)
+        if len(commands) >= 8:
+            break
+    return commands
+
+
+def extract_distribution_snippets(text: str, role: str) -> List[str]:
+    snippets: List[str] = []
+    role_tokens = {
+        "product": ("human", "agent", "dual", "workflow", "users", "maintainer"),
+        "architecture": ("platform", "adapter", "distribution", "cli", "entry", "python", "npm", "npx"),
+    }
+    shared_tokens = ("docagent", "codex", "claude", "continue", "copilot")
+    tokens = role_tokens.get(role, ()) + shared_tokens
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("```"):
+            continue
+        plain = re.sub(r"^[-*]\s+", "", stripped)
+        lowered = plain.lower()
+        if len(plain) < 20 or len(plain) > 180:
+            continue
+        if not any(token in lowered for token in tokens):
+            continue
+        cleaned = clean_doc_line(plain)
+        if cleaned and cleaned not in snippets:
+            snippets.append(cleaned)
+        if len(snippets) >= 4:
+            break
+    return snippets
+
+
 def summarize_sources(paths: Sequence[Path], root: Path) -> str:
     labels: List[str] = []
     for path in paths[:2]:
@@ -545,7 +631,7 @@ def summarize_sources(paths: Sequence[Path], root: Path) -> str:
     return ", ".join(labels)
 
 
-def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path]) -> Dict[str, List[str]]:
+def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role: str) -> Dict[str, List[str]]:
     confirmed_groups: Dict[str, Tuple[str, List[Path]]] = {}
     unresolved_groups: Dict[str, Tuple[str, List[Path]]] = {}
     explicit_conflicts: Dict[str, Tuple[str, List[Path]]] = {}
@@ -558,6 +644,10 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path]) -> Di
         text = read_text(path)
         aggregate_text += "\n" + text.lower()
         snippets = extract_supporting_doc_snippets(text)
+        if role == "execution":
+            snippets.extend(extract_execution_command_snippets(text))
+        if role in {"product", "architecture"}:
+            snippets.extend(extract_distribution_snippets(text, role))
         for snippet in snippets:
             key = normalize_snippet_key(snippet)
             if not key:
@@ -626,7 +716,7 @@ def synthesize_supporting_doc_insights(root: Path, docs_inventory: Documentation
 
     insights: Dict[str, Dict[str, List[str]]] = {}
     for role, paths in role_paths.items():
-        insights[role] = synthesize_role_supporting_insights(root, sort_paths(paths))
+        insights[role] = synthesize_role_supporting_insights(root, sort_paths(paths), role)
     return insights
 
 
