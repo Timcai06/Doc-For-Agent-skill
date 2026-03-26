@@ -8,10 +8,12 @@ from .engine import (
     apply_generation_plan,
     build_analysis_explanation_lines,
     build_generation_plan,
+    effective_profile_for_mode,
     execute_engine_request,
     plan_dry_run_actions,
     plan_title,
     suggest_profile,
+    write_strategy_for_mode,
 )
 from .markdown import MANUAL_END, MANUAL_START, merge_markdown
 from .utils import infer_project_name, read_text, write_file
@@ -30,6 +32,7 @@ __all__ = [
     "apply_generation_plan",
     "build_analysis_explanation_lines",
     "build_generation_plan",
+    "effective_profile_for_mode",
     "execute_engine_request",
     "generate_docs",
     "generate_human_docs",
@@ -38,6 +41,7 @@ __all__ = [
     "plan_dry_run_actions",
     "plan_title",
     "suggest_profile",
+    "write_strategy_for_mode",
     "repo_type_label",
     "read_text",
     "write_file",

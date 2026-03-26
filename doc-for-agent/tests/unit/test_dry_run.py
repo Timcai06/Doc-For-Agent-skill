@@ -291,6 +291,34 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("archive workflows.md -> AGENTS/_archive/flat/workflows.md", result.stdout)
             self.assertFalse((sandbox_root / "AGENTS/_archive").exists())
 
+    def test_migrate_mode_forces_layered_profile_behavior(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-migrate-forced-layered-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "legacy_agents_repo"
+            (sandbox_root / "AGENTS").mkdir(parents=True)
+            (sandbox_root / "README.md").write_text("# Legacy Repo\n\nLegacy repo.\n", encoding="utf-8")
+            (sandbox_root / "AGENTS/product.md").write_text("# Product\n\nLegacy product notes.\n", encoding="utf-8")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "migrate",
+                    "--profile",
+                    "bootstrap",
+                    "--dry-run",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("Dry run: would migrate AGENTS docs", result.stdout)
+            self.assertIn("archive product.md -> AGENTS/_archive/flat/product.md", result.stdout)
+            self.assertIn("create AGENTS/00-entry/AGENTS.md", result.stdout)
+
     def test_layered_migration_archives_flat_docs_and_preserves_notes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-") as tmpdir:
             sandbox_root = Path(tmpdir) / "legacy_agents_repo"
