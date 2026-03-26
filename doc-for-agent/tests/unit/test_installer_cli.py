@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import json
 import sys
 import tempfile
 import unittest
@@ -121,6 +122,15 @@ class InstallerCliTests(unittest.TestCase):
             main(["--version"])
 
         self.assertEqual(context.exception.code, 0)
+
+    def test_npm_wrapper_surface_exists(self) -> None:
+        repo_root = TEST_ROOT.parents[1]
+        package_json = repo_root / "package.json"
+        self.assertTrue(package_json.exists())
+
+        payload = json.loads(package_json.read_text(encoding="utf-8"))
+        self.assertEqual(payload["bin"]["docagent"], "doc-for-agent/installer/node/docagent.js")
+        self.assertTrue((repo_root / payload["bin"]["docagent"]).exists())
 
     def test_generate_command_executes_generator_dry_run(self) -> None:
         fixture_root = TEST_ROOT / "fixtures" / "backend_service"
