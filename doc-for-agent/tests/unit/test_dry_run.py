@@ -234,6 +234,34 @@ class DryRunTests(unittest.TestCase):
             self.assertFalse((sandbox_root / "AGENTS").exists())
             self.assertFalse((sandbox_root / "docs").exists())
 
+    def test_generate_mode_dry_run_reports_dual_outputs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-generate-mode-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "web_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "web_app", sandbox_root)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "generate",
+                    "--output-mode",
+                    "dual",
+                    "--dry-run",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("Dry run: would generate AGENTS + human docs", result.stdout)
+            self.assertIn("create AGENTS/README.md", result.stdout)
+            self.assertIn("create docs/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "docs").exists())
+
     def test_layered_migration_dry_run_reports_archive_actions(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-dry-run-") as tmpdir:
             sandbox_root = Path(tmpdir) / "legacy_agents_repo"

@@ -309,6 +309,8 @@ Use `--mode init` if you want to be explicit about a brand new repository:
 python3 doc-for-agent/scripts/init_agents_docs.py --root /path/to/repo --mode init
 ```
 
+The engine now also accepts `--mode migrate` and `--mode generate` so product-level CLIs can map user intents to stable engine actions without re-implementing internal wiring.
+
 Preview the file plan without writing anything:
 
 ```bash
