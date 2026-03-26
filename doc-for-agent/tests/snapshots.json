@@ -301,6 +301,8 @@
       "contains": [
         "# Project Overview",
         "Supporting Doc Synthesis",
+        "## Intended Audience",
+        "## Synthesis Summary",
         "## Provenance"
       ]
     },
@@ -308,6 +310,7 @@
       "contains": [
         "# Workflows",
         "## Supporting Doc Synthesis",
+        "## Operational Notes",
         "## Provenance"
       ]
     }
@@ -324,26 +327,30 @@
       "contains": [
         "# Project Overview",
         "Current repo shape:",
-        "## Current Priorities"
+        "## Current Priorities",
+        "No supporting docs matched this role; content below is inferred from repository structure and code signals."
       ]
     },
     "docs/architecture.md": {
       "contains": [
         "# Architecture",
         "## Source Of Truth",
+        "## System Map",
         "## Provenance"
       ]
     },
     "docs/workflows.md": {
       "contains": [
         "# Workflows",
-        "python3 -m pip install -r requirements.txt"
+        "python3 -m pip install -r requirements.txt",
+        "## Synthesis Summary"
       ]
     },
     "docs/glossary.md": {
       "contains": [
         "# Glossary",
-        "## Naming Rules"
+        "## Naming Rules",
+        "## Candidate Terms From Code Signals"
       ]
     }
   }

@@ -36,6 +36,38 @@ def supporting_doc_provenance_lines(analysis: RepoAnalysis, role: str) -> list[s
     return [f"`{path}`" for path in analysis.supporting_doc_provenance.get(role, [])]
 
 
+def synthesis_summary_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    role_insights = analysis.supporting_doc_insights.get(role, {})
+    role_sources = analysis.supporting_doc_provenance.get(role, [])
+    confirmed_count = len(role_insights.get("confirmed", []))
+    conflicting_count = len(role_insights.get("conflicting", []))
+    unresolved_count = len(role_insights.get("unresolved", []))
+    lines = [
+        f"Sources analyzed: `{len(role_sources)}`",
+        f"Synthesized statements: `{confirmed_count}` confirmed, `{conflicting_count}` conflicting, `{unresolved_count}` unresolved",
+    ]
+    if not role_sources:
+        lines.append("No supporting docs matched this role; content below is inferred from repository structure and code signals.")
+    return lines
+
+
+def human_audience_lines(analysis: RepoAnalysis) -> list[str]:
+    lines = [
+        "Repository maintainers responsible for day-to-day delivery and operational stability.",
+    ]
+    if analysis.repo_type == "web-app":
+        lines.append("Cross-functional engineers coordinating frontend and backend changes.")
+    elif analysis.repo_type == "backend-service":
+        lines.append("Backend operators and API maintainers responsible for service behavior.")
+    elif analysis.repo_type == "cli-tool":
+        lines.append("CLI maintainers preserving command UX and script compatibility.")
+    elif analysis.repo_type == "library-sdk":
+        lines.append("SDK maintainers preserving public API behavior for downstream consumers.")
+    elif analysis.repo_type == "skill-meta":
+        lines.append("Skill maintainers keeping manifests, prompts, and generator behavior aligned.")
+    return lines
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -1492,6 +1524,8 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
     provenance = supporting_doc_provenance_lines(analysis, "product")
+    synthesis_summary = synthesis_summary_lines(analysis, "product")
+    audiences = human_audience_lines(analysis)
 
     core = []
     if analysis.summary:
@@ -1508,6 +1542,9 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
         priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
     if not priorities:
         priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
+    documentation_gaps = list(unresolved)
+    if not documentation_gaps:
+        documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
 
     return f"""# Project Overview
 
@@ -1515,9 +1552,17 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(core, "Project overview should be confirmed with maintainers.")}
 
+## Intended Audience
+
+{format_bullets(audiences, "Add the primary maintainer audiences for this project.")}
+
 ## Key Entry Points
 
 {format_bullets(product_entry_point_lines(analysis), "No clear routes or invocation entrypoints were detected automatically.")}
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
 
 ## Supporting Doc Synthesis
 
@@ -1537,6 +1582,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(priorities, "No immediate priorities were inferred automatically.")}
 
+## Documentation Gaps To Close
+
+{format_bullets(documentation_gaps, "No explicit product documentation gaps were detected.")}
+
 ## Provenance
 
 {format_bullets(provenance, "No supporting product documents were discovered outside generated outputs.")}
@@ -1548,10 +1597,20 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
+    synthesis_summary = synthesis_summary_lines(analysis, "architecture")
     boundaries = [
         "Treat source-of-truth files as canonical when supporting docs disagree.",
         "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
     ]
+    system_map = []
+    if analysis.frontend_root:
+        system_map.append(f"Frontend surface: `{rel_path(analysis.frontend_root, analysis.root)}`")
+    if analysis.backend_root:
+        system_map.append(f"Backend/runtime surface: `{rel_path(analysis.backend_root, analysis.root)}`")
+    if analysis.routes:
+        system_map.append(f"Route coverage detected: {', '.join(f'`{route}`' for route in analysis.routes[:4])}")
+    if analysis.endpoints:
+        system_map.append(f"Endpoint coverage detected: {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:4])}")
 
     return f"""# Architecture
 
@@ -1562,6 +1621,14 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Detected Signals
 
 {format_bullets(list(analysis.repo_type_reasons), "No strong repo-type signals were detected automatically.")}
+
+## System Map
+
+{format_bullets(system_map, "No system map details were detected automatically.")}
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
 
 ## Supporting Doc Synthesis
 
@@ -1596,6 +1663,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
     provenance = supporting_doc_provenance_lines(analysis, "execution")
+    synthesis_summary = synthesis_summary_lines(analysis, "execution")
 
     if analysis.frontend_root:
         frontend_prefix = (
@@ -1650,6 +1718,13 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
         run_lines = ["Run the main local command from README examples."]
     if not verify_lines:
         verify_lines = ["Run verification commands from CI or README (lint/test/build equivalents)."]
+    operational_notes = []
+    if conflicting:
+        operational_notes.append("Resolve conflicting workflow instructions before standardizing CI or release checks.")
+    if unresolved:
+        operational_notes.append("Assign owners for unresolved runbook items to prevent drift in release operations.")
+    if not operational_notes:
+        operational_notes.append("Keep command examples in this file aligned with CI and README instructions.")
 
     return f"""# Workflows
 
@@ -1671,6 +1746,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 {chr(10).join(verify_lines)}
 ```
 
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
 ## Supporting Doc Synthesis
 
 ### Confirmed
@@ -1685,6 +1764,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 {format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
 
+## Operational Notes
+
+{format_bullets(operational_notes, "No additional operational notes were inferred automatically.")}
+
 ## Provenance
 
 {format_bullets(provenance, "No supporting execution documents were discovered outside generated outputs.")}
@@ -1698,6 +1781,14 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
     conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
     provenance = supporting_doc_provenance_lines(analysis, "memory")
+    synthesis_summary = synthesis_summary_lines(analysis, "memory")
+    candidate_terms = []
+    if analysis.routes:
+        candidate_terms.extend(f"- `route:{route}`" for route in analysis.routes[:4])
+    if analysis.endpoints:
+        candidate_terms.extend(f"- `endpoint:{endpoint}`" for endpoint in analysis.endpoints[:4])
+    if not candidate_terms:
+        candidate_terms.append("- No additional term candidates were inferred from routes/endpoints.")
 
     return f"""# Glossary
 
@@ -1709,6 +1800,14 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 - Keep user-facing names, commands, and labels consistent across docs and scripts.
 - Prefer canonical project terms over ad-hoc synonyms.
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
+## Candidate Terms From Code Signals
+
+{chr(10).join(candidate_terms)}
 
 ## Unresolved Terminology Items
 
