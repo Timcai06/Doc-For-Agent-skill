@@ -49,6 +49,7 @@ class PlatformAdapterTests(unittest.TestCase):
             self.assertTrue((install_root / "agents" / "openai.yaml").exists())
             self.assertTrue((install_root / "templates" / "platforms" / "codex.json").exists())
             self.assertTrue((install_root / "installer" / "docagent.py").exists())
+            self.assertTrue((install_root / "installer" / "node" / "docagent.js").exists())
             self.assertTrue(receipt_path.exists())
 
             skill_text = (install_root / "SKILL.md").read_text(encoding="utf-8")
