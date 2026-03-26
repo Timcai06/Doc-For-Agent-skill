@@ -32,6 +32,10 @@ def supporting_doc_insight_lines(analysis: RepoAnalysis, role: str, kind: str) -
     return [value for value in values if value]
 
 
+def supporting_doc_provenance_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    return [f"`{path}`" for path in analysis.supporting_doc_provenance.get(role, [])]
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -1487,6 +1491,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+    provenance = supporting_doc_provenance_lines(analysis, "product")
 
     core = []
     if analysis.summary:
@@ -1496,6 +1501,13 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
         core.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
     if analysis.backend_root:
         core.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+    priorities = []
+    if conflicting:
+        priorities.append("Resolve conflicting product statements before locking roadmap or interface commitments.")
+    if unresolved:
+        priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
+    if not priorities:
+        priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
 
     return f"""# Project Overview
 
@@ -1520,6 +1532,14 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ### Unresolved
 
 {format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
+
+## Current Priorities
+
+{format_bullets(priorities, "No immediate priorities were inferred automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting product documents were discovered outside generated outputs.")}
 """
 
 
@@ -1527,6 +1547,11 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+    provenance = supporting_doc_provenance_lines(analysis, "architecture")
+    boundaries = [
+        "Treat source-of-truth files as canonical when supporting docs disagree.",
+        "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
+    ]
 
     return f"""# Architecture
 
@@ -1551,6 +1576,14 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ### Unresolved
 
 {format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+
+## Stability Boundaries
+
+{format_bullets(boundaries, "No architecture boundaries were inferred automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting architecture documents were discovered outside generated outputs.")}
 """
 
 
@@ -1562,6 +1595,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+    provenance = supporting_doc_provenance_lines(analysis, "execution")
 
     if analysis.frontend_root:
         frontend_prefix = (
@@ -1650,6 +1684,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ### Unresolved
 
 {format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting execution documents were discovered outside generated outputs.")}
 """
 
 
@@ -1658,6 +1696,8 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
     if analysis.skill_meta.skill_name:
         terms.append(f"- `skill`: `{analysis.skill_meta.skill_name}`")
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    provenance = supporting_doc_provenance_lines(analysis, "memory")
 
     return f"""# Glossary
 
@@ -1673,6 +1713,14 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 ## Unresolved Terminology Items
 
 {format_bullets(unresolved, "No unresolved terminology or memory items were synthesized from supporting docs.")}
+
+## Conflicting Terminology Signals
+
+{format_bullets(conflicting, "No conflicting terminology signals were synthesized from supporting docs.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting memory documents were discovered outside generated outputs.")}
 """
 
 

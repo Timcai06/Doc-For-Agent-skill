@@ -209,11 +209,12 @@ def print_analysis_explanation(analysis, output_mode: str) -> None:
     print("Supporting-doc synthesis summary:")
     for role in ("product", "architecture", "execution", "memory"):
         role_insights = analysis.supporting_doc_insights.get(role, {})
+        role_sources = analysis.supporting_doc_provenance.get(role, [])
         confirmed_count = len(role_insights.get("confirmed", []))
         conflicting_count = len(role_insights.get("conflicting", []))
         unresolved_count = len(role_insights.get("unresolved", []))
         print(
-            f"- {role}: confirmed={confirmed_count}, conflicting={conflicting_count}, unresolved={unresolved_count}"
+            f"- {role}: confirmed={confirmed_count}, conflicting={conflicting_count}, unresolved={unresolved_count}, sources={len(role_sources)}"
         )
 
     sections = [

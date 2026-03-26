@@ -630,6 +630,24 @@ def synthesize_supporting_doc_insights(root: Path, docs_inventory: Documentation
     return insights
 
 
+def synthesize_supporting_doc_provenance(root: Path, docs_inventory: DocumentationInventory) -> Dict[str, List[str]]:
+    role_paths: Dict[str, List[str]] = {
+        "product": [],
+        "architecture": [],
+        "execution": [],
+        "memory": [],
+    }
+    for path in docs_inventory.reference_only_docs:
+        try:
+            normalized = str(path.relative_to(root)).replace("\\", "/")
+        except ValueError:
+            normalized = str(path).replace("\\", "/")
+        for role in supporting_doc_roles(path, root):
+            if normalized not in role_paths[role]:
+                role_paths[role].append(normalized)
+    return role_paths
+
+
 def detect_library_entrypoints(root: Path) -> List[Path]:
     return find_files(
         root,
@@ -1002,6 +1020,7 @@ def analyze_repo(
     backend_stack, endpoints, storage_rules = detect_backend_stack(backend_root)
     docs_inventory = discover_documentation_inventory(root)
     supporting_doc_insights = synthesize_supporting_doc_insights(root, docs_inventory)
+    supporting_doc_provenance = synthesize_supporting_doc_provenance(root, docs_inventory)
 
     return RepoAnalysis(
         root=root,
@@ -1031,4 +1050,5 @@ def analyze_repo(
         classification=classification,
         docs_inventory=docs_inventory,
         supporting_doc_insights=supporting_doc_insights,
+        supporting_doc_provenance=supporting_doc_provenance,
     )
