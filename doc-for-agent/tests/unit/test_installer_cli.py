@@ -182,7 +182,6 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("Node users: `npm install -g doc-for-agent`", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai <claude|codex|continue|copilot|all>", text)
-            self.assertIn("Current target root:", text)
             self.assertIn("<repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)

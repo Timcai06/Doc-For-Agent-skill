@@ -6,16 +6,16 @@ Use `docagent init --ai ...` to choose your platform entrypoint.
 
 | Platform | First command | Adapter type | Install target |
 | --- | --- | --- | --- |
-| Claude Code | `docagent init --ai claude --target /path/to/repo` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
-| Codex | `docagent init --ai codex --target /path/to/repo` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| CodeBuddy | `docagent init --ai codex --target /path/to/repo` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| Continue | `docagent init --ai continue --target /path/to/repo` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
-| GitHub Copilot | `docagent init --ai copilot --target /path/to/repo` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
+| Claude Code | `docagent init --ai claude --target <repo-root>` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
+| Codex | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
+| CodeBuddy | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
+| Continue | `docagent init --ai continue --target <repo-root>` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
+| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
 
 ## Multi-Agent Setup
 
 ```bash
-docagent init --ai all --target /path/to/repo
+docagent init --ai all --target <repo-root>
 ```
 
 ## Distribution Model
@@ -29,7 +29,7 @@ docagent init --ai all --target /path/to/repo
 After init:
 
 ```bash
-docagent refresh --root /path/to/repo --output-mode agent
+docagent refresh --root <repo-root> --output-mode agent
 ```
 
 See also:
