@@ -590,6 +590,19 @@ def extract_execution_command_snippets(text: str) -> List[str]:
         add_command(stripped)
         if len(commands) >= 8:
             break
+
+    if len(commands) < 8:
+        for raw_line in text.splitlines():
+            stripped = raw_line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            bullet = re.sub(r"^[-*]\s+", "", stripped).strip()
+            bullet = re.sub(r"^\d+\.\s+", "", bullet).strip()
+            if bullet.startswith("`") and bullet.endswith("`") and len(bullet) > 2:
+                bullet = bullet[1:-1].strip()
+            add_command(bullet)
+            if len(commands) >= 8:
+                break
     return commands
 
 
@@ -643,11 +656,13 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
     for path in paths:
         text = read_text(path)
         aggregate_text += "\n" + text.lower()
-        snippets = extract_supporting_doc_snippets(text)
+        primary_snippets: List[str] = []
         if role == "execution":
-            snippets.extend(extract_execution_command_snippets(text))
+            primary_snippets.extend(extract_execution_command_snippets(text))
         if role in {"product", "architecture"}:
-            snippets.extend(extract_distribution_snippets(text, role))
+            primary_snippets.extend(extract_distribution_snippets(text, role))
+        secondary_snippets = extract_supporting_doc_snippets(text)
+        snippets = primary_snippets + secondary_snippets
         for snippet in snippets:
             key = normalize_snippet_key(snippet)
             if not key:

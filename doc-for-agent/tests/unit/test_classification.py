@@ -46,6 +46,35 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
             self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
 
+    def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-command-priority-") as tmpdir:
+            root = Path(tmpdir) / "command-priority-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Command Priority Repo\n\n"
+                    "- This repository contains broad project context and documentation notes.\n"
+                    "- Another long descriptive line intended to look like generic documentation text.\n"
+                    "- A third descriptive line that could otherwise crowd the synthesis result window.\n"
+                    "- Additional documentation context line for stability checks in summary extraction.\n"
+                    "- Yet another descriptive documentation statement used for extraction pressure.\n"
+                    "- Final descriptive line before command examples are listed.\n\n"
+                    "## Quickstart\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex\n"
+                    "docagent refresh --output-mode dual\n"
+                    "```\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Command Priority Repo")
+            execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
+
+            self.assertTrue(execution_confirmed)
+            self.assertIn("docagent init --ai codex", execution_confirmed[0])
+            self.assertTrue(any("docagent refresh --output-mode dual" in line for line in execution_confirmed))
+
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")
 
