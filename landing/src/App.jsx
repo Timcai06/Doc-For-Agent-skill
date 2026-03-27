@@ -108,7 +108,7 @@ function App() {
               <span style={{ color: 'var(--primary)' }}>Between Code and Agents.</span>
             </h1>
             <p className="hero-text">
-              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and zero knowledge drift.
+              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and lower knowledge drift across sessions.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">Start Lifecycle</a>
@@ -193,7 +193,7 @@ function App() {
                  <div className="res-card human"><strong>/docs/</strong> Narrative Baseline</div>
                </div>
                <strong>Unified Knowledge Hub</strong>
-               <p>Grounded in AST analysis and legacy heuristics.</p>
+               <p>Grounded in repository analysis and legacy-document heuristics.</p>
              </div>
           </div>
 
@@ -204,7 +204,7 @@ function App() {
               <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with lower ambiguity.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
-                <li>✓ Zero Context Overflow</li>
+                <li>✓ Lower Context Drift</li>
                 <li>✓ Cross-Platform Context</li>
               </ul>
             </div>
@@ -214,7 +214,7 @@ function App() {
               <p>Natural narrative for human maintainers. Clear documentation for onboarding, architecture reviews, and team-wide knowledge persistence.</p>
               <ul className="mini-features">
                 <li>✓ Professional Onboarding</li>
-                <li>✓ AST-Grounded Accuracy</li>
+                <li>✓ Repository-Grounded Context</li>
                 <li>✓ Unified Team Standards</li>
               </ul>
             </div>
