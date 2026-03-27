@@ -201,6 +201,8 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai <claude|codex|continue|copilot|all>", text)
             self.assertIn("<repo-root>", text)
+            self.assertIn("docagent init --ai all --target <repo-root>", text)
+            self.assertIn("docagent init --ai claude --target <repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)
             self.assertIn("docs/platforms.md (EN) / docs/platforms.zh.md (ZH)", text)
