@@ -43,6 +43,25 @@ GENERATED_HUMAN_DOC_PATHS = {
     "docs/workflows.md",
     "docs/glossary.md",
 }
+ROLE_CONCLUSION_PREFIXES: Dict[str, Tuple[str, ...]] = {
+    "product": (
+        "Product positioning:",
+        "Repository adaptation scope:",
+        "Retention value:",
+        "Product usage context:",
+    ),
+    "architecture": (
+        "CLI boundary:",
+        "Source-of-truth boundary:",
+        "Distribution structure:",
+    ),
+    "execution": (
+        "Execution contract:",
+        "Verification gate:",
+        "Execution constraints:",
+    ),
+    "memory": (),
+}
 
 
 def load_package_metadata(package_path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -480,6 +499,7 @@ def supporting_doc_roles(path: Path, root: Path) -> List[str]:
         or "/architecture/" in normalized
         or normalized.startswith("docs/adr")
         or "adr" in path.name.lower()
+        or "platform" in path.name.lower()
     ):
         roles.append("architecture")
     if (
@@ -722,6 +742,12 @@ def is_low_value_snippet(role: str, snippet: str) -> bool:
         return True
     low_value_prefixes = (
         "this repository contains",
+        "this repository appears to",
+        "this project appears to",
+        "it appears to",
+        "it likely",
+        "likely",
+        "inferred",
         "additional documentation context",
         "another long descriptive line",
         "yet another descriptive",
@@ -774,18 +800,68 @@ def extract_source_of_truth_paths(snippets: Sequence[str], aggregate_text: str) 
     return candidates[:4]
 
 
+def find_docagent_command(commands: Sequence[str], subcommand: str) -> str:
+    prefix = f"docagent {subcommand}"
+    return next((cmd for cmd in commands if cmd.startswith(prefix)), "")
+
+
+def extract_output_mode(command: str) -> str:
+    match = re.search(r"--output-mode\s+([a-z0-9_-]+)", command)
+    if not match:
+        return ""
+    return match.group(1).strip()
+
+
+def is_role_conclusion_line(role: str, line: str) -> bool:
+    prefixes = ROLE_CONCLUSION_PREFIXES.get(role, ())
+    return any(line.startswith(prefix) for prefix in prefixes)
+
+
+def collect_platform_command_facts(snippets: Sequence[str]) -> List[Tuple[str, str]]:
+    facts: List[Tuple[str, str]] = []
+    seen: set[Tuple[str, str]] = set()
+    pattern = re.compile(r"^\s*([A-Za-z][A-Za-z0-9 +/_-]{1,40})\s+uses\s+(docagent\s+[a-z0-9][^()]+)", re.IGNORECASE)
+    for snippet in snippets:
+        match = pattern.match(snippet.strip())
+        if not match:
+            continue
+        platform = match.group(1).strip()
+        command = match.group(2).strip()
+        key = (platform.lower(), command)
+        if key in seen:
+            continue
+        seen.add(key)
+        facts.append((platform, command))
+        if len(facts) >= 3:
+            break
+    return facts
+
+
 def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: Sequence[str]) -> List[str]:
     lines: List[str] = []
     lowered = aggregate_text.lower()
     commands = extract_commands_from_snippets(snippets)
 
     if role == "execution":
-        init_command = next((cmd for cmd in commands if "docagent init" in cmd), "")
-        refresh_command = next((cmd for cmd in commands if "docagent refresh" in cmd), "")
+        init_command = find_docagent_command(commands, "init")
+        refresh_command = find_docagent_command(commands, "refresh")
+        doctor_command = find_docagent_command(commands, "doctor")
+        generate_command = find_docagent_command(commands, "generate")
         if init_command and refresh_command:
+            if doctor_command:
+                lines.append(
+                    f"Execution contract: `{init_command}` -> `{refresh_command}` -> `{doctor_command}` is the documented command order for setup, sync, and drift checks."
+                )
+            else:
+                lines.append(
+                    f"Execution contract: run `{init_command}` once to establish docs, then `{refresh_command}` after repo changes to keep outputs synchronized."
+                )
+        elif init_command and doctor_command:
             lines.append(
-                f"Documented workflow sequence: run `{init_command}` then `{refresh_command}` to keep docs synchronized."
+                f"Execution contract: use `{init_command}` for setup and `{doctor_command}` as a repeatable drift check before release."
             )
+        elif generate_command:
+            lines.append(f"Execution contract: `{generate_command}` is treated as the generation step in this repository workflow.")
         verify_commands = [
             cmd
             for cmd in commands
@@ -793,23 +869,48 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         ]
         if verify_commands:
             summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
-            lines.append(f"Verification gate: after workflow updates, run {summary} before handoff or release.")
+            lines.append(f"Verification gate: workflow changes are not complete until {summary} pass.")
+        constraints: List[str] = []
+        if any("--target" in cmd for cmd in commands if cmd.startswith("docagent ")):
+            constraints.append("keep `--target <repo-root>` explicit when commands run outside the target repo")
+        refresh_mode = extract_output_mode(refresh_command) if refresh_command else ""
+        if refresh_mode:
+            constraints.append(f"keep `--output-mode {refresh_mode}` consistent across refresh runs")
+        if any("--ai " in cmd for cmd in commands if cmd.startswith("docagent ")):
+            constraints.append("declare `--ai <platform>` explicitly so platform routing stays deterministic")
+        if constraints:
+            lines.append(f"Execution constraints: {'; '.join(constraints)}.")
     elif role == "architecture":
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
         if platforms and "docagent" in lowered:
             labels = ", ".join(f"`{name}`" for name in platforms)
-            lines.append(f"Platform entry surface is documented around `docagent` for {labels} workflows.")
+            lines.append(f"CLI boundary: keep `docagent` as the single entry surface for {labels} workflows.")
         source_paths = extract_source_of_truth_paths(snippets, aggregate_text)
         if source_paths and any(token in lowered for token in ("source of truth", "canonical", "readme.md", "entry", "distribution")):
             labels = ", ".join(f"`{path}`" for path in source_paths[:3])
-            lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry or distribution wiring.")
+            lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
+        if "docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform")):
+            platform_facts = collect_platform_command_facts(snippets)
+            if platform_facts:
+                labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
+                lines.append(
+                    f"Distribution structure: keep platform mappings in adapter/config docs ({labels}) while CLI contract changes stay centralized."
+                )
+            else:
+                lines.append(
+                    "Distribution structure: platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized."
+                )
     elif role == "product":
-        if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
-            lines.append("Product usage context emphasizes `human / agent / dual` outputs for CLI coding-agent workflows.")
+        if "docagent" in lowered and any(token in lowered for token in ("coding-agent", "codex", "claude", "continue", "copilot", "cli")):
+            lines.append("Product positioning: this repository is scoped for CLI coding-agent workflows, not a standalone end-user application.")
+        if all(token in lowered for token in ("initialize", "migrate", "refresh")) or all(
+            token in lowered for token in ("init", "migrate", "refresh")
+        ):
+            lines.append("Repository adaptation scope: cover initialize, migrate, and refresh paths so existing and messy docs can converge to one system.")
         if "docagent init" in lowered and "docagent refresh" in lowered:
-            lines.append("Product expectations center on repeatable `init -> refresh` lifecycle, not one-off document generation.")
-        if any(token in lowered for token in ("cli", "coding-agent", "codex", "claude")):
-            lines.append("Product scope rule: optimize for CLI coding-agent users who need repeatable repository documentation workflows.")
+            lines.append("Retention value: prioritize repeatable `init -> refresh` lifecycle updates over one-shot document generation.")
+        if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
+            lines.append("Product usage context emphasizes `human / agent / dual` outputs within the same workflow contract.")
     return lines[:3]
 
 
@@ -871,13 +972,14 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
                     existing_paths.append(path)
                 target[key] = (existing_text, existing_paths, existing_score)
 
-    for line in synthesize_role_conclusion_lines(role, aggregate_text, collected_snippets):
+    for index, line in enumerate(synthesize_role_conclusion_lines(role, aggregate_text, collected_snippets)):
         key = normalize_snippet_key(line)
         if not key:
             continue
         existing = confirmed_groups.get(key)
-        if not existing or existing[2] < 100:
-            confirmed_groups[key] = (line, list(paths), 100)
+        boosted_score = 120 - index
+        if not existing or existing[2] < boosted_score:
+            confirmed_groups[key] = (line, [], boosted_score)
 
     conflicting: List[str] = []
     package_managers = sorted(set(re.findall(r"\b(npm|pnpm|yarn)\b", aggregate_text)))
@@ -895,10 +997,27 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         sources = summarize_sources(snippet_paths, root)
         conflicting.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
-    confirmed: List[str] = []
-    for snippet, snippet_paths, _ in sorted(confirmed_groups.values(), key=lambda item: (-item[2], len(item[0]))):
+    confirmed_raw: List[Tuple[str, List[Path], int]] = sorted(
+        confirmed_groups.values(),
+        key=lambda item: (-item[2], len(item[0])),
+    )
+    confirmed_conclusions: List[str] = []
+    confirmed_evidence: List[str] = []
+    for snippet, snippet_paths, _ in confirmed_raw:
         sources = summarize_sources(snippet_paths, root)
-        confirmed.append(f"{snippet} (sources: {sources})" if sources else snippet)
+        rendered = f"{snippet} (sources: {sources})" if sources else snippet
+        if is_role_conclusion_line(role, snippet):
+            confirmed_conclusions.append(rendered)
+        else:
+            confirmed_evidence.append(rendered)
+
+    evidence_limit_by_role = {
+        "product": 2,
+        "architecture": 2,
+        "execution": 3,
+        "memory": 4,
+    }
+    confirmed = confirmed_conclusions + confirmed_evidence[: evidence_limit_by_role.get(role, 3)]
 
     unresolved: List[str] = []
     for snippet, snippet_paths, _ in sorted(unresolved_groups.values(), key=lambda item: (-item[2], len(item[0]))):
