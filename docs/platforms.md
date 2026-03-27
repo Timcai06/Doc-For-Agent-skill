@@ -15,6 +15,7 @@ Use `docagent init --ai ...` to choose your platform entrypoint.
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
+After init, use `refresh --output-mode agent|human|dual` based on the docs audience.
 
 ## Multi-Agent Setup
 
@@ -38,5 +39,6 @@ docagent refresh --root <repo-root> --output-mode agent
 
 See also:
 
+- [Landing Page Note](landing-page.md)
 - [Quickstart](quickstart.md)
 - [Maintainer Guide](maintainers.md)
