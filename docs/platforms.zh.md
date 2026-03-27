@@ -15,6 +15,7 @@
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` 会自动处理各平台适配文件，你只需要选择 `--ai`。
+初始化后，根据文档受众选择 `refresh --output-mode agent|human|dual`。
 
 ## 多 Agent 安装
 
