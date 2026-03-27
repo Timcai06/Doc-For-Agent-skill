@@ -194,6 +194,30 @@ class EngineApiTests(unittest.TestCase):
             self.assertEqual(first_agents, second_agents)
             self.assertEqual(first_overview, second_overview)
 
+    def test_layered_human_docs_reference_paired_agent_docs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-layered-human-pairs-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            result = execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="human",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            self.assertIn("Generated human docs in:", result.summary)
+            overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+            architecture = (sandbox_root / "docs" / "architecture.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "docs" / "workflows.md").read_text(encoding="utf-8")
+            self.assertIn("## Paired Agent Docs (Dual Mode)", overview)
+            self.assertIn("AGENTS/01-product/001-core-goals.md", overview)
+            self.assertIn("AGENTS/02-architecture/007-architecture-compatibility.md", architecture)
+            self.assertIn("AGENTS/03-execution/008-implementation-plan.md", workflows)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -279,6 +279,35 @@ def human_dual_sync_checklist_lines(role: str) -> list[str]:
     return base
 
 
+def paired_agent_doc_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    if analysis.doc_profile == "layered":
+        mapping = {
+            "product": [
+                ("01-product/001-core-goals.md", "agent-facing product rules and scope guardrails"),
+                ("01-product/002-prd.md", "agent-facing user and outcome contract"),
+                ("01-product/003-app-flow.md", "agent-facing flow and entry-surface notes"),
+            ],
+            "architecture": [
+                ("02-architecture/004-tech-stack.md", "stack facts and platform anchors"),
+                ("02-architecture/007-architecture-compatibility.md", "source-of-truth and compatibility rules"),
+            ],
+            "execution": [
+                ("03-execution/008-implementation-plan.md", "setup, verify, and failure-triage order"),
+            ],
+        }
+    else:
+        mapping = {
+            "product": [("product.md", "agent-facing product rules and scope guardrails")],
+            "architecture": [("architecture.md", "source-of-truth and repository boundary rules")],
+            "execution": [("workflows.md", "setup, verify, and failure-triage order")],
+        }
+
+    lines: list[str] = []
+    for relative, purpose in mapping.get(role, []):
+        lines.append(f"`AGENTS/{relative}` for {purpose}.")
+    return lines
+
+
 def prune_weak_human_inferences(lines: Sequence[str]) -> list[str]:
     weak_markers = ("likely", "appears to", "suggests", "could", "might")
     filtered: list[str] = []
@@ -1884,6 +1913,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(human_dual_sync_checklist_lines("product"), "Add dual-system synchronization checks for this page.")}
 
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "product"), "Add the paired agent-facing product docs for dual mode.")}
+
 ## Intended Audience
 
 {format_bullets(audiences, "Add the primary maintainer audiences for this project.")}
@@ -1996,6 +2029,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Dual Sync Checklist
 
 {format_bullets(human_dual_sync_checklist_lines("architecture"), "Add dual-system synchronization checks for this page.")}
+
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "architecture"), "Add the paired agent-facing architecture docs for dual mode.")}
 
 ## Detected Signals
 
@@ -2153,6 +2190,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Dual Sync Checklist
 
 {format_bullets(human_dual_sync_checklist_lines("execution"), "Add dual-system synchronization checks for this page.")}
+
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "execution"), "Add the paired agent-facing execution docs for dual mode.")}
 
 ## Setup
 
