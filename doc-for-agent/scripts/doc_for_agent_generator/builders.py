@@ -227,11 +227,80 @@ def compact_human_evidence(
     return confirmed_out, inferred_out, unresolved_out, conflicting_out
 
 
+def trim_human_evidence_density(
+    role: str,
+    confirmed: Sequence[str],
+    inferred: Sequence[str],
+    unresolved: Sequence[str],
+    conflicting: Sequence[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    limits = {
+        "product": {"confirmed": 4, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "architecture": {"confirmed": 5, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "execution": {"confirmed": 5, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "memory": {"confirmed": 5, "inferred": 3, "unresolved": 4, "conflicting": 4},
+    }
+    role_limits = limits.get(role, limits["memory"])
+    return (
+        list(confirmed)[: role_limits["confirmed"]],
+        list(inferred)[: role_limits["inferred"]],
+        list(unresolved)[: role_limits["unresolved"]],
+        list(conflicting)[: role_limits["conflicting"]],
+    )
+
+
+def human_doc_contract_lines(role: str) -> list[str]:
+    base = [
+        "This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode.",
+        "Update this page in the same PR as behavior changes; avoid narrative-only refreshes without command or contract changes.",
+    ]
+    if role == "product":
+        base.append("Record scope decisions as explicit rules and owners; move stale discussion text to decision backlog.")
+    elif role == "architecture":
+        base.append("Resolve source-of-truth conflicts before editing CLI, adapter, or build-path behavior.")
+    elif role == "execution":
+        base.append("Keep setup/run/verify/triage order executable from a clean checkout before marking this page done.")
+    else:
+        base.append("Keep terminology and decision memory aligned with current docs and command surfaces.")
+    return base
+
+
+def human_dual_sync_checklist_lines(role: str) -> list[str]:
+    base = [
+        "After edits, refresh in dual mode and verify both `AGENTS/` and `docs/` were updated in the same change set.",
+        "If one side changed without the other, treat it as documentation drift and resolve before merge.",
+    ]
+    if role == "execution":
+        base.append("Run documented verify commands after refresh and keep failure-triage order aligned across both doc systems.")
+    elif role == "architecture":
+        base.append("When source-of-truth files move, update references in both doc systems before adjusting adapter/build-path rules.")
+    elif role == "product":
+        base.append("When scope or audience changes, update project positioning and retention rules in both doc systems together.")
+    return base
+
+
+def prune_weak_human_inferences(lines: Sequence[str]) -> list[str]:
+    weak_markers = ("likely", "appears to", "suggests", "could", "might")
+    filtered: list[str] = []
+    for line in lines:
+        lowered = line.lower()
+        if any(marker in lowered for marker in weak_markers):
+            continue
+        filtered.append(line)
+    return filtered
+
+
 def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
     prefixes_by_role = {
         "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
         "architecture": ("CLI boundary:", "Source-of-truth boundary:", "Build-path rule:", "Distribution structure:"),
-        "execution": ("Execution contract:", "Verification gate:", "Failure triage:", "Execution constraints:"),
+        "execution": (
+            "Execution contract:",
+            "Verification gate:",
+            "Verification order:",
+            "Failure triage priority:",
+            "Execution constraints:",
+        ),
     }
     conflict_prefix_by_role = {
         "architecture": "Conflict rule:",
@@ -1015,7 +1084,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
             run_lines.append(f"python3 {skill_script_rel} --root /path/to/target-repo --mode refresh")
             refresh_lines.append(f"python3 {skill_script_rel} --root {analysis.root} --mode refresh")
         refresh_lines.append(
-            "Review generated `AGENTS/*.md` files and tighten any sections still marked as needing human confirmation."
+            "Review generated `AGENTS/*.md` and `docs/*.md` files and tighten sections still marked as needing human confirmation."
         )
 
     if analysis.script_files:
@@ -1031,7 +1100,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     if not refresh_lines:
-        refresh_lines = ["Refresh `AGENTS/` after major codebase, workflow, or terminology changes."]
+        refresh_lines = ["Refresh `AGENTS/` + `docs/` after major codebase, workflow, or terminology changes."]
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Workflows
@@ -1762,6 +1831,14 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "product",
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
@@ -1798,6 +1875,14 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ## Top Rules (Read First)
 
 {format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("product"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("product"), "Add dual-system synchronization checks for this page.")}
 
 ## Intended Audience
 
@@ -1866,6 +1951,14 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "architecture",
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
@@ -1895,6 +1988,14 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Top Rules (Read First)
 
 {format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("architecture"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("architecture"), "Add dual-system synchronization checks for this page.")}
 
 ## Detected Signals
 
@@ -1958,6 +2059,14 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
     inferred = human_inferred_lines(analysis, "execution")
     confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "execution",
         confirmed,
         inferred,
         unresolved,
@@ -2036,6 +2145,14 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Top Rules (Read First)
 
 {format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("execution"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("execution"), "Add dual-system synchronization checks for this page.")}
 
 ## Setup
 

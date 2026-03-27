@@ -53,6 +53,8 @@ class EngineApiTests(unittest.TestCase):
             explanation = build_analysis_explanation_lines(plan)
             self.assertTrue(any(line.startswith("Analysis for: ") for line in explanation))
             self.assertTrue(any("Suggested command:" in line for line in explanation))
+            self.assertTrue(any("Recommended output mode: `dual`" in line for line in explanation))
+            self.assertTrue(any("--output-mode dual" in line for line in explanation if line.startswith("Suggested command:")))
 
     def test_migrate_mode_uses_refresh_write_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-migrate-") as tmpdir:
@@ -119,6 +121,78 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "docs/architecture.md").exists())
             self.assertFalse((sandbox_root / "AGENTS").exists())
             self.assertIn("Generated human docs in:", result.summary)
+
+    def test_dual_refresh_preserves_manual_blocks_for_agents_and_human_docs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-manual-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            manual_block = "\n".join(
+                [
+                    "<!-- doc-for-agent:manual-start -->",
+                    "- Human maintained note: keep release gate unchanged until CI parity is proven.",
+                    "<!-- doc-for-agent:manual-end -->",
+                ]
+            )
+            agents_path = sandbox_root / "AGENTS" / "01-product" / "002-prd.md"
+            overview_path = sandbox_root / "docs" / "overview.md"
+            agents_path.write_text(agents_path.read_text(encoding="utf-8").rstrip() + "\n\n" + manual_block + "\n", encoding="utf-8")
+            overview_path.write_text(overview_path.read_text(encoding="utf-8").rstrip() + "\n\n" + manual_block + "\n", encoding="utf-8")
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            self.assertIn(manual_block, agents_path.read_text(encoding="utf-8"))
+            self.assertIn(manual_block, overview_path.read_text(encoding="utf-8"))
+
+    def test_dual_generate_then_refresh_is_idempotent_for_key_outputs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-idempotent-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+            first_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            first_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+            second_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            second_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+
+            self.assertEqual(first_agents, second_agents)
+            self.assertEqual(first_overview, second_overview)
 
 
 if __name__ == "__main__":
