@@ -43,13 +43,13 @@ class RepoClassificationTests(unittest.TestCase):
             architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
 
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
-            self.assertTrue(any("Documented workflow sequence" in line for line in execution_confirmed))
+            self.assertTrue(any("Execution contract:" in line for line in execution_confirmed))
             self.assertTrue(any("Verification gate:" in line for line in execution_confirmed))
             self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
             self.assertTrue(
                 "unified CLI surface" in architecture_confirmed[0]
-                or "Platform entry surface is documented around `docagent`" in architecture_confirmed[0]
+                or "CLI boundary: keep `docagent` as the single entry surface" in architecture_confirmed[0]
             )
             self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
 
@@ -74,7 +74,7 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("Codex uses docagent init --ai codex --target <repo-root>" in line for line in architecture_confirmed))
             self.assertFalse(any(line.strip().startswith("|") for line in architecture_confirmed))
 
-    def test_synthesis_emits_product_scope_rule_and_source_of_truth_boundary(self) -> None:
+    def test_synthesis_emits_product_positioning_and_source_of_truth_boundary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-synthesis-rules-") as tmpdir:
             root = Path(tmpdir) / "synthesis-rules-repo"
             root.mkdir(parents=True)
@@ -94,8 +94,54 @@ class RepoClassificationTests(unittest.TestCase):
             product_confirmed = analysis.supporting_doc_insights.get("product", {}).get("confirmed", [])
             architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
 
-            self.assertTrue(any("Product scope rule:" in line for line in product_confirmed))
+            self.assertTrue(any("Product positioning:" in line for line in product_confirmed))
             self.assertTrue(any("Source-of-truth boundary:" in line for line in architecture_confirmed))
+
+    def test_dogfooding_synthesis_prefers_rule_style_conclusions(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-dogfooding-synthesis-") as tmpdir:
+            root = Path(tmpdir) / "dogfooding-repo"
+            (root / "docs").mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Dogfooding Repo\n\n"
+                    "doc-for-agent is a CLI coding-agent workflow tool.\n"
+                    "Source of truth files include `README.md` and `package.json`.\n"
+                    "Keep adapter and distribution wiring aligned with the docagent CLI boundary.\n"
+                    "It should initialize sparse repos, migrate messy docs, and refresh existing AGENTS/docs.\n"
+                    "Supports human, agent, and dual output modes through docagent.\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex --target <repo-root>\n"
+                    "docagent refresh --output-mode dual --target <repo-root>\n"
+                    "docagent doctor --target <repo-root>\n"
+                    "npm run test\n"
+                    "```\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "docs/platforms.md").write_text(
+                (
+                    "# Distribution\n\n"
+                    "Keep platform adapters and distribution notes aligned with the main CLI contract.\n"
+                    "Codex and Claude use docagent as entrypoint.\n"
+                    "Source of truth files include `README.md` and `package.json`.\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Dogfooding Repo")
+            execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
+            architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
+            product_confirmed = analysis.supporting_doc_insights.get("product", {}).get("confirmed", [])
+
+            self.assertTrue(any("Execution contract:" in line for line in execution_confirmed))
+            self.assertTrue(any("Execution constraints:" in line for line in execution_confirmed))
+            self.assertTrue(any("Verification gate:" in line for line in execution_confirmed))
+            self.assertTrue(any("CLI boundary:" in line for line in architecture_confirmed))
+            self.assertTrue(any("Source-of-truth boundary:" in line for line in architecture_confirmed))
+            self.assertTrue(any("Distribution structure:" in line for line in architecture_confirmed))
+            self.assertTrue(any("Product positioning:" in line for line in product_confirmed))
+            self.assertTrue(any("Repository adaptation scope:" in line for line in product_confirmed))
+            self.assertTrue(any("Retention value:" in line for line in product_confirmed))
 
     def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-command-priority-") as tmpdir:
@@ -123,7 +169,7 @@ class RepoClassificationTests(unittest.TestCase):
             execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
 
             self.assertTrue(execution_confirmed)
-            self.assertIn("docagent init --ai codex", execution_confirmed[0])
+            self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
             self.assertTrue(any("docagent refresh --output-mode dual" in line for line in execution_confirmed))
             self.assertFalse(any("broad project context" in line for line in execution_confirmed))
 
