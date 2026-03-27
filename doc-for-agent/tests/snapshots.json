@@ -301,7 +301,7 @@
       "contains": [
         "# Project Overview",
         "## Knowledge Status",
-        "### Inferred Signals",
+        "### Derived Signals",
         "### Open Questions",
         "## Intended Audience",
         "## Synthesis Summary",
@@ -315,7 +315,7 @@
       "contains": [
         "# Architecture",
         "## Knowledge Status",
-        "### Inferred Signals",
+        "### Derived Signals",
         "### Conflict Watchlist",
         "## Update Triggers",
         "## Maintenance Workflow",
@@ -326,7 +326,7 @@
       "contains": [
         "# Workflows",
         "## Knowledge Status",
-        "### Inferred Signals",
+        "### Derived Signals",
         "### Open Questions",
         "## Operational Notes",
         "## Update Triggers",
@@ -338,7 +338,7 @@
     "docs/glossary.md": {
       "contains": [
         "# Glossary",
-        "## Inferred Terminology Signals",
+        "## Derived Terminology Signals",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)"
       ]
@@ -356,13 +356,13 @@
       "contains": [
         "# Project Overview",
         "Current repo shape:",
-        "### Inferred Signals",
+        "### Derived Signals",
         "### Open Questions",
         "## Current Priorities",
         "## Update Triggers",
         "## Maintenance Workflow",
         "## Bootstrap Backlog (When Docs Are Thin)",
-        "No supporting docs matched this role; content below is inferred from repository structure and code signals."
+        "No supporting docs matched this role; content below is derived from repository structure and code signals."
       ]
     },
     "docs/architecture.md": {
