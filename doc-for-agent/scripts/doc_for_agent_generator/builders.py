@@ -319,6 +319,27 @@ def prune_weak_human_inferences(lines: Sequence[str]) -> list[str]:
     return filtered
 
 
+def strip_supporting_sources_suffix(lines: Sequence[str]) -> list[str]:
+    compacted: list[str] = []
+    for line in lines:
+        compacted.append(re.sub(r"\s*\(sources:\s*.*\)$", "", line).strip())
+    return [line for line in compacted if line]
+
+
+def human_output_boundary_lines(role: str) -> list[str]:
+    shared = [
+        "Use `docs/` for maintainer-facing policy and decisions; use `AGENTS/` for execution order, command wiring, and handoff runbooks.",
+        "If a change affects both reader types, update both systems in one dual refresh cycle instead of patching only one side.",
+    ]
+    if role == "product":
+        shared.append("Keep user/value framing in `docs/overview.md`; keep edit-time operating rules in `AGENTS/product.md` (or layered product docs).")
+    elif role == "architecture":
+        shared.append("Keep architecture rationale in `docs/architecture.md`; keep CLI/build/source-of-truth guardrails in `AGENTS/architecture.md` (or layered architecture docs).")
+    elif role == "execution":
+        shared.append("Keep maintainer runbook context in `docs/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs).")
+    return shared
+
+
 def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
     prefixes_by_role = {
         "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
@@ -1868,6 +1889,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
@@ -1916,6 +1941,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ## Paired Agent Docs (Dual Mode)
 
 {format_bullets(paired_agent_doc_lines(analysis, "product"), "Add the paired agent-facing product docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("product"), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Intended Audience
 
@@ -1992,6 +2021,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
@@ -2033,6 +2066,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Paired Agent Docs (Dual Mode)
 
 {format_bullets(paired_agent_doc_lines(analysis, "architecture"), "Add the paired agent-facing architecture docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("architecture"), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Detected Signals
 
@@ -2109,6 +2146,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
     provenance = supporting_doc_provenance_lines(analysis, "execution")
     synthesis_summary = synthesis_summary_lines(analysis, "execution")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
@@ -2194,6 +2235,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Paired Agent Docs (Dual Mode)
 
 {format_bullets(paired_agent_doc_lines(analysis, "execution"), "Add the paired agent-facing execution docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("execution"), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Setup
 

@@ -217,6 +217,12 @@ class EngineApiTests(unittest.TestCase):
             self.assertIn("AGENTS/01-product/001-core-goals.md", overview)
             self.assertIn("AGENTS/02-architecture/007-architecture-compatibility.md", architecture)
             self.assertIn("AGENTS/03-execution/008-implementation-plan.md", workflows)
+            self.assertIn("## Output Boundary (Human vs Agent)", overview)
+            self.assertIn("## Output Boundary (Human vs Agent)", architecture)
+            self.assertIn("## Output Boundary (Human vs Agent)", workflows)
+            self.assertNotIn("(sources:", overview)
+            self.assertNotIn("(sources:", architecture)
+            self.assertNotIn("(sources:", workflows)
 
 
 if __name__ == "__main__":
