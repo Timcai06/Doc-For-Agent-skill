@@ -30,6 +30,8 @@ Node 一次性开始（无需全局安装）：
 npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 
+如果你只需要单个平台，把 `all` 替换成 `claude`、`codex`、`continue` 或 `copilot`。
+
 ## Init
 
 统一命令形态：

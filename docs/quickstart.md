@@ -30,6 +30,8 @@ One-off Node start (no global install):
 npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 
+If you only need one platform, replace `all` with `claude`, `codex`, `continue`, or `copilot`.
+
 ## Init
 
 Use one command shape:
