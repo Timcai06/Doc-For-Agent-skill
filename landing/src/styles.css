@@ -270,6 +270,101 @@ h1, h2, h3, h4 {
   overflow: hidden;
 }
 
+/* Terminal iTerm Style */
+.terminal-window {
+  background: #0d111b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 18px 36px -18px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+  height: 36px;
+  background: #1e2533;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.window-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.terminal-tabs {
+  display: flex;
+  background: #161b26;
+  padding: 0 8px;
+  gap: 4px;
+}
+
+.terminal-tab-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-top: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.terminal-tab-btn:hover {
+  color: #fff;
+}
+
+.terminal-tab-btn.active {
+  background: #0d111b;
+  color: var(--primary);
+  border-top-color: var(--primary);
+}
+
+.terminal-body {
+  padding: 24px;
+  min-height: 280px;
+}
+
+.terminal-line {
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.terminal-line.command {
+  margin-bottom: 16px;
+}
+
+.prompt {
+  color: var(--primary);
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+.terminal-output {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Code Window */
 .code-window {
   background: #080a12;

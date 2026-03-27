@@ -70,8 +70,58 @@ const commands = [
   { name: 'generate', desc: 'Force-generate specific artifact subsets', status: 'Stable' },
 ];
 
+const heroCases = [
+  {
+    label: 'docagent init',
+    title: 'Initialize System',
+    command: '$ docagent init --ai codex',
+    output: [
+      { text: '[1/3] Analyzing repo architecture...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected 4 microservices', color: 'var(--accent)' },
+      { text: '✓ Found legacy docs in /wiki', color: 'var(--accent)' },
+      { text: '[2/3] Synthesizing Dual-Docs...', color: 'var(--text-secondary)' },
+      { text: '+ Created /AGENTS/ (Source of Truth)', color: '#fff' },
+      { text: '+ Structured /docs/ (Human Guides)', color: '#fff' },
+    ]
+  },
+  {
+    label: 'docagent doctor',
+    title: 'Health Audit',
+    command: '$ docagent doctor --root .',
+    output: [
+      { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
+      { text: '! 1 drift found in /src/api/auth.js', color: 'var(--warning)' },
+      { text: '  - Code: Omit refreshToken', color: 'var(--text-muted)' },
+      { text: '  - Doc says: Returns refreshToken', color: 'var(--text-muted)' },
+      { text: '✓ Stability confirmed elsewhere.', color: 'var(--accent)' },
+      { text: '[2/2] Ready for auto-sync.', color: 'var(--primary)' },
+    ]
+  },
+  {
+    label: 'docagent refresh',
+    title: 'Sync Lifecycle',
+    command: '$ docagent refresh --output-mode dual',
+    output: [
+      { text: '[1/2] Scanning branch feature/v2...', color: 'var(--text-secondary)' },
+      { text: '✓ 14 files changed', color: 'var(--accent)' },
+      { text: '[2/2] Syncing documentation...', color: 'var(--text-secondary)' },
+      { text: '✓ AGENTS/context.json updated', color: '#fff' },
+      { text: '✓ docs/CHANGELOG.md updated', color: '#fff' },
+      { text: 'Sync complete (12s).', color: 'var(--primary)' },
+    ]
+  }
+];
+
 function App() {
   const [activeArtifact, setActiveArtifact] = useState('agent');
+  const [activeHeroCase, setActiveHeroCase] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveHeroCase((prev) => (prev + 1) % heroCases.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -104,42 +154,58 @@ function App() {
       </header>
 
       <main>
-        {/* HERO SECTION: Evidence-Driven */}
-        <section className="hero section" id="hero" style={{ paddingBottom: '40px' }}>
+        {/* HERO SECTION */}
+        <section className="hero section" id="hero">
           <div className="hero-copy scroll-reveal">
-            <span className="eyebrow">Production Ready</span>
+            <span className="eyebrow">Real-World Proof</span>
             <h1>
               Proof-of-Documentation <br />
               <span style={{ color: 'var(--primary)' }}>for AI Workflows.</span>
             </h1>
             <p className="hero-text">
-              Don't just prompt an LLM. Create a durable, systemic knowledge base that persists across Claude Code, Codex, and Copilot sessions. 
-              <strong> Real repo-analysis, real artifact sync, real stability.</strong>
+              Create a durable, systemic knowledge base that persists across Claude Code, Codex, and Copilot sessions. 
+              <strong> Repo-analysis, artifact sync, real stability.</strong>
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#artifacts">See the Artifacts</a>
-              <a className="button button-secondary" href="#scenarios">Explore Scenarios</a>
+              <a className="button button-secondary" href="#scenarios">Case Studies</a>
             </div>
           </div>
 
-          <div className="hero-preview scroll-reveal" style={{ display: 'grid', gridTemplateRows: 'auto auto', gap: '16px' }}>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span className="dot green-pulse" style={{ width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0 }}></span>
-                <span style={{ fontSize: '0.9rem' }}><strong>Claude Code / Codex / Cursor</strong> fully integrated via source-of-truth baseline.</span>
+          <div className="hero-preview scroll-reveal">
+            <div className="terminal-window floating">
+              <div className="terminal-header">
+                <div className="window-dots">
+                  <div className="dot red" />
+                  <div className="dot yellow" />
+                  <div className="dot green" />
+                </div>
+                <div className="terminal-title">
+                  zsh — {heroCases[activeHeroCase].title}
+                </div>
               </div>
-            </div>
-            <div className="code-window">
-              <div className="code-header">
-                <span style={{ fontSize: '12px', opacity: 0.5 }}>docagent doctor --root .</span>
+              <div className="terminal-tabs">
+                {heroCases.map((c, i) => (
+                  <button 
+                    key={i} 
+                    className={`terminal-tab-btn ${activeHeroCase === i ? 'active' : ''}`}
+                    onClick={() => setActiveHeroCase(i)}
+                  >
+                    {c.label}
+                  </button>
+                ))}
               </div>
-              <div className="code-body">
-                <div style={{ color: 'var(--primary)' }}>$ docagent doctor</div>
-                <div>[1/2] Auditing knowledge drift...</div>
-                <div style={{ color: 'var(--warning)' }}>! 1 drift found in /src/api/auth.js</div>
-                <div style={{ color: 'var(--text-secondary)' }}>  - Code added: "Omit refreshToken"</div>
-                <div style={{ color: 'var(--text-secondary)' }}>  - Doc says: "Returns refreshToken"</div>
-                <div style={{ color: 'var(--accent)' }}>[2/2] Auto-syncing potential... Ready.</div>
+              <div className="code-body terminal-body">
+                <div className="terminal-line command">
+                  <span className="prompt">tim@macBook ~ %</span> {heroCases[activeHeroCase].command}
+                </div>
+                <div className="terminal-output">
+                  {heroCases[activeHeroCase].output.map((line, i) => (
+                    <div key={i} className="terminal-line" style={{ color: line.color, animationDelay: `${i * 100}ms` }}>
+                      {line.text}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
