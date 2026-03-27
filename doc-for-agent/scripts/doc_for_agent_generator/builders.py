@@ -265,6 +265,31 @@ def human_doc_contract_lines(role: str) -> list[str]:
     return base
 
 
+def human_dual_sync_checklist_lines(role: str) -> list[str]:
+    base = [
+        "After edits, refresh in dual mode and verify both `AGENTS/` and `docs/` were updated in the same change set.",
+        "If one side changed without the other, treat it as documentation drift and resolve before merge.",
+    ]
+    if role == "execution":
+        base.append("Run documented verify commands after refresh and keep failure-triage order aligned across both doc systems.")
+    elif role == "architecture":
+        base.append("When source-of-truth files move, update references in both doc systems before adjusting adapter/build-path rules.")
+    elif role == "product":
+        base.append("When scope or audience changes, update project positioning and retention rules in both doc systems together.")
+    return base
+
+
+def prune_weak_human_inferences(lines: Sequence[str]) -> list[str]:
+    weak_markers = ("likely", "appears to", "suggests", "could", "might")
+    filtered: list[str] = []
+    for line in lines:
+        lowered = line.lower()
+        if any(marker in lowered for marker in weak_markers):
+            continue
+        filtered.append(line)
+    return filtered
+
+
 def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
     prefixes_by_role = {
         "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
@@ -1806,6 +1831,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    inferred = prune_weak_human_inferences(inferred)
     confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
         "product",
         confirmed,
@@ -1853,6 +1879,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ## Document Contract
 
 {format_bullets(human_doc_contract_lines("product"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("product"), "Add dual-system synchronization checks for this page.")}
 
 ## Intended Audience
 
@@ -1921,6 +1951,7 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    inferred = prune_weak_human_inferences(inferred)
     confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
         "architecture",
         confirmed,
@@ -1961,6 +1992,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Document Contract
 
 {format_bullets(human_doc_contract_lines("architecture"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("architecture"), "Add dual-system synchronization checks for this page.")}
 
 ## Detected Signals
 
@@ -2029,6 +2064,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
         unresolved,
         conflicting,
     )
+    inferred = prune_weak_human_inferences(inferred)
     confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
         "execution",
         confirmed,
@@ -2113,6 +2149,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Document Contract
 
 {format_bullets(human_doc_contract_lines("execution"), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("execution"), "Add dual-system synchronization checks for this page.")}
 
 ## Setup
 

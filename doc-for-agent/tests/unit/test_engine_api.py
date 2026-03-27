@@ -162,6 +162,38 @@ class EngineApiTests(unittest.TestCase):
             self.assertIn(manual_block, agents_path.read_text(encoding="utf-8"))
             self.assertIn(manual_block, overview_path.read_text(encoding="utf-8"))
 
+    def test_dual_generate_then_refresh_is_idempotent_for_key_outputs(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-idempotent-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+            first_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            first_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="dual",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+            second_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            second_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+
+            self.assertEqual(first_agents, second_agents)
+            self.assertEqual(first_overview, second_overview)
+
 
 if __name__ == "__main__":
     unittest.main()
