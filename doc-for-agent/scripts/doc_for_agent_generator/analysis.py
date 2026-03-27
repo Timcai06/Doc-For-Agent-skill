@@ -890,6 +890,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             triage_steps.append("prioritize lifecycle commands (`docagent init/refresh/doctor`) before ad-hoc script edits")
             if doctor_command or "docagent doctor" in lowered:
                 triage_steps.append("run `docagent doctor` for install/config drift checks")
+                triage_steps.append("if `docagent doctor` fails, fix install/config drift before rerunning verify commands")
             if "readme.md" in lowered:
                 triage_steps.append("reconcile command context with `README.md`")
             if "quickstart" in lowered:
@@ -919,6 +920,9 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
                 lines.append(
                     f"Source-of-truth boundary: confirm {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
                 )
+                lines.append(
+                    f"Build-path rule: if platform entry or packaging behavior breaks, inspect {anchors} before changing adapter/config mappings."
+                )
             else:
                 lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
         if platform_facts or ("docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform"))):
@@ -940,6 +944,8 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             token in lowered for token in ("init", "migrate", "refresh")
         ):
             lines.append("Repository adaptation scope: cover initialize, migrate, and refresh paths so existing and messy docs can converge to one system.")
+        elif "docagent" in lowered and any(token in lowered for token in ("refresh", "migrate", "doctor")):
+            lines.append("Repository adaptation scope: fit repositories that need ongoing refresh/governance workflows, not one-off documentation scans.")
         if "docagent init" in lowered and "docagent refresh" in lowered:
             if doctor_command or "docagent doctor" in lowered:
                 lines.append(
@@ -955,7 +961,13 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
                 )
         if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
             lines.append("Product usage context emphasizes `human / agent / dual` outputs within the same workflow contract.")
-    return lines[:3]
+    limit_by_role = {
+        "product": 3,
+        "architecture": 4,
+        "execution": 3,
+        "memory": 3,
+    }
+    return lines[: limit_by_role.get(role, 3)]
 
 
 def summarize_sources(paths: Sequence[Path], root: Path) -> str:
