@@ -568,17 +568,50 @@ h1, h2, h3, h4 {
   color: #e2e8f0;
 }
 
-/* The Lifecycle Visualizer */
-.lifecycle-path {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 80px 40px;
+/* Scenario Section */
+.scenario-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.scenario-pill {
+  flex: 1;
+  min-width: 300px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 80px;
-  margin-top: 64px;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.scenario-pill:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  background: var(--surface-hover);
+}
+
+.scenario-pill strong {
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.scenario-pill span {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Glass Card Enhancements */
+.glass-card {
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
 }
 
 .steps-row {
