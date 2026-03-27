@@ -32,22 +32,21 @@ npx -y doc-for-agent
 
 ## Init
 
-按需选择：
+统一命令形态：
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent init --ai claude --target <repo-root>
-docagent init --ai codex --target <repo-root>
-docagent init --ai continue --target <repo-root>
-docagent init --ai copilot --target <repo-root>
-docagent init --ai all --target <repo-root>
 ```
 
-CodeBuddy 用户通常从下面开始：
+常见选择：
 
 ```bash
+docagent init --ai all --target <repo-root>
+docagent init --ai claude --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
+
+CodeBuddy 用户通常从 `--ai codex` 开始。
 
 ## Refresh
 
@@ -80,4 +79,3 @@ docagent versions --target <repo-root>
 
 - [Platform Guide（英文）](platforms.md) / [Platform Guide（中文）](platforms.zh.md)
 - [Maintainer Guide](maintainers.md)
-

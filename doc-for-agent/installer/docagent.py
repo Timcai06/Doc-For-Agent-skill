@@ -246,6 +246,7 @@ def build_parser() -> argparse.ArgumentParser:
     primary_commands = "init, doctor, refresh, generate, update, versions"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
+        prog=metadata.installer_command,
         description=(
             f"Unified {metadata.product_name} product CLI. "
             "Use `init` as the primary entry to install platform adapters."

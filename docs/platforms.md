@@ -6,13 +6,15 @@ Use `docagent init --ai ...` to choose your platform entrypoint.
 
 ## Platform Matrix
 
-| Platform | First command | Adapter type | Install target |
-| --- | --- | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
-| Codex | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| Continue | `docagent init --ai continue --target <repo-root>` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
+| Platform | First command |
+| --- | --- |
+| Claude Code | `docagent init --ai claude --target <repo-root>` |
+| Codex | `docagent init --ai codex --target <repo-root>` |
+| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
+| Continue | `docagent init --ai continue --target <repo-root>` |
+| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+
+`init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 
 ## Multi-Agent Setup
 

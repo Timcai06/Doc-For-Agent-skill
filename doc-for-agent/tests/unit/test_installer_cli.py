@@ -27,6 +27,8 @@ class InstallerCliTests(unittest.TestCase):
 
         self.assertEqual(context.exception.code, 0)
         text = stdout.getvalue()
+        self.assertIn("usage: docagent", text)
+        self.assertNotIn("usage: docagent.py", text)
         self.assertIn("Product CLI v1", text)
         self.assertIn("primary commands: init, doctor, refresh, generate, update, versions", text)
         self.assertIn("legacy compatibility: install, all", text)

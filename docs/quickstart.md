@@ -32,22 +32,21 @@ npx -y doc-for-agent
 
 ## Init
 
-Pick one:
+Use one command shape:
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent init --ai claude --target <repo-root>
-docagent init --ai codex --target <repo-root>
-docagent init --ai continue --target <repo-root>
-docagent init --ai copilot --target <repo-root>
-docagent init --ai all --target <repo-root>
 ```
 
-CodeBuddy users usually start with:
+Common picks:
 
 ```bash
+docagent init --ai all --target <repo-root>
+docagent init --ai claude --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
+
+CodeBuddy users usually start with `--ai codex`.
 
 ## Refresh
 
