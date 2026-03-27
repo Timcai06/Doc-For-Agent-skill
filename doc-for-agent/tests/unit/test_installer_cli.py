@@ -201,6 +201,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("<repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)
+            self.assertIn("docs/platforms.md (EN) / docs/platforms.zh.md (ZH)", text)
 
     def test_generate_command_executes_generator_dry_run(self) -> None:
         fixture_root = TEST_ROOT / "fixtures" / "backend_service"
