@@ -108,11 +108,21 @@ function App() {
               <span style={{ color: 'var(--primary)' }}>Between Code and Agents.</span>
             </h1>
             <p className="hero-text">
-              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and lower drift across sessions.
+              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and zero knowledge drift.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">Start Lifecycle</a>
-              <a className="button button-secondary" href="#dual-logic">The Dual-Doc Advantage</a>
+              <a className="button button-secondary" href="#dual-logic">The Dual-Doc Architecture</a>
+            </div>
+            
+            <div className="ecosystem-row">
+              <span>Bridging:</span>
+              <div className="ecosystem-badges">
+                <span className="eco-badge">Claude Code</span>
+                <span className="eco-badge">Codex</span>
+                <span className="eco-badge">Continue</span>
+                <span className="eco-badge">Copilot</span>
+              </div>
             </div>
           </div>
 
@@ -179,11 +189,11 @@ function App() {
              </div>
              <div className="sync-part results">
                <div className="res-card-group">
-                 <div className="res-card agent"><strong>/AGENTS/</strong> Machine Truth</div>
-                 <div className="res-card human"><strong>/docs/</strong> Human Narrative</div>
+                 <div className="res-card agent"><strong>/AGENTS/</strong> Context Baseline</div>
+                 <div className="res-card human"><strong>/docs/</strong> Narrative Baseline</div>
                </div>
-               <strong>Dual-Doc Ecosystem</strong>
-               <p>Synchronized, systemic knowledge.</p>
+               <strong>Unified Knowledge Hub</strong>
+               <p>Grounded in AST analysis and legacy heuristics.</p>
              </div>
           </div>
 
@@ -194,18 +204,18 @@ function App() {
               <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with lower ambiguity.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
-                <li>✓ Cross-session Memory</li>
-                <li>✓ Faster Repo Navigation</li>
+                <li>✓ Zero Context Overflow</li>
+                <li>✓ Cross-Platform Context</li>
               </ul>
             </div>
             <div className="dual-card human">
               <div className="card-label">FOR HUMANS (The Narrative)</div>
               <h3>/docs/ Guides</h3>
-              <p>Natural narrative for human maintainers. Clear documentation for onboarding, architecture reviews, and technical handoffs.</p>
+              <p>Natural narrative for human maintainers. Clear documentation for onboarding, architecture reviews, and team-wide knowledge persistence.</p>
               <ul className="mini-features">
-                <li>✓ Narrative Cohesion</li>
-                <li>✓ Maintenance Logic</li>
-                <li>✓ Team Alignment</li>
+                <li>✓ Professional Onboarding</li>
+                <li>✓ AST-Grounded Accuracy</li>
+                <li>✓ Unified Team Standards</li>
               </ul>
             </div>
           </div>
@@ -219,9 +229,9 @@ function App() {
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Repo', desc: 'Bootstrap a structured documentation system from source code and config files.' },
-              { type: 'Messy-Doc Repo', desc: 'Inhale scattered, outdated READMEs and systemize them into a durable structured baseline.' },
-              { type: 'Scaling Repo', desc: 'Maintain stronger alignment for repeated agent work with a repeatable refresh cycle.' }
+              { type: 'Low-Doc Repos', desc: 'Bootstrap a structured documentation system from raw source code and scattered configurations.' },
+              { type: 'Messy-Doc Repos', desc: 'Inhale outdated READMEs and systemize them into a durable, machine-readable baseline.' },
+              { type: 'Team Standardization', desc: 'Establish a unified documentation standard across multiple repositories and engineering teams.' }
             ].map(s => (
               <div key={s.type} className="scenario-pill glass-card">
                 <strong>{s.type}</strong>

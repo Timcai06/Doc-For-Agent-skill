@@ -1203,8 +1203,82 @@ tr:hover {
   background: var(--accent-glow);
 }
 
+/* Ecosystem Badges */
+.ecosystem-row {
+  margin-top: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  animation: revealIn 0.8s 0.6s ease forwards;
+}
+
+.ecosystem-row span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ecosystem-badges {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.eco-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  transition: all 0.3s;
+}
+
+.eco-badge:hover {
+  background: var(--primary-glow);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* Custom Refinement for Lifecycle Marker */
+.marker-dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--primary);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.4s;
+}
+
+.lifecycle-step:hover .marker-dot::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.lifecycle-step.active .marker-dot {
+  background: var(--primary);
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.lifecycle-step.recurring .marker-dot {
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Sync Results Glow */
+.res-card.agent { box-shadow: 0 10px 30px -10px var(--primary-glow); }
+.res-card.human { box-shadow: 0 10px 30px -10px var(--accent-glow); }
+
 @media (max-width: 768px) {
   .lifecycle-step { gap: 24px; }
   .step-content { padding-bottom: 48px; }
   .lifecycle-step h3 { font-size: 1.25rem; }
+  .ecosystem-row { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
