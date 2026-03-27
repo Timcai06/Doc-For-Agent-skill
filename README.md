@@ -6,6 +6,8 @@ English | [简体中文](README.zh.md)
 
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
 
+It supports a dual documentation system: `agent`, `human`, or `dual` outputs.
+
 The product path is short:
 
 1. install

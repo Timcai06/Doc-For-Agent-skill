@@ -6,6 +6,8 @@
 
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
 
+它支持双文档系统输出：`agent`、`human` 或 `dual`。
+
 产品路径很短：
 
 1. 安装
