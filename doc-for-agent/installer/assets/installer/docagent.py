@@ -189,6 +189,7 @@ def render_quickstart(target_root: Path) -> str:
         "- Refresh:",
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
         "- Optional modes: `--output-mode human` or `--output-mode dual`",
+        "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both",
         "- Verify:",
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",

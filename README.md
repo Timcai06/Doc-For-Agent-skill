@@ -7,6 +7,7 @@ English | [简体中文](README.zh.md)
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
 
 It supports a dual documentation system: `agent`, `human`, or `dual` outputs.
+Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, and `dual` writes both.
 
 The product path is short:
 
