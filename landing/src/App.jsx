@@ -43,7 +43,7 @@ function App() {
           <LogoMark />
           <span>
             <strong>doc-for-agent</strong>
-            <small>v1.0.0 "Stability"</small>
+            <small>v1.1.0 "Lifecycle"</small>
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">
@@ -59,17 +59,17 @@ function App() {
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
           <div className="hero-copy">
-            <span className="eyebrow">Durable Context for the Agentic Era</span>
+            <span className="eyebrow">Context is for repositories, not just for chats</span>
             <h1>
-              Stop wasting context in <span style={{ color: 'var(--primary)' }}>single-use chats.</span>
+              Build documentation that <span style={{ color: 'var(--primary)' }}>keeps your agents sharp.</span>
             </h1>
             <p className="hero-text">
-              Build a permanent documentation system for your coding agents. 
-              doc-for-agent turns raw codebases into systemized knowledge that stays fresh across every Claude Code, Codex, and Copilot session.
+              doc-for-agent turns raw codebases into systemized knowledge. 
+              Move from single-use sessions to a durable documentation system that works across every Claude Code, Codex, and Copilot workflow.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#how-it-works">Get the lifecycle</a>
-              <a className="button button-secondary" href="#comparison">System vs. Prompting</a>
+              <a className="button button-secondary" href="#comparison">Why not just prompt?</a>
             </div>
           </div>
 
@@ -77,8 +77,8 @@ function App() {
             <div className="glass-card floating">
               <div className="code-window">
                 <div className="code-header">
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted)', marginLeft: 'auto', marginRight: '8px' }}>docagent init</span>
-                  <div className="dot red" />
+                  <span style={{ fontSize: '0.7rem', color: 'var(--muted)', marginLeft: '8px' }}>docagent init</span>
+                  <div className="dot red" style={{ marginLeft: 'auto' }} />
                   <div className="dot yellow" />
                   <div className="dot green" />
                 </div>
@@ -183,8 +183,8 @@ function App() {
         <section className="section" id="dual-system">
           <div className="section-head">
             <span className="eyebrow">The Dual-Doc Advantage</span>
-            <h2>One engine, two audiences</h2>
-            <p className="feature-desc">Stop splitting your effort. Generate deep context for humans and strict guardrails for agents simultaneously.</p>
+            <h2>Synchronization as your new standard</h2>
+            <p className="feature-desc">Stop splitting your effort. Generate a single source of truth that serves human maintainers and AI coding agents simultaneously.</p>
           </div>
 
           <div className="bento-grid">
@@ -217,8 +217,8 @@ function App() {
             </div>
             
             <div className="bento-item glass-card accent-hover">
-              <h3 className="feature-title">The "Messy Docs" Fix</h3>
-              <p className="feature-desc">Scattered READMEs and outdated notes get absorbed, deduplicated, and unified into the new lifecycle model.</p>
+              <h3 className="feature-title">The "Messy Attic" Fix</h3>
+              <p className="feature-desc">Scattered READMEs and outdated notes get absorbed, deduplicated, and unified into a clean, refreshable lifecycle model.</p>
             </div>
 
             <div className="bento-item wide glass-card">

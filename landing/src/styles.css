@@ -511,21 +511,61 @@ code {
 
 /* Refined Steps Visual */
 .steps-visual {
-  background: rgba(255, 255, 255, 0.02);
-  padding: 64px 32px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  padding: 80px 48px;
   border-radius: var(--radius-xl);
   border: 1px solid var(--line);
-  margin-top: 64px;
+  margin-top: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.steps-visual::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 200px;
+  background: var(--primary-glow);
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.step-node {
+  position: relative;
+  z-index: 1;
 }
 
 .step-circle {
-  transition: all 0.3s ease;
+  width: 72px;
+  height: 72px;
+  font-size: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: var(--surface-strong);
+  border: 2px solid var(--line);
 }
 
 .step-node:hover .step-circle {
-  transform: scale(1.1);
+  transform: scale(1.15) translateY(-5px);
+  border-color: var(--primary);
   background: var(--primary);
   color: #fff;
+  box-shadow: 0 10px 30px var(--primary-glow);
+}
+
+.step-arrow {
+  height: 3px;
+  background: linear-gradient(90deg, var(--line) 0%, var(--primary) 50%, var(--line) 100%);
+  background-size: 200% 100%;
+  animation: flow 3s linear infinite;
+}
+
+@keyframes flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: 0% 0; }
 }
 
 @media (max-width: 1024px) {
