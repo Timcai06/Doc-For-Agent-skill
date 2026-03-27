@@ -37,5 +37,7 @@ npm run dev
 
 ## See Also
 
+After this note, go to Quickstart, then Platform Guide.
+
 - [Quickstart](quickstart.md)
 - [Platform Guide](platforms.md)
