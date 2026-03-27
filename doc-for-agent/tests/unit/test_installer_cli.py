@@ -178,6 +178,7 @@ class InstallerCliTests(unittest.TestCase):
             (repo_root / "README.md", repo_root / "README.zh.md"),
             (repo_root / "docs" / "quickstart.md", repo_root / "docs" / "quickstart.zh.md"),
             (repo_root / "docs" / "platforms.md", repo_root / "docs" / "platforms.zh.md"),
+            (repo_root / "docs" / "landing-page.md", repo_root / "docs" / "landing-page.zh.md"),
         ]
         for english, chinese in required_pairs:
             self.assertTrue(english.exists(), f"Missing English doc: {english}")
@@ -185,8 +186,12 @@ class InstallerCliTests(unittest.TestCase):
 
             english_text = english.read_text(encoding="utf-8")
             chinese_text = chinese.read_text(encoding="utf-8")
-            self.assertIn("docagent init --ai", english_text)
-            self.assertIn("docagent init --ai", chinese_text)
+            if english.name == "landing-page.md":
+                self.assertIn("install", english_text)
+                self.assertIn("install", chinese_text)
+            else:
+                self.assertIn("docagent init --ai", english_text)
+                self.assertIn("docagent init --ai", chinese_text)
 
     def test_quickstart_command_prints_unified_entry_guidance(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-quickstart-") as tmpdir:
@@ -207,6 +212,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("docagent init --ai claude --target <repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
             self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)
+            self.assertIn("docs/landing-page.md (EN) / docs/landing-page.zh.md (ZH)", text)
             self.assertIn("docs/quickstart.md (EN) / docs/quickstart.zh.md (ZH)", text)
             self.assertIn("docs/platforms.md (EN) / docs/platforms.zh.md (ZH)", text)
 

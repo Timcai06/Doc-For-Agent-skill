@@ -1,5 +1,7 @@
 # Landing Page Prototype
 
+Language: English | [简体中文](landing-page.zh.md)
+
 This repository now includes a React landing page prototype for the public-facing product surface.
 
 ## Location
@@ -16,6 +18,15 @@ The landing page is aimed at CLI coding-agent users and explains the short produ
 
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
 
+## Entry Path
+
+From repository entry docs, use this order:
+
+1. `README.md`
+2. `docs/landing-page.md`
+3. `docs/quickstart.md`
+4. `docs/platforms.md`
+
 ## Local Preview
 
 ```bash
@@ -23,3 +34,8 @@ cd landing
 npm install
 npm run dev
 ```
+
+## See Also
+
+- [Quickstart](quickstart.md)
+- [Platform Guide](platforms.md)
