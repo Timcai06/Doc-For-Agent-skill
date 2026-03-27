@@ -15,7 +15,7 @@ FIXTURE_ROOT = TEST_ROOT / "fixtures" / "cli_tool"
 
 
 class DryRunTests(unittest.TestCase):
-    def test_dry_run_reports_planned_files_without_writing_agents_directory(self) -> None:
+    def test_dry_run_defaults_to_dual_outputs_without_writing_directories(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dry-run-") as tmpdir:
             sandbox_root = Path(tmpdir) / "cli_tool"
             shutil.copytree(FIXTURE_ROOT, sandbox_root)
@@ -35,9 +35,39 @@ class DryRunTests(unittest.TestCase):
                 text=True,
             )
 
+            self.assertIn("Dry run: would refresh AGENTS + human docs", result.stdout)
+            self.assertIn("create AGENTS/README.md", result.stdout)
+            self.assertIn("create docs/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "docs").exists())
+
+    def test_dry_run_agent_mode_still_reports_agents_only(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-dry-run-agent-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "cli_tool"
+            shutil.copytree(FIXTURE_ROOT, sandbox_root)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "refresh",
+                    "--output-mode",
+                    "agent",
+                    "--dry-run",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
             self.assertIn("Dry run: would refresh AGENTS docs", result.stdout)
             self.assertIn("create AGENTS/README.md", result.stdout)
+            self.assertNotIn("create docs/overview.md", result.stdout)
             self.assertFalse((sandbox_root / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "docs").exists())
 
     def test_explain_and_repo_type_override_can_be_combined_with_dry_run(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-explain-") as tmpdir:
@@ -112,6 +142,8 @@ class DryRunTests(unittest.TestCase):
                     "refresh",
                     "--profile",
                     "layered",
+                    "--output-mode",
+                    "agent",
                     "--dry-run",
                 ],
                 check=True,
@@ -320,6 +352,8 @@ class DryRunTests(unittest.TestCase):
                     "migrate",
                     "--profile",
                     "bootstrap",
+                    "--output-mode",
+                    "agent",
                     "--dry-run",
                 ],
                 check=True,
@@ -355,6 +389,8 @@ class DryRunTests(unittest.TestCase):
                     "refresh",
                     "--profile",
                     "layered",
+                    "--output-mode",
+                    "agent",
                 ],
                 check=True,
                 capture_output=True,
@@ -384,6 +420,8 @@ class DryRunTests(unittest.TestCase):
                     "refresh",
                     "--profile",
                     "layered",
+                    "--output-mode",
+                    "agent",
                 ],
                 check=True,
                 capture_output=True,
