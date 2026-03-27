@@ -3,56 +3,54 @@ import React, { useEffect, useState } from 'react';
 // --- Icon Components (Inline SVG) ---
 const Artifacts = {
   human: {
-    title: "docs/overview.md",
-    content: `# Project Overview\n\n## Purpose\nThis repository provides a CLI-first documentation system for coding-agent workflows.\n\n## Core Outputs\n- \`docs/\` for human maintainers and onboarding\n- \`AGENTS/\` for agent execution and handoff\n\n## Lifecycle\n- \`docagent init\`\n- \`docagent doctor\`\n- \`docagent refresh\``
+    title: "docs/architecture.md",
+    content: `# Architecture Overview\n\n## Narrative Context\nThis repository implements a rule-based documentation engine. It prioritizes clarity for human onboarding.\n\n## Core Logic\n- Unified Scan: One pass for both target outputs.\n- Drift Detection: Automated sync checks.\n\n## How to Maintain\nUse \`docagent refresh\` after significant AST changes.`
   },
   agent: {
-    title: "AGENTS/03-execution/008-implementation-plan.md",
-    content: `# Workflows\n\n## Top Rules (Read First)\n- Verify before merging.\n- Use the documented command path, not ad-hoc prompts.\n- Escalate source-of-truth conflicts before editing.\n\n## Run\n- \`docagent init --ai codex --target .\`\n- \`docagent refresh --root . --output-mode dual\``
+    title: "AGENTS/00-context/002-rules.md",
+    content: `# Execution Rules\n\n## Path Mapping\n- Source: /src/core\n- Documentation: /docs\n\n## Constraints (Machine Truth)\n- STRICT: Do not modify index.js directly.\n- REQUIRED: Run @docagent-doctor before every task.\n- INVARIANT: All skills must reside in /AGENTS/skills.`
   }
 };
 
 const heroCases = [
   {
     index: 0,
-    label: 'Agent Skill',
-    title: 'Codex / Agentic Workflow',
-    command: 'tim@macBook ~ % @codex Use doc-for-agent to check the current branch health.',
-    output: [
-      { text: 'Codex: Calling doc-for-agent skill...', color: 'var(--primary)' },
-      { text: '$ docagent doctor --target . --platform codex', color: 'var(--text-secondary)' },
-      { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
-      { text: '✓ No drift detected in 24 core modules.', color: 'var(--accent)' },
-      { text: '[2/2] Status: Systemic Integrity Confirmed.', color: 'var(--accent)' },
-      { text: 'Codex: Context grounded. You are ready to proceed.', color: 'var(--primary)' },
-    ]
-  },
-  {
-    index: 1,
     label: 'docagent init',
     title: 'Initialize System',
     command: 'tim@macBook ~ % docagent init --ai codex --target .',
     output: [
-      { text: '[1/3] Scanning repository depth...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected CLI-first repo with existing product docs', color: 'var(--accent)' },
-      { text: '[2/3] Building dual documentation baseline...', color: 'var(--text-secondary)' },
-      { text: '+ Generated /AGENTS/ (Machine Source-of-Truth)', color: '#fff' },
-      { text: '+ Generated /docs/ (Human-Centric Guides)', color: '#fff' },
-      { text: '[3/3] Done. Baseline established for all agents.', color: 'var(--accent)' },
+      { text: '[1/3] Deep scanning repository...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected low-doc state with scattered configurations.', color: 'var(--accent)' },
+      { text: '[2/3] Generating Dual-Doc baseline...', color: 'var(--text-secondary)' },
+      { text: '  + /AGENTS/ (Machine Source-of-Truth)', color: '#fff' },
+      { text: '  + /docs/   (Human Narrative)', color: '#fff' },
+      { text: '[3/3] Systemic Bridge established.', color: 'var(--accent)' },
+    ]
+  },
+  {
+    index: 1,
+    label: 'docagent refresh',
+    title: 'Lifecycle Sync',
+    command: 'tim@macBook ~ % docagent refresh',
+    output: [
+      { text: '[1/2] Checking for drift...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected 3 core logic changes in /src/models.', color: 'var(--accent)' },
+      { text: '[2/2] Synchronizing dual outputs...', color: 'var(--text-secondary)' },
+      { text: '  ↺ /AGENTS/ context updated.', color: '#fff' },
+      { text: '  ↺ /docs/ technical guides updated.', color: '#fff' },
+      { text: 'Refresh complete (1.2s). All agents aligned.', color: 'var(--primary)' },
     ]
   },
   {
     index: 2,
-    label: 'docagent refresh',
-    title: 'Lifecycle Sync',
-    command: 'tim@macBook ~ % docagent refresh --root . --output-mode dual',
+    label: 'docagent doctor',
+    title: 'Health Audit',
+    command: 'tim@macBook ~ % docagent doctor',
     output: [
-      { text: '[1/2] Detecting code evolution...', color: 'var(--text-secondary)' },
-      { text: '✓ Supporting docs and code signals changed', color: 'var(--accent)' },
-      { text: '[2/2] Synchronizing dual documentation...', color: 'var(--text-secondary)' },
-      { text: '↺ AGENTS/ updated for agent execution', color: '#fff' },
-      { text: '↺ docs/ updated for maintainers and onboarding', color: '#fff' },
-      { text: 'Lifecycle Sync complete (8s).', color: 'var(--primary)' },
+      { text: '[1/1] Auditing knowledge integrity...', color: 'var(--text-secondary)' },
+      { text: '✓ All AGENTS/ skills grounded to current code.', color: 'var(--accent)' },
+      { text: '✓ Human docs synchronized with recent PRs.', color: 'var(--accent)' },
+      { text: 'Status: Systemic Integrity Confirmed.', color: 'var(--primary)' },
     ]
   }
 ];
@@ -106,11 +104,11 @@ function App() {
           <div className="hero-copy scroll-reveal">
             <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>CLI Agent Skill</div>
             <h1>
-              The Documentation System <br />
-              <span style={{ color: 'var(--primary)' }}>for CLI Coding Agents.</span>
+              The Systemic Bridge <br />
+              <span style={{ color: 'var(--primary)' }}>Between Code and Agents.</span>
             </h1>
             <p className="hero-text">
-              Transform raw code into a durable, systemic knowledge base. Stop relying on one-off chat sessions; build a persistent bridge between your code and your agents.
+              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent Machine Truth for Agents, Clear Narrative for Humans. Zero drift, full alignment.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">Start Lifecycle</a>
@@ -158,23 +156,34 @@ function App() {
         {/* DUAL DOC LOGIC SECTION */}
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Dual-Doc Advantage</span>
-            <h2>One engine. Two core audiences. Less drift.</h2>
-            <p className="feature-desc">By using a unified analysis engine, we keep agent-facing rules and human-facing guides synchronized through the same repository scan.</p>
+            <span className="eyebrow">The Dual-Doc Architecture</span>
+            <h2>One scan. Two worlds. Zero drift.</h2>
+            <p className="feature-desc">Why maintain two sets of docs? Because agents need <strong>Execution Rules</strong> while humans need <strong>Architectural Narrative</strong>. We generate both from a single source of truth.</p>
           </div>
 
           <div className="sync-diagram scroll-reveal">
-             <div className="sync-part">
-               <div className="circle-pulse accent" />
-               <strong>Unified Analysis Engine</strong>
-               <p>Deep scan of directory structure, AST, and legacy artifacts.</p>
+             <div className="sync-part source">
+               <div className="source-stack">
+                 <div className="stack-item code">/src</div>
+                 <div className="stack-item messy">README.md</div>
+                 <div className="stack-item config">.env.example</div>
+               </div>
+               <strong>Raw Repository Assets</strong>
+               <p>Messy, low-doc, or inconsistent files.</p>
              </div>
-             <div className="sync-arrow">
-               <svg width="40" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h30"/><path d="m28 5 7 7-7 7"/></svg>
+             <div className="sync-arrow-center">
+               <div className="engine-orb">
+                 <div className="orb-inner" />
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
+               </div>
              </div>
-             <div className="sync-results">
-               <div className="res-card agent"><strong>/AGENTS/</strong> Machine Truth</div>
-               <div className="res-card human"><strong>/docs/</strong> Human Narrative</div>
+             <div className="sync-part results">
+               <div className="res-card-group">
+                 <div className="res-card agent"><strong>/AGENTS/</strong> Machine Truth</div>
+                 <div className="res-card human"><strong>/docs/</strong> Human Narrative</div>
+               </div>
+               <strong>Dual-Doc Ecosystem</strong>
+               <p>Synchronized, systemic knowledge.</p>
              </div>
           </div>
 
@@ -182,7 +191,7 @@ function App() {
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (The Context)</div>
               <h3>/AGENTS/ Baseline</h3>
-              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, Continue, and Copilot workflows to navigate repositories with lower ambiguity.</p>
+              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with machine-level precision.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
                 <li>✓ Cross-session Memory</li>
@@ -210,9 +219,9 @@ function App() {
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Repo', desc: 'From a thin baseline to a structured documentation system with one command path.' },
-              { type: 'Messy-Doc Repo', desc: 'Inhale scattered READMEs and systemize them into a durable Dual-Doc system.' },
-              { type: 'Agent-Ready Repo', desc: 'Maintain peak efficiency for every agent session with automated lifecycle sync.' }
+              { type: 'Low-Doc Repo', desc: 'Bootstrap a professional documentation system from raw source code and config files.' },
+              { type: 'Messy-Doc Repo', desc: 'Inhale scattered, outdated READMEs and systemize them into a durable structured baseline.' },
+              { type: 'Scaling Repo', desc: 'Maintain peak alignment for every agent session with automated, recurring lifecycle sync.' }
             ].map(s => (
               <div key={s.type} className="scenario-pill glass-card">
                 <strong>{s.type}</strong>
@@ -241,25 +250,27 @@ function App() {
         {/* WHY DOCAGENT SECTION */}
         <section className="section" id="why-docagent">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Prompting Trap</span>
-            <h2>Stop chat-history knowledge rot.</h2>
-            <p className="feature-desc">Sessions drift. Knowledge vanishes. HALLUCINATIONS increase as repositories grow. doc-for-agent provides the systemic ground truth that ephemeral chats lack.</p>
+            <span className="eyebrow">The Prompting Paradox</span>
+            <h2>Why not just prompt the agent?</h2>
+            <p className="feature-desc">Prompting works for small fixes, but fails for long-term repo maintenance. Ephemeral chat histories drift, context limits overflow, and different agents hallucinate different rules.</p>
           </div>
 
           <div className="drift-visual scroll-reveal">
             <div className="drift-card bad">
-              <div className="drift-title">Ad-hoc Prompting</div>
-              <ul>
+              <div className="drift-title">Ephemeral Prompting</div>
+              <ul className="mini-features" style={{ color: '#f87171' }}>
                 <li>❌ Knowledge expires mid-session</li>
                 <li>❌ Inconsistent for different agents</li>
-                <li>❌ Manual sync, manual copy-paste</li>
+                <li>❌ Fails on large, messy context</li>
+                <li>❌ Manual drift, higher hallucinations</li>
               </ul>
             </div>
             <div className="drift-card good">
-              <div className="drift-title">Doc-for-Agent System</div>
-              <ul>
+              <div className="drift-title">Systemic Documentation</div>
+              <ul className="mini-features">
                 <li>✅ Persistent /AGENTS baseline</li>
                 <li>✅ Unified truth for every agent</li>
+                <li>✅ Scales to complex, low-doc repos</li>
                 <li>✅ Automated CLI refresh cycle</li>
               </ul>
             </div>
