@@ -85,6 +85,7 @@ docagent all --target <repo-root>
 
 ## Docs
 
-- [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md) (start here)
-- [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md) (choose `--ai`)
+1. [Landing Page Note (EN)](docs/landing-page.md) / [落地页说明 (ZH)](docs/landing-page.zh.md)
+2. [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md)
+3. [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md)
 - [Maintainer Guide](docs/maintainers.md)
