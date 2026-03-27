@@ -11,6 +11,7 @@ from doc_for_agent_generator import (
     SUPPORTED_DOC_PROFILES,
     SUPPORTED_ENGINE_ACTIONS,
     SUPPORTED_HUMAN_LOCALES,
+    SUPPORTED_HUMAN_TEMPLATE_VARIANTS,
     SUPPORTED_OUTPUT_MODES,
     SUPPORTED_REPO_TYPES,
     EngineRequest,
@@ -92,6 +93,12 @@ def main() -> None:
         default="en",
         help="Locale-aware human docs output root mapping only (`en` -> `docs/`, `zh` -> `docs.zh/`); no translation applied.",
     )
+    parser.add_argument(
+        "--human-template",
+        choices=SUPPORTED_HUMAN_TEMPLATE_VARIANTS,
+        default="paired-core",
+        help="Select human docs template variant for pairing/structure rules (no translation logic).",
+    )
     args = parser.parse_args()
 
     root = Path(args.root).expanduser().resolve()
@@ -100,6 +107,7 @@ def main() -> None:
         mode=args.mode,
         output_mode=args.output_mode,
         human_locale=args.human_locale,
+        human_template_variant=args.human_template,
         profile=args.profile,
         project_name=args.project_name or "",
         repo_type_override=args.repo_type,

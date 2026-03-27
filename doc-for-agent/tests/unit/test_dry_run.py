@@ -111,6 +111,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("agent roots: 1", result.stdout)
             self.assertIn("flat agent files: 0", result.stdout)
             self.assertIn("Suggested command: python3 doc-for-agent/scripts/init_agents_docs.py --root", result.stdout)
+            self.assertIn("Human template variant: `paired-core`", result.stdout)
             self.assertIn("Suggested source-of-truth files:", result.stdout)
             self.assertIn("Supporting-doc synthesis summary:", result.stdout)
             self.assertIn("product: confirmed=", result.stdout)
@@ -298,6 +299,8 @@ class DryRunTests(unittest.TestCase):
                     "human",
                     "--human-locale",
                     "zh",
+                    "--human-template",
+                    "paired-core",
                 ],
                 check=True,
                 capture_output=True,

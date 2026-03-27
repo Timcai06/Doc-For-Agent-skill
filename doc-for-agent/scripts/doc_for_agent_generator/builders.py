@@ -11,9 +11,41 @@ from .utils import find_files, load_json, rel_path
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
 SUPPORTED_HUMAN_LOCALES = ("en", "zh")
+SUPPORTED_HUMAN_TEMPLATE_VARIANTS = ("paired-core",)
 HUMAN_LOCALE_OUTPUT_ROOTS = {
     "en": "docs",
     "zh": "docs.zh",
+}
+DEFAULT_HUMAN_TEMPLATE_BY_LOCALE = {
+    "en": "paired-core",
+    "zh": "paired-core",
+}
+HUMAN_PAIRED_PATH_RULES = {
+    "bootstrap": {
+        "product": [
+            ("product.md", "agent-facing product rules and scope guardrails"),
+        ],
+        "architecture": [
+            ("architecture.md", "source-of-truth and repository boundary rules"),
+        ],
+        "execution": [
+            ("workflows.md", "setup, verify, and failure-triage order"),
+        ],
+    },
+    "layered": {
+        "product": [
+            ("01-product/001-core-goals.md", "agent-facing product rules and scope guardrails"),
+            ("01-product/002-prd.md", "agent-facing user and outcome contract"),
+            ("01-product/003-app-flow.md", "agent-facing flow and entry-surface notes"),
+        ],
+        "architecture": [
+            ("02-architecture/004-tech-stack.md", "stack facts and platform anchors"),
+            ("02-architecture/007-architecture-compatibility.md", "source-of-truth and compatibility rules"),
+        ],
+        "execution": [
+            ("03-execution/008-implementation-plan.md", "setup, verify, and failure-triage order"),
+        ],
+    },
 }
 
 
@@ -25,6 +57,12 @@ def format_bullets(items: Sequence[str], empty_line: str) -> str:
 
 def resolve_human_output_root(human_locale: str) -> str:
     return HUMAN_LOCALE_OUTPUT_ROOTS.get(human_locale, HUMAN_LOCALE_OUTPUT_ROOTS["en"])
+
+
+def resolve_human_template_variant(human_locale: str, human_template_variant: str | None = None) -> str:
+    if human_template_variant:
+        return human_template_variant
+    return DEFAULT_HUMAN_TEMPLATE_BY_LOCALE.get(human_locale, DEFAULT_HUMAN_TEMPLATE_BY_LOCALE["en"])
 
 
 def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> str:
@@ -289,27 +327,8 @@ def human_dual_sync_checklist_lines(role: str) -> list[str]:
 
 
 def paired_agent_doc_lines(analysis: RepoAnalysis, role: str) -> list[str]:
-    if analysis.doc_profile == "layered":
-        mapping = {
-            "product": [
-                ("01-product/001-core-goals.md", "agent-facing product rules and scope guardrails"),
-                ("01-product/002-prd.md", "agent-facing user and outcome contract"),
-                ("01-product/003-app-flow.md", "agent-facing flow and entry-surface notes"),
-            ],
-            "architecture": [
-                ("02-architecture/004-tech-stack.md", "stack facts and platform anchors"),
-                ("02-architecture/007-architecture-compatibility.md", "source-of-truth and compatibility rules"),
-            ],
-            "execution": [
-                ("03-execution/008-implementation-plan.md", "setup, verify, and failure-triage order"),
-            ],
-        }
-    else:
-        mapping = {
-            "product": [("product.md", "agent-facing product rules and scope guardrails")],
-            "architecture": [("architecture.md", "source-of-truth and repository boundary rules")],
-            "execution": [("workflows.md", "setup, verify, and failure-triage order")],
-        }
+    profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
+    mapping = HUMAN_PAIRED_PATH_RULES[profile]
 
     lines: list[str] = []
     for relative, purpose in mapping.get(role, []):
@@ -2412,7 +2431,12 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 """
 
 
-def generate_human_docs(analysis: RepoAnalysis, human_locale: str = "en") -> Dict[str, str]:
+def generate_human_docs(
+    analysis: RepoAnalysis,
+    human_locale: str = "en",
+    human_template_variant: str | None = None,
+) -> Dict[str, str]:
+    _ = resolve_human_template_variant(human_locale, human_template_variant)
     output_root = resolve_human_output_root(human_locale)
     return {
         f"{output_root}/overview.md": build_human_overview(analysis),

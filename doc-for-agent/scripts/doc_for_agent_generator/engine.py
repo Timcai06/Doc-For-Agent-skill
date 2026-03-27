@@ -9,12 +9,14 @@ from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
 from .builders import (
     SUPPORTED_DOC_PROFILES,
     SUPPORTED_HUMAN_LOCALES,
+    SUPPORTED_HUMAN_TEMPLATE_VARIANTS,
     SUPPORTED_OUTPUT_MODES,
     generate_docs,
     generate_human_docs,
     infer_source_of_truth_lines,
     repo_type_label,
     resolve_human_output_root,
+    resolve_human_template_variant,
 )
 from .markdown import MANUAL_END, MANUAL_START, merge_markdown
 from .models import RepoAnalysis
@@ -45,6 +47,7 @@ class EngineRequest:
     mode: str = "refresh"
     output_mode: str = "dual"
     human_locale: str = "en"
+    human_template_variant: str = "paired-core"
     profile: str = "bootstrap"
     project_name: str = ""
     repo_type_override: Optional[str] = None
@@ -92,6 +95,11 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         raise ValueError(
             f"Unsupported human locale `{request.human_locale}`. Supported: {', '.join(SUPPORTED_HUMAN_LOCALES)}"
         )
+    if request.human_template_variant not in SUPPORTED_HUMAN_TEMPLATE_VARIANTS:
+        raise ValueError(
+            "Unsupported human template variant "
+            f"`{request.human_template_variant}`. Supported: {', '.join(SUPPORTED_HUMAN_TEMPLATE_VARIANTS)}"
+        )
     effective_profile = effective_profile_for_mode(request.mode, request.profile)
     if effective_profile not in SUPPORTED_DOC_PROFILES:
         raise ValueError(f"Unsupported profile `{request.profile}`. Supported: {', '.join(SUPPORTED_DOC_PROFILES)}")
@@ -105,6 +113,7 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         mode=request.mode,
         output_mode=request.output_mode,
         human_locale=request.human_locale,
+        human_template_variant=request.human_template_variant,
         profile=effective_profile,
         project_name=project_name,
         repo_type_override=request.repo_type_override,
@@ -164,6 +173,7 @@ def collect_output_plan(
     analysis: RepoAnalysis,
     output_mode: str,
     human_locale: str,
+    human_template_variant: str,
 ) -> tuple[Dict[str, str], list[Path]]:
     planned: Dict[str, str] = {}
     archive_candidates: list[Path] = []
@@ -176,7 +186,11 @@ def collect_output_plan(
         archive_candidates = list(analysis.docs_inventory.archive_candidates)
 
     if output_mode in {"human", "dual"}:
-        human_files = generate_human_docs(analysis, human_locale=human_locale)
+        human_files = generate_human_docs(
+            analysis,
+            human_locale=human_locale,
+            human_template_variant=human_template_variant,
+        )
         for name, content in human_files.items():
             planned[str(root / name)] = content
 
@@ -196,6 +210,7 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
         analysis,
         normalized_request.output_mode,
         normalized_request.human_locale,
+        normalized_request.human_template_variant,
     )
     agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
     docs_dir = normalized_request.root / resolve_human_output_root(normalized_request.human_locale)
@@ -306,6 +321,7 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         f"- Package manager: `{analysis.package_manager}`",
         f"- Output mode: `{plan.request.output_mode}`",
         f"- Human locale: `{plan.request.human_locale}` (output root: `{plan.docs_dir}`)",
+        f"- Human template variant: `{resolve_human_template_variant(plan.request.human_locale, plan.request.human_template_variant)}`",
         "- Recommended output mode: `dual` (AGENTS + docs).",
         f"- Suggested profile: `{suggested_profile}`",
         f"- Documentation state: `{analysis.docs_inventory.detected_state}`",

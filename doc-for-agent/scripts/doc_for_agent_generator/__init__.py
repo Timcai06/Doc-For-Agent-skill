@@ -1,12 +1,17 @@
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
 from .builders import (
+    DEFAULT_HUMAN_TEMPLATE_BY_LOCALE,
+    HUMAN_LOCALE_OUTPUT_ROOTS,
+    HUMAN_PAIRED_PATH_RULES,
     SUPPORTED_DOC_PROFILES,
     SUPPORTED_HUMAN_LOCALES,
+    SUPPORTED_HUMAN_TEMPLATE_VARIANTS,
     SUPPORTED_OUTPUT_MODES,
     generate_docs,
     generate_human_docs,
     repo_type_label,
     resolve_human_output_root,
+    resolve_human_template_variant,
 )
 from .engine import (
     SUPPORTED_ENGINE_ACTIONS,
@@ -31,8 +36,12 @@ __all__ = [
     "MANUAL_START",
     "SUPPORTED_REPO_TYPES",
     "SUPPORTED_DOC_PROFILES",
+    "SUPPORTED_HUMAN_TEMPLATE_VARIANTS",
     "SUPPORTED_HUMAN_LOCALES",
     "SUPPORTED_OUTPUT_MODES",
+    "HUMAN_LOCALE_OUTPUT_ROOTS",
+    "DEFAULT_HUMAN_TEMPLATE_BY_LOCALE",
+    "HUMAN_PAIRED_PATH_RULES",
     "SUPPORTED_ENGINE_ACTIONS",
     "EngineExecutionResult",
     "EngineRequest",
@@ -53,6 +62,7 @@ __all__ = [
     "write_strategy_for_mode",
     "repo_type_label",
     "resolve_human_output_root",
+    "resolve_human_template_variant",
     "read_text",
     "write_file",
 ]
