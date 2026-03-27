@@ -1,3 +1,5 @@
+import React from 'react';
+
 export function LogoMark() {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" className="logo-mark">
