@@ -449,6 +449,85 @@ code {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Output Columns in Dual-Doc section */
+.output-column {
+  padding: 12px;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0 !important;
+}
+
+.feature-list li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+}
+
+.feature-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Accent Hovers */
+.accent-hover {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.accent-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+}
+
+/* Command Pills */
+.command-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cmd-pill {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cmd-pill:hover {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+/* Refined Steps Visual */
+.steps-visual {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 64px 32px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  margin-top: 64px;
+}
+
+.step-circle {
+  transition: all 0.3s ease;
+}
+
+.step-node:hover .step-circle {
+  transform: scale(1.1);
+  background: var(--primary);
+  color: #fff;
+}
+
 @media (max-width: 1024px) {
   .hero {
     grid-template-columns: 1fr;
@@ -459,13 +538,22 @@ code {
   .hero-text { margin: 32px auto; }
   .hero-actions { justify-content: center; }
   .bento-item, .bento-item.wide, .bento-item.large { grid-column: span 12; }
+  
+  .output-column {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+  }
+  .output-column:last-child {
+    border-bottom: none;
+    padding-top: 24px;
+  }
 }
 
 @media (max-width: 768px) {
   .topbar { margin-top: 16px; width: calc(100% - 32px); }
   .nav-links { display: none; }
   .hero { padding-top: 80px; }
-  .steps-visual { flex-direction: column; }
+  .steps-visual { flex-direction: column; gap: 48px; }
   .step-arrow { display: none; }
 }
 
