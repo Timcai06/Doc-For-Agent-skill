@@ -29,6 +29,7 @@ class RepoClassificationTests(unittest.TestCase):
                     "```bash\n"
                     "docagent init --ai codex\n"
                     "docagent refresh --output-mode dual\n"
+                    "npm run test\n"
                     "```\n\n"
                     "## Platform Coverage\n\n"
                     "- Supports Codex, Claude Code, Continue, and Copilot through a unified CLI surface.\n"
@@ -43,6 +44,7 @@ class RepoClassificationTests(unittest.TestCase):
 
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
             self.assertTrue(any("Documented workflow sequence" in line for line in execution_confirmed))
+            self.assertTrue(any("Verification gate:" in line for line in execution_confirmed))
             self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
             self.assertTrue(
@@ -71,6 +73,29 @@ class RepoClassificationTests(unittest.TestCase):
 
             self.assertTrue(any("Codex uses docagent init --ai codex --target <repo-root>" in line for line in architecture_confirmed))
             self.assertFalse(any(line.strip().startswith("|") for line in architecture_confirmed))
+
+    def test_synthesis_emits_product_scope_rule_and_source_of_truth_boundary(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-synthesis-rules-") as tmpdir:
+            root = Path(tmpdir) / "synthesis-rules-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Synthesis Rules Repo\n\n"
+                    "Docagent is the unified CLI entry for Codex and Claude coding-agent workflows.\n\n"
+                    "Use source of truth files before editing distribution behavior:\n"
+                    "- `README.md`\n"
+                    "- `package.json`\n\n"
+                    "This project serves human, agent, and dual documentation workflows.\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Synthesis Rules Repo")
+            product_confirmed = analysis.supporting_doc_insights.get("product", {}).get("confirmed", [])
+            architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
+
+            self.assertTrue(any("Product scope rule:" in line for line in product_confirmed))
+            self.assertTrue(any("Source-of-truth boundary:" in line for line in architecture_confirmed))
 
     def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-command-priority-") as tmpdir:

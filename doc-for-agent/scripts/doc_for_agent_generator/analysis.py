@@ -606,6 +606,12 @@ def extract_execution_command_snippets(text: str) -> List[str]:
             add_command(bullet)
             if len(commands) >= 8:
                 break
+
+    if len(commands) < 8:
+        for inline in re.findall(r"`([^`]+)`", text):
+            add_command(inline)
+            if len(commands) >= 8:
+                break
     return commands
 
 
@@ -745,6 +751,29 @@ def extract_commands_from_snippets(snippets: Sequence[str]) -> List[str]:
     return commands
 
 
+def extract_source_of_truth_paths(snippets: Sequence[str], aggregate_text: str) -> List[str]:
+    candidates: List[str] = []
+    path_pattern = re.compile(r"`([^`]+(?:/[^`]+)*\.[a-z0-9_-]+)`", re.IGNORECASE)
+    for snippet in snippets:
+        for match in path_pattern.findall(snippet):
+            normalized = match.strip()
+            if normalized and normalized not in candidates:
+                candidates.append(normalized)
+
+    common_files = (
+        "readme.md",
+        "skill.md",
+        "package.json",
+        "pyproject.toml",
+        "requirements.txt",
+    )
+    lowered = aggregate_text.lower()
+    for filename in common_files:
+        if filename in lowered and filename not in candidates:
+            candidates.append(filename)
+    return candidates[:4]
+
+
 def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: Sequence[str]) -> List[str]:
     lines: List[str] = []
     lowered = aggregate_text.lower()
@@ -764,20 +793,24 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         ]
         if verify_commands:
             summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
-            lines.append(f"Documented verification commands include {summary}.")
+            lines.append(f"Verification gate: after workflow updates, run {summary} before handoff or release.")
     elif role == "architecture":
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
         if platforms and "docagent" in lowered:
             labels = ", ".join(f"`{name}`" for name in platforms)
             lines.append(f"Platform entry surface is documented around `docagent` for {labels} workflows.")
-        if any(token in lowered for token in ("source of truth", "canonical", "readme.md")):
-            lines.append("Source-of-truth expectations are explicitly documented and should stay aligned with generator behavior.")
+        source_paths = extract_source_of_truth_paths(snippets, aggregate_text)
+        if source_paths and any(token in lowered for token in ("source of truth", "canonical", "readme.md", "entry", "distribution")):
+            labels = ", ".join(f"`{path}`" for path in source_paths[:3])
+            lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry or distribution wiring.")
     elif role == "product":
         if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
             lines.append("Product usage context emphasizes `human / agent / dual` outputs for CLI coding-agent workflows.")
         if "docagent init" in lowered and "docagent refresh" in lowered:
             lines.append("Product expectations center on repeatable `init -> refresh` lifecycle, not one-off document generation.")
-    return lines[:2]
+        if any(token in lowered for token in ("cli", "coding-agent", "codex", "claude")):
+            lines.append("Product scope rule: optimize for CLI coding-agent users who need repeatable repository documentation workflows.")
+    return lines[:3]
 
 
 def summarize_sources(paths: Sequence[Path], root: Path) -> str:
