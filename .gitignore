@@ -20,3 +20,6 @@ landing/dist/
 
 # Local kickoff / collaboration notes live under /开工 and should not ship.
 /开工/
+
+# Antigravity/Gemini may emit a root-level landing report artifact during landing work.
+/landing-page-report.md
