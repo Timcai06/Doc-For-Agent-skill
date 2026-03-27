@@ -16,7 +16,5 @@ __pycache__/
 # Packaging experiments are not part of main's source of truth yet.
 /src/doc_for_agent/
 
-# Local product / collaboration notes live at repo root and should not ship.
-/产品定位文档.md
-/worktree-collaboration.md
-/worktree-collaboration.zh.md
+# Local kickoff / collaboration notes live under /开工 and should not ship.
+/开工/
