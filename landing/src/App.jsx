@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 // --- Icon Components (Inline SVG) ---
 const Artifacts = {
   human: {
-    title: "docs/onboarding.md",
-    content: `# Onboarding Guide\n## Core Concepts\nThe system uses a **Plugin-based** architecture.\nTo extend, see \`/src/plugins\`.\n\n## Getting Started\n1. \`npm install\`\n2. \`docagent init\`\n3. \`docagent refresh\``
+    title: "docs/architecture.md",
+    content: `# Technical Architecture\n\n## Overview\nThis project follows a **modular plugin** design. Each core component is isolated in \`/src/plugins\` to ensure high maintainability.\n\n## Core Flows\n- **Scanner**: Analyzes file AST and directory structures.\n- **Synthesizer**: Generates balanced human/agent context.\n- **Lifecycle Manager**: Handles \`init\`, \`doctor\`, and \`refresh\` logic.`
   },
   agent: {
     title: "AGENTS/source-of-truth.json",
-    content: `{\n  "project_type": "nodejs/vite",\n  "entry_points": ["src/main.jsx"],\n  "knowledge_graph": {\n    "nodes": 42,\n    "edges": 128\n  },\n  "constraints": [\n    "No global state",\n    "Tailwind not allowed"\n  ]\n}`
+    content: `{\n  "project_id": "agent-skill-engine",\n  "architecture": "plugin-modular",\n  "critical_paths": ["src/plugins", "src/core"],\n  "execution_rules": [\n    "strict_typing_required",\n    "no_transient_state"\n  ],\n  "dependency_graph": {\n    "nodes": 84,\n    "depth": 5\n  }\n}`
   }
 };
 
@@ -17,52 +17,52 @@ const heroCases = [
     index: 0,
     label: 'Agent Skill',
     title: 'Codex / Agentic Workflow',
-    command: 'tim@macBook ~ % @codex Analyze current branch health.',
+    command: 'tim@macBook ~ % @codex Use doc-for-agent to check the current branch health.',
     output: [
       { text: 'Codex: Calling doc-for-agent skill...', color: 'var(--primary)' },
       { text: '$ docagent doctor --root .', color: 'var(--text-secondary)' },
       { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
       { text: '✓ No drift detected in 24 core modules.', color: 'var(--accent)' },
       { text: '[2/2] Status: Systemic Integrity Confirmed.', color: 'var(--accent)' },
-      { text: 'Codex: Doc-for-agent grounded your context.', color: 'var(--primary)' },
+      { text: 'Codex: Context grounded. You are ready to proceed.', color: 'var(--primary)' },
     ]
   },
   {
     index: 1,
     label: 'docagent init',
     title: 'Initialize System',
-    command: 'tim@macBook ~ % docagent init --ai codex',
+    command: 'tim@macBook ~ % docagent init --mode dual',
     output: [
-      { text: '[1/3] Analyzing repo architecture...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected 4 microservices', color: 'var(--accent)' },
-      { text: '✓ Found legacy docs in /wiki', color: 'var(--accent)' },
-      { text: '[2/3] Synthesizing Dual-Docs...', color: 'var(--text-secondary)' },
-      { text: '+ Created /AGENTS/ (Source of Truth)', color: '#fff' },
-      { text: '+ Structured /docs/ (Human Onboarding)', color: '#fff' },
+      { text: '[1/3] Scanning repository depth...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected 4 microservices & 12 entry points', color: 'var(--accent)' },
+      { text: '[2/3] Building Knowledge Bridge...', color: 'var(--text-secondary)' },
+      { text: '+ Generated /AGENTS/ (Machine Source-of-Truth)', color: '#fff' },
+      { text: '+ Generated /docs/ (Human-Centric Guides)', color: '#fff' },
+      { text: '[3/3] Done. Baseline established for all agents.', color: 'var(--accent)' },
     ]
   },
   {
     index: 2,
     label: 'docagent refresh',
-    title: 'Sync Lifecycle',
+    title: 'Lifecycle Sync',
     command: 'tim@macBook ~ % docagent refresh --ai all',
     output: [
-      { text: '[1/2] Scanning branch feature/v2...', color: 'var(--text-secondary)' },
-      { text: '✓ 14 files changed', color: 'var(--accent)' },
-      { text: '[2/2] Syncing documentation...', color: 'var(--text-secondary)' },
-      { text: '✓ AGENTS/context.json updated', color: '#fff' },
-      { text: '✓ docs/CHANGELOG.md updated', color: '#fff' },
-      { text: 'Sync complete (12s).', color: 'var(--primary)' },
+      { text: '[1/2] Detecting code evolution...', color: 'var(--text-secondary)' },
+      { text: '✓ 14 files changed in /src/core', color: 'var(--accent)' },
+      { text: '[2/2] Synchronizing Dual-Docs...', color: 'var(--text-secondary)' },
+      { text: '↺ AGENTS/context.json updated', color: '#fff' },
+      { text: '↺ docs/CHANGELOG.md updated', color: '#fff' },
+      { text: 'Lifecycle Sync complete (8s).', color: 'var(--primary)' },
     ]
   }
 ];
 
 const commands = [
-  { name: 'init', desc: 'Initialize documentation system from scratch', status: 'Production' },
-  { name: 'doctor', desc: 'Audit current documentation for drift and health', status: 'Stable' },
-  { name: 'refresh', desc: 'Sync documentation with the latest code state', status: 'Production' },
-  { name: 'migrate', desc: 'Inhale and systemize legacy documentation files', status: 'Beta' },
-  { name: 'generate', desc: 'Force-generate specific artifact subsets', status: 'Stable' },
+  { name: 'init', desc: 'Bootstrap the Dual-Doc system from zero-knowledge state', status: 'Production' },
+  { name: 'doctor', desc: 'Audit repository stability and documentation health', status: 'Stable' },
+  { name: 'refresh', desc: 'Sync documentation with real-time code evolution', status: 'Production' },
+  { name: 'migrate', desc: 'Systemize scattered READMEs into structured baselines', status: 'Beta' },
+  { name: 'generate', desc: 'Produce machine-first artifacts for specific AI agents', status: 'Stable' },
 ];
 
 function App() {
@@ -93,10 +93,9 @@ function App() {
           <small>v1.2.0 "Systemic"</small>
         </a>
         <nav className="nav-links">
-          <a href="#why-stability">Why?</a>
-          <a href="#workflow">Path</a>
-          <a href="#artifacts">Outputs</a>
-          <a href="#status">Matrix</a>
+          <a href="#dual-logic">Dual-Doc System</a>
+          <a href="#why-docagent">Why Stability?</a>
+          <a href="#workflow">The Path</a>
           <a className="nav-cta" href="https://github.com/Timcai06/Doc-For-Agent-skill">GitHub</a>
         </nav>
       </header>
@@ -105,17 +104,17 @@ function App() {
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
           <div className="hero-copy scroll-reveal">
-            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>Stable Source-of-Truth</div>
+            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>CLI Agent Skill</div>
             <h1>
-              Ground your Agents. <br />
-              <span style={{ color: 'var(--primary)' }}>Sustain your Knowledge.</span>
+              The Documentation System <br />
+              <span style={{ color: 'var(--primary)' }}>for CLI Coding Agents.</span>
             </h1>
             <p className="hero-text">
-              The purpose-built documentation skill for CLI coding agents. Stop relying on one-off chat sessions; build a durable knowledge bridge between your code, your team, and your agents.
+              Transform raw code into a durable, systemic knowledge base. Stop relying on one-off chat sessions; build a persistent bridge between your code and your agents.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#workflow">Get Started</a>
-              <a className="button button-secondary" href="#artifacts">Explore Artifacts</a>
+              <a className="button button-primary" href="#workflow">Start Lifecycle</a>
+              <a className="button button-secondary" href="#dual-logic">The Dual-Doc Advantage</a>
             </div>
           </div>
 
@@ -156,88 +155,47 @@ function App() {
           </div>
         </section>
 
-        {/* WHY STABILITY */}
-        <section className="section" id="why-stability">
+        {/* DUAL DOC LOGIC SECTION */}
+        <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Prompting Trap</span>
-            <h2>One-off chats are not documentation.</h2>
-            <p className="feature-desc">Sessions drift. Knowledge vanishes. Agents hallucinate in messy repositories. We provide the systemic "Ground Truth" that ephemeral sessions lack.</p>
+            <span className="eyebrow">The Dual-Doc Model</span>
+            <h2>One engine, two core audiences.</h2>
+            <p className="feature-desc">We separate machine truth from human narrative to maximize efficiency for both.</p>
           </div>
 
-          <div className="drift-visual scroll-reveal">
-            <div className="drift-card bad">
-              <div className="drift-title">Ad-hoc Prompting</div>
-              <ul>
-                <li>❌ Knowledge expires with session</li>
-                <li>❌ Inconsistent for different agents</li>
-                <li>❌ Manual sync, manual copy-paste</li>
+          <div className="dual-grid scroll-reveal">
+            <div className="dual-card agent">
+              <div className="card-label">FOR AGENTS</div>
+              <h3>/AGENTS/ Baseline</h3>
+              <p>Machine-optimized source of truth. High-density knowledge maps and strict execution rules strictly tuned for Claude Code, Codex, and Cursor.</p>
+              <ul className="mini-features">
+                <li>✓ Execution Constraints</li>
+                <li>✓ Structural Invariants</li>
+                <li>✓ Cross-session Handoff</li>
               </ul>
             </div>
-            <div className="drift-card good">
-              <div className="drift-title">Doc-for-Agent Skill</div>
-              <ul>
-                <li>✅ Persistent /AGENTS baseline</li>
-                <li>✅ Unified truth for every agent</li>
-                <li>✅ Automated CLI refresh cycle</li>
+            <div className="dual-card human">
+              <div className="card-label">FOR HUMANS</div>
+              <h3>/docs/ Guides</h3>
+              <p>Narrative-centric documentation. Clean onboarding guides, architectural overviews, and decision logs for team alignment.</p>
+              <ul className="mini-features">
+                <li>✓ Narrative Clarity</li>
+                <li>✓ Architectural Logic</li>
+                <li>✓ Historical Context</li>
               </ul>
             </div>
           </div>
         </section>
 
-        {/* WORKFLOW */}
-        <section className="section" id="workflow">
-          <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Lifecycle</span>
-            <h2>Install. Init. Refresh.</h2>
-          </div>
-          <div className="workflow-grid scroll-reveal">
-            <div className="workflow-card">
-              <div className="step-num">01</div>
-              <h3>Global Install</h3>
-              <p>Equip your machine with the systemic CLI engine via NPM.</p>
-              <code>npm install -g doc-for-agent</code>
-            </div>
-            <div className="workflow-card">
-              <div className="step-num">02</div>
-              <h3>Scan & Init</h3>
-              <p>Analyze repo architecture and legacy docs into a systemic baseline.</p>
-              <code>docagent init --ai codex</code>
-            </div>
-            <div className="workflow-card">
-              <div className="step-num">03</div>
-              <h3>Continuous Refresh</h3>
-              <p>Sync knowledge as your code evolves. No more outdated docs.</p>
-              <code>docagent refresh</code>
-            </div>
-          </div>
-        </section>
-
-        {/* ARTIFACTS */}
+        {/* ARTIFACT VISUALIZER */}
         <section className="section" id="artifacts">
-          <div className="section-head scroll-reveal">
-            <span className="eyebrow">System Architecture</span>
-            <h2>The Dual-Doc Balance.</h2>
-          </div>
-
           <div className="artifact-viewer scroll-reveal">
             <div className="viewer-tabs">
-              <button 
-                className={`tab ${activeArtifact === 'agent' ? 'active' : ''}`}
-                onClick={() => setActiveArtifact('agent')}
-              >
-                /AGENTS (Machine Truth)
-              </button>
-              <button 
-                className={`tab ${activeArtifact === 'human' ? 'active' : ''}`}
-                onClick={() => setActiveArtifact('human')}
-              >
-                /docs (Human Guides)
-              </button>
+              <button className={`tab ${activeArtifact === 'agent' ? 'active' : ''}`} onClick={() => setActiveArtifact('agent')}>AGENTS Context (Machine)</button>
+              <button className={`tab ${activeArtifact === 'human' ? 'active' : ''}`} onClick={() => setActiveArtifact('human')}>Human Guide (docs/)</button>
             </div>
             <div className="viewer-window">
-              <div className="viewer-header">
-                <strong>{Artifacts[activeArtifact].title}</strong>
-              </div>
+              <div className="viewer-header">Viewing: {Artifacts[activeArtifact].title}</div>
               <div className="code-body">
                 <pre><code>{Artifacts[activeArtifact].content}</code></pre>
               </div>
@@ -245,19 +203,75 @@ function App() {
           </div>
         </section>
 
-        {/* STATUS MATRIX */}
+        {/* WHY DOCAGENT SECTION */}
+        <section className="section" id="why-docagent">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">The Prompting Trap</span>
+            <h2>One-off chats are not documentation.</h2>
+            <p className="feature-desc">Temporary prompts vanish. We provide the systemic baseline that persistent development requires.</p>
+          </div>
+
+          <div className="drift-visual scroll-reveal">
+            <div className="drift-card bad">
+              <div className="drift-title">Ad-hoc Prompting</div>
+              <ul>
+                <li>❌ Knowledge expires with session</li>
+                <li>❌ Hallucinations in messy repos</li>
+                <li>❌ Manual drift, manual copy-paste</li>
+              </ul>
+            </div>
+            <div className="drift-card good">
+              <div className="drift-title">Doc-for-Agent System</div>
+              <ul>
+                <li>✅ Persistent /AGENTS baseline</li>
+                <li>✅ Stability Audit (docagent doctor)</li>
+                <li>✅ Lifecycle Sync (docagent refresh)</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* SETUP WORKFLOW */}
+        <section className="section" id="workflow">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">The Path</span>
+            <h2>Install. Init. Refresh.</h2>
+          </div>
+          <div className="workflow-grid scroll-reveal">
+            <div className="workflow-card">
+              <div className="step-num">01</div>
+              <h3>Global Install</h3>
+              <p>Equip your environment with the systemic CLI engine.</p>
+              <code>npm install -g doc-for-agent</code>
+            </div>
+            <div className="workflow-card">
+              <div className="step-num">02</div>
+              <h3>System Init</h3>
+              <p>Scan baseline and establish your Dual-Doc foundation.</p>
+              <code>docagent init --ai codex</code>
+            </div>
+            <div className="workflow-card">
+              <div className="step-num">03</div>
+              <h3>Active Refresh</h3>
+              <p>Sync knowledge as code evolves. Zero-manual overhead.</p>
+              <code>docagent refresh</code>
+            </div>
+          </div>
+        </section>
+
+        {/* CAPABILITY MATRIX */}
         <section className="section" id="status">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">Capabilities</span>
-            <h2>Command-Line Matrix</h2>
+            <span className="eyebrow">Product Integrity</span>
+            <h2>Capability Matrix</h2>
           </div>
           <div className="glass-card scroll-reveal" style={{ overflowX: 'auto' }}>
             <table className="capability-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
               <thead>
                 <tr>
                   <th style={{ padding: '16px' }}>Command</th>
-                  <th style={{ padding: '16px' }}>Internal Mechanism</th>
-                  <th style={{ padding: '16px' }}>Status</th>
+                  <th style={{ padding: '16px' }}>Systemic Logic</th>
+                  <th style={{ padding: '16px' }}>Product Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -279,12 +293,12 @@ function App() {
 
         {/* CTA */}
         <section className="section" id="cta">
-          <div className="cta-card scroll-reveal main-cta" style={{ textAlign: 'center', padding: '80px 40px', background: 'linear-gradient(135deg, var(--surface) 0%, var(--primary-glow) 100%)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--primary)' }}>
-            <div className="eyebrow" style={{ color: '#fff' }}>Production Ready</div>
-            <h2>Protect your repo from knowledge rot.</h2>
-            <p className="hero-text" style={{ margin: '0 auto 48px' }}>Join teams moving from ephemeral prompts to durable repository systemics.</p>
+          <div className="cta-card scroll-reveal main-cta">
+            <div className="eyebrow" style={{ color: '#fff' }}>Grounded Development</div>
+            <h2>Protect your repo from knowledge drift.</h2>
+            <p className="hero-text" style={{ margin: '0 auto 48px' }}>Move from ephemeral chat history to a durable knowledge system.</p>
             <div className="hero-actions" style={{ justifyContent: 'center' }}>
-              <div className="install-box" style={{ background: 'var(--bg)', padding: '16px 32px', border: '1px solid var(--primary)', borderRadius: '8px' }}>
+              <div className="install-box">
                 <code>npm install -g doc-for-agent</code>
               </div>
             </div>
@@ -293,7 +307,7 @@ function App() {
       </main>
 
       <footer style={{ padding: '64px 0', textAlign: 'center', color: 'var(--text-muted)', borderTop: '1px solid var(--line)' }}>
-        <p>&copy; 2026 doc-for-agent. Stability-first system for the Agentic Era.</p>
+        <p>&copy; 2026 doc-for-agent. A systematic documentation tool for the Agentic Era.</p>
       </footer>
     </div>
   );
