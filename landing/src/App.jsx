@@ -43,7 +43,7 @@ function App() {
           <LogoMark />
           <span>
             <strong>doc-for-agent</strong>
-            <small>v1.0.0 "Stability"</small>
+            <small>v1.1.0 "Lifecycle"</small>
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">
@@ -183,8 +183,8 @@ function App() {
         <section className="section" id="dual-system">
           <div className="section-head">
             <span className="eyebrow">The Dual-Doc Advantage</span>
-            <h2>One engine, two audiences</h2>
-            <p className="feature-desc">Stop splitting your effort. Generate deep context for humans and strict guardrails for agents simultaneously.</p>
+            <h2>Synchronization as your new standard</h2>
+            <p className="feature-desc">Stop splitting your effort. Generate a single source of truth that serves human maintainers and AI coding agents simultaneously.</p>
           </div>
 
           <div className="bento-grid">
