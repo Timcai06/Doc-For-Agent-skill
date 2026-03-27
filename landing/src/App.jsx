@@ -56,11 +56,51 @@ const heroCases = [
 ];
 
 const commands = [
-  { name: 'init', desc: 'Bootstrap the Dual-Doc system from zero-knowledge state', status: 'Production' },
-  { name: 'doctor', desc: 'Audit repository stability and documentation health', status: 'Stable' },
-  { name: 'refresh', desc: 'Sync documentation with real-time code evolution', status: 'Production' },
-  { name: 'migrate', desc: 'Systemize scattered READMEs into structured baselines', status: 'Beta' },
-  { name: 'generate', desc: 'Produce machine-first artifacts for specific AI agents', status: 'Stable' },
+  { 
+    name: 'init', 
+    desc: 'Bootstrap the Dual-Doc system from zero-knowledge state', 
+    status: 'Production',
+    logic: 'Global Repository Scan',
+    complexity: 'High',
+    efficiency: '98%',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
+  },
+  { 
+    name: 'doctor', 
+    desc: 'Audit repository stability and documentation health', 
+    status: 'Stable',
+    logic: 'Integrity Verification',
+    complexity: 'Medium',
+    efficiency: '99%',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>
+  },
+  { 
+    name: 'refresh', 
+    desc: 'Sync documentation with real-time code evolution', 
+    status: 'Production',
+    logic: 'Drift Detection Engine',
+    complexity: 'High',
+    efficiency: '94%',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+  },
+  { 
+    name: 'migrate', 
+    desc: 'Systemize scattered READMEs into structured baselines', 
+    status: 'Beta',
+    logic: 'Heuristic Document Extraction',
+    complexity: 'Extreme',
+    efficiency: '88%',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+  },
+  { 
+    name: 'generate', 
+    desc: 'Produce machine-first artifacts for specific AI agents', 
+    status: 'Stable',
+    logic: 'Context Compression',
+    complexity: 'Low',
+    efficiency: '100%',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+  },
 ];
 
 function App() {
@@ -104,11 +144,11 @@ function App() {
           <div className="hero-copy scroll-reveal">
             <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>CLI Agent Skill</div>
             <h1>
-              The Systemic Bridge <br />
-              <span style={{ color: 'var(--primary)' }}>Between Code and Agents.</span>
+              The Dual Documentation <br />
+              <span style={{ color: 'var(--primary)' }}>System for the Agentic Era.</span>
             </h1>
             <p className="hero-text">
-              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and lower knowledge drift across sessions.
+              Stop splitting your focus. <strong>doc-for-agent</strong> builds a unified knowledge system: /AGENTS/ for machine precision, /docs/ for human clarity. One systemic source of truth.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">Start Lifecycle</a>
@@ -166,9 +206,9 @@ function App() {
         {/* DUAL DOC LOGIC SECTION */}
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Dual-Doc Architecture</span>
-            <h2>One scan. Two worlds. Less drift.</h2>
-            <p className="feature-desc">Why maintain two sets of docs? Because agents need <strong>Execution Rules</strong> while humans need <strong>Architectural Narrative</strong>. We generate both from a single source of truth.</p>
+            <span className="eyebrow">The Dual-Mode Architecture</span>
+            <h2>Two Targets. One Engine.</h2>
+            <p className="feature-desc">Humans need <strong>Architectural Narrative</strong> to maintain context. Agents need <strong>Execution Rules</strong> to maintain stability. We generate both from the same code signals.</p>
           </div>
 
           <div className="sync-diagram scroll-reveal">
@@ -199,42 +239,46 @@ function App() {
 
           <div className="dual-grid scroll-reveal" style={{ marginTop: '64px' }}>
             <div className="dual-card agent">
-              <div className="card-label">FOR AGENTS (The Context)</div>
-              <h3>/AGENTS/ Baseline</h3>
-              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with lower ambiguity.</p>
+              <div className="card-label">FOR AGENTS (Context-First)</div>
+              <h3>/AGENTS/ Context</h3>
+              <p>Actionable, high-density knowledge maps. Designed for AI like Claude Code and Codex to navigate repositories with machine-level precision and zero context overflow.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
-                <li>✓ Lower Context Drift</li>
-                <li>✓ Cross-Platform Context</li>
+                <li>✓ Deterministic Grounding</li>
+                <li>✓ Machine-readable Rules</li>
               </ul>
             </div>
             <div className="dual-card human">
-              <div className="card-label">FOR HUMANS (The Narrative)</div>
-              <h3>/docs/ Guides</h3>
-              <p>Natural narrative for human maintainers. Clear documentation for onboarding, architecture reviews, and team-wide knowledge persistence.</p>
+              <div className="card-label">FOR HUMANS (Narrative-First)</div>
+              <h3>/docs/ Reference</h3>
+              <p>Natural narrative for maintainers and team onboarding. High-level architecture guides, technical principles, and onboarding maps grounded in real code signals.</p>
               <ul className="mini-features">
-                <li>✓ Professional Onboarding</li>
-                <li>✓ Repository-Grounded Context</li>
-                <li>✓ Unified Team Standards</li>
+                <li>✓ Narrative Cohesion</li>
+                <li>✓ Architecture Visibility</li>
+                <li>✓ Fast Human Onboarding</li>
               </ul>
             </div>
           </div>
         </section>
 
-        {/* REPO SCENARIOS SECTION: Explicit Proof */}
+        {/* SYSTEMS RESILIENCE SECTION */}
         <section className="section" id="scenarios">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">Proven Resilience</span>
-            <h2>Built for the messiest repositories.</h2>
+            <span className="eyebrow">Enterprise Resilience</span>
+            <h2>Grounded in messy realities.</h2>
+            <p className="feature-desc">doc-for-agent doesn't require a clean repo to start. It creates order from fragmentation.</p>
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Repos', desc: 'Bootstrap a structured documentation system from raw source code and scattered configurations.' },
-              { type: 'Messy-Doc Repos', desc: 'Inhale outdated READMEs and systemize them into a durable, machine-readable baseline.' },
-              { type: 'Team Standardization', desc: 'Establish a unified documentation standard across multiple repositories and engineering teams.' }
+              { type: 'Low-Doc Legacy', desc: 'Bootstrap a professional documentation system from zero-knowledge source and scattered configs.' },
+              { type: 'Messy-Doc Repos', desc: 'Inhale outdated, conflicting READMEs and systemize them into a durable /AGENTS/ baseline.' },
+              { type: 'Team Scalability', desc: 'Maintain peak alignment for every agent session with a repeatable, automated refresh cycle.' }
             ].map(s => (
               <div key={s.type} className="scenario-pill glass-card">
-                <strong>{s.type}</strong>
+                <div className="pill-header">
+                  <strong>{s.type}</strong>
+                  <div className="trend-up" />
+                </div>
                 <span>{s.desc}</span>
               </div>
             ))}
@@ -347,32 +391,47 @@ function App() {
         {/* CAPABILITY MATRIX */}
         <section className="section" id="status">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">Product Integrity</span>
-            <h2>Capability Matrix</h2>
+            <span className="eyebrow">Engine Integrity</span>
+            <h2>Modular Capability Matrix</h2>
+            <p className="feature-desc">High-density operational modules designed for deterministic repository alignment.</p>
           </div>
-          <div className="glass-card scroll-reveal" style={{ overflowX: 'auto' }}>
-            <table className="capability-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: '16px' }}>Command</th>
-                  <th style={{ padding: '16px' }}>Systemic Logic</th>
-                  <th style={{ padding: '16px' }}>Product Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {commands.map(cmd => (
-                  <tr key={cmd.name} style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <td style={{ padding: '16px' }}><code>docagent {cmd.name}</code></td>
-                    <td style={{ padding: '16px', color: 'var(--text-secondary)' }}>{cmd.desc}</td>
-                    <td style={{ padding: '16px' }}>
-                      <span className={`status-badge ${cmd.status.toLowerCase()}`} style={{ fontSize: '0.8rem', padding: '4px 12px', borderRadius: '4px', background: cmd.status === 'Production' ? 'var(--accent-glow)' : 'rgba(255,255,255,0.05)', color: cmd.status === 'Production' ? 'var(--accent)' : '#fff' }}>
-                        {cmd.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          
+          <div className="matrix-grid scroll-reveal">
+            {commands.map((cmd) => (
+              <div key={cmd.name} className="matrix-card glass-card">
+                <div className="matrix-card-header">
+                  <div className="matrix-icon">{cmd.icon}</div>
+                  <span className={`status-badge-mini ${cmd.status.toLowerCase()}`}>
+                    {cmd.status === 'Production' && <span className="green-pulse-indicator" />}
+                    {cmd.status}
+                  </span>
+                </div>
+                
+                <div className="matrix-card-body">
+                  <div className="matrix-cmd-name">docagent {cmd.name}</div>
+                  <p className="matrix-cmd-desc">{cmd.desc}</p>
+                </div>
+                
+                <div className="matrix-card-footer">
+                  <div className="matrix-stat">
+                    <span className="stat-label">Logic</span>
+                    <span className="stat-value">{cmd.logic}</span>
+                  </div>
+                  <div className="matrix-stat-row">
+                    <div className="matrix-stat">
+                      <span className="stat-label">Complexity</span>
+                      <span className="stat-value">{cmd.complexity}</span>
+                    </div>
+                    <div className="matrix-stat">
+                      <span className="stat-label">Efficiency</span>
+                      <span className="stat-value">{cmd.efficiency}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="matrix-card-glow" />
+              </div>
+            ))}
           </div>
         </section>
 

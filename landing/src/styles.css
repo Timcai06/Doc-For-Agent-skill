@@ -1045,40 +1045,168 @@ footer {
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Matrix Table Styling */
-table {
-  border-spacing: 0;
+/* Matrix Grid Styling */
+.matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: var(--container);
+  margin: 0 auto;
 }
 
-tr {
-  transition: background 0.2s;
-}
-
-tr:hover {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-/* CTA Box */
-.install-box {
-  background: var(--bg);
-  padding: 24px 48px;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-md);
-  box-shadow: 0 0 40px var(--primary-glow);
+.matrix-card {
   position: relative;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid var(--line);
+  background: rgba(13, 17, 27, 0.4);
 }
 
-.install-box::before {
-  content: '$';
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+.matrix-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  background: rgba(13, 17, 27, 0.6);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--primary-glow);
+}
+
+.matrix-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.matrix-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
   color: var(--primary);
+  transition: all 0.3s ease;
+}
+
+.matrix-card:hover .matrix-icon {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.status-badge-mini {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-badge-mini.production {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-badge-mini.stable {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.status-badge-mini.beta {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.green-pulse-indicator {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-mini 2s infinite;
+}
+
+@keyframes pulse-mini {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.matrix-cmd-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.matrix-cmd-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.matrix-card-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.matrix-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   font-weight: 600;
 }
 
-/* Lifecycle Path Section */
+.stat-value {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.matrix-stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.matrix-card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, var(--primary-glow), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.matrix-card:hover .matrix-card-glow {
+  opacity: 0.1;
+}
+
+/* Lifecycle Path Section Refinements */
 .lifecycle-path {
   max-width: 900px;
   margin: 64px auto;
