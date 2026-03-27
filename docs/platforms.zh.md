@@ -31,11 +31,13 @@ docagent init --ai all --target <repo-root>
 
 ## 下一条命令
 
-初始化后：
+默认：
 
 ```bash
 docagent refresh --root <repo-root> --output-mode agent
 ```
+
+可选模式：`--output-mode human` 或 `--output-mode dual`。
 
 另见：
 
