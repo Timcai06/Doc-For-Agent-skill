@@ -17,6 +17,7 @@ The landing page is aimed at CLI coding-agent users and explains the short produ
 3. refresh
 
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
+The docs output model is `agent`, `human`, or `dual` according to user intent.
 
 ## Entry Path
 

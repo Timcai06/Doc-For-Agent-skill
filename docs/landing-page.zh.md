@@ -17,6 +17,7 @@
 3. refresh
 
 同时把 `doc-for-agent` 定位为“项目文档系统工具”，而不是一次性 markdown 生成器。
+文档输出模型可按用户意图选择：`agent`、`human` 或 `dual`。
 
 ## 入口路径
 

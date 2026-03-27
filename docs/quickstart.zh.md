@@ -10,6 +10,8 @@
 2. init
 3. refresh
 
+`refresh` 支持 `agent`、`human`、`dual` 三种文档输出。
+
 ## 安装
 
 Node：

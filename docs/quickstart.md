@@ -10,6 +10,8 @@ Use one mental model:
 2. init
 3. refresh
 
+`refresh` supports `agent`, `human`, and `dual` documentation outputs.
+
 ## Install
 
 Node:
