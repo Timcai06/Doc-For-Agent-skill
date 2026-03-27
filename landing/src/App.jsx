@@ -158,32 +158,67 @@ function App() {
         {/* DUAL DOC LOGIC SECTION */}
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Dual-Doc Model</span>
-            <h2>One engine, two core audiences.</h2>
-            <p className="feature-desc">We separate machine truth from human narrative to maximize efficiency for both.</p>
+            <span className="eyebrow">The Dual-Doc Advantage</span>
+            <h2>One engine. Two core audiences. ZERO drift.</h2>
+            <p className="feature-desc">By using a unified analysis engine, we maintain perfect synchronization between internal machine truth and external human guides.</p>
           </div>
 
-          <div className="dual-grid scroll-reveal">
+          <div className="sync-diagram scroll-reveal">
+             <div className="sync-part">
+               <div className="circle-pulse accent" />
+               <strong>Unified Analysis Engine</strong>
+               <p>Deep scan of directory structure, AST, and legacy artifacts.</p>
+             </div>
+             <div className="sync-arrow">
+               <svg width="40" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h30"/><path d="m28 5 7 7-7 7"/></svg>
+             </div>
+             <div className="sync-results">
+               <div className="res-card agent"><strong>/AGENTS/</strong> Machine Truth</div>
+               <div className="res-card human"><strong>/docs/</strong> Human Narrative</div>
+             </div>
+          </div>
+
+          <div className="dual-grid scroll-reveal" style={{ marginTop: '64px' }}>
             <div className="dual-card agent">
-              <div className="card-label">FOR AGENTS</div>
+              <div className="card-label">FOR AGENTS (The Context)</div>
               <h3>/AGENTS/ Baseline</h3>
-              <p>Machine-optimized source of truth. High-density rules and execution guidance tuned for Claude Code, Codex, Continue, and Copilot workflows.</p>
+              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, Continue, and Copilot to navigate massive codebases with zero-hallucination precision.</p>
               <ul className="mini-features">
-                <li>✓ Execution Constraints</li>
-                <li>✓ Structural Invariants</li>
-                <li>✓ Cross-session Handoff</li>
+                <li>✓ Execution Invariants</li>
+                <li>✓ Cross-session Memory</li>
+                <li>✓ Rapid AST Navigation</li>
               </ul>
             </div>
-            <div className="dual-card human">
-              <div className="card-label">FOR HUMANS</div>
+            <div className="dual-card human (The Onboarding)">
+              <div className="card-label">FOR HUMANS (The Narrative)</div>
               <h3>/docs/ Guides</h3>
-              <p>Narrative-centric documentation. Clean onboarding guides, architectural overviews, and decision logs for team alignment.</p>
+              <p>Natural narrative for human maintainers. Perfect documentation for team onboarding, architecture reviews, and technical handoffs.</p>
               <ul className="mini-features">
-                <li>✓ Narrative Clarity</li>
-                <li>✓ Architectural Logic</li>
-                <li>✓ Historical Context</li>
+                <li>✓ Narrative Cohesion</li>
+                <li>✓ Maintenance Logic</li>
+                <li>✓ Team Alignment</li>
               </ul>
             </div>
+          </div>
+        </section>
+
+        {/* REPO SCENARIOS SECTION: Explicit Proof */}
+        <section className="section" id="scenarios">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">Proven Resilience</span>
+            <h2>Built for the messiest repositories.</h2>
+          </div>
+          <div className="scenario-row scroll-reveal">
+            {[
+              { type: 'Low-Doc Repo', desc: 'From zero baseline to professional documentation structure in seconds.' },
+              { type: 'Messy-Doc Repo', desc: 'Inhale scattered READMEs and systemize them into a durable Dual-Doc system.' },
+              { type: 'Agent-Ready Repo', desc: 'Maintain peak efficiency for every agent session with automated lifecycle sync.' }
+            ].map(s => (
+              <div key={s.type} className="scenario-pill glass-card">
+                <strong>{s.type}</strong>
+                <span>{s.desc}</span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -207,25 +242,25 @@ function App() {
         <section className="section" id="why-docagent">
           <div className="section-head scroll-reveal">
             <span className="eyebrow">The Prompting Trap</span>
-            <h2>One-off chats are not documentation.</h2>
-            <p className="feature-desc">Temporary prompts vanish. We provide the systemic baseline that persistent development requires.</p>
+            <h2>Stop chat-history knowledge rot.</h2>
+            <p className="feature-desc">Sessions drift. Knowledge vanishes. HALLUCINATIONS increase as repositories grow. doc-for-agent provides the systemic ground truth that ephemeral chats lack.</p>
           </div>
 
           <div className="drift-visual scroll-reveal">
             <div className="drift-card bad">
               <div className="drift-title">Ad-hoc Prompting</div>
               <ul>
-                <li>❌ Knowledge expires with session</li>
-                <li>❌ Hallucinations in messy repos</li>
-                <li>❌ Manual drift, manual copy-paste</li>
+                <li>❌ Knowledge expires mid-session</li>
+                <li>❌ Inconsistent for different agents</li>
+                <li>❌ Manual sync, manual copy-paste</li>
               </ul>
             </div>
             <div className="drift-card good">
               <div className="drift-title">Doc-for-Agent System</div>
               <ul>
                 <li>✅ Persistent /AGENTS baseline</li>
-                <li>✅ Stability Audit (docagent doctor)</li>
-                <li>✅ Lifecycle Sync (docagent refresh)</li>
+                <li>✅ Unified truth for every agent</li>
+                <li>✅ Automated CLI refresh cycle</li>
               </ul>
             </div>
           </div>
