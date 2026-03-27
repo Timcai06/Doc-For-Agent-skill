@@ -7,6 +7,7 @@
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
 
 它支持双文档系统输出：`agent`、`human` 或 `dual`。
+模式映射：`agent` 写入 `AGENTS/`，`human` 写入 `docs/`，`dual` 同时写入两者。
 
 产品路径很短：
 

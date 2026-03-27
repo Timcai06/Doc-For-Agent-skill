@@ -211,6 +211,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("docagent init --ai all --target <repo-root>", text)
             self.assertIn("docagent init --ai claude --target <repo-root>", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
+            self.assertIn("Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both", text)
             self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)
             self.assertIn("docs/landing-page.md (EN) / docs/landing-page.zh.md (ZH)", text)
             self.assertIn("docs/quickstart.md (EN) / docs/quickstart.zh.md (ZH)", text)

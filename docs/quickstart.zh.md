@@ -11,6 +11,7 @@
 3. refresh
 
 `refresh` 支持 `agent`、`human`、`dual` 三种文档输出。
+模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出。
 
 ## 安装
 

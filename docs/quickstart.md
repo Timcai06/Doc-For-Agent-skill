@@ -11,6 +11,7 @@ Use one mental model:
 3. refresh
 
 `refresh` supports `agent`, `human`, and `dual` documentation outputs.
+Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
 
 ## Install
 
