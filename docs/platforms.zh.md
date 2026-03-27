@@ -6,13 +6,15 @@
 
 ## 平台矩阵
 
-| 平台 | 首条命令 | 适配类型 | 安装位置 |
-| --- | --- | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` | skill (`SKILL.md`) | `.claude/skills/doc-for-agent/` |
-| Codex | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` | skill (`SKILL.md`) | `.codex/skills/doc-for-agent/` |
-| Continue | `docagent init --ai continue --target <repo-root>` | skill (`SKILL.md`) | `.continue/skills/doc-for-agent/` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` | prompt (`PROMPT.md`) | `.github/prompts/doc-for-agent/` |
+| 平台 | 首条命令 |
+| --- | --- |
+| Claude Code | `docagent init --ai claude --target <repo-root>` |
+| Codex | `docagent init --ai codex --target <repo-root>` |
+| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
+| Continue | `docagent init --ai continue --target <repo-root>` |
+| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+
+`init` 会自动处理各平台适配文件，你只需要选择 `--ai`。
 
 ## 多 Agent 安装
 
@@ -38,4 +40,3 @@ docagent refresh --root <repo-root> --output-mode agent
 
 - [Quickstart（英文）](quickstart.md) / [Quickstart（中文）](quickstart.zh.md)
 - [Maintainer Guide](maintainers.md)
-

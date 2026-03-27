@@ -177,13 +177,12 @@ def render_quickstart(target_root: Path) -> str:
         "- Install:",
         "- Node users: `npm install -g doc-for-agent` or `npx -y doc-for-agent`",
         "- Python users: `pipx install doc-for-agent`",
-        "- Init:",
+        "- Init (one command shape):",
         f"- `docagent init --ai <claude|codex|continue|copilot|all> --target {repo_placeholder}`",
-        "- Pick your agent:",
-        f"- `docagent init --ai codex --target {repo_placeholder}`",
+        "- Common picks:",
+        f"- `docagent init --ai all --target {repo_placeholder}`",
         f"- `docagent init --ai claude --target {repo_placeholder}`",
-        f"- `docagent init --ai continue --target {repo_placeholder}`",
-        f"- `docagent init --ai copilot --target {repo_placeholder}`",
+        f"- `docagent init --ai codex --target {repo_placeholder}`",
         "- CodeBuddy users usually start with `--ai codex`.",
         "- Refresh:",
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
@@ -246,6 +245,7 @@ def build_parser() -> argparse.ArgumentParser:
     primary_commands = "init, doctor, refresh, generate, update, versions"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
+        prog=metadata.installer_command,
         description=(
             f"Unified {metadata.product_name} product CLI. "
             "Use `init` as the primary entry to install platform adapters."
