@@ -42,9 +42,13 @@ class RepoClassificationTests(unittest.TestCase):
             architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
 
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
+            self.assertTrue(any("Documented workflow sequence" in line for line in execution_confirmed))
             self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
-            self.assertIn("unified CLI surface", architecture_confirmed[0])
+            self.assertTrue(
+                "unified CLI surface" in architecture_confirmed[0]
+                or "Platform entry surface is documented around `docagent`" in architecture_confirmed[0]
+            )
             self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
 
     def test_architecture_distribution_synthesis_normalizes_markdown_table_rows(self) -> None:

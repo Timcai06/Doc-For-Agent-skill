@@ -728,6 +728,58 @@ def is_low_value_snippet(role: str, snippet: str) -> bool:
     return False
 
 
+def extract_commands_from_snippets(snippets: Sequence[str]) -> List[str]:
+    commands: List[str] = []
+    for snippet in snippets:
+        matches = re.findall(r"`([^`]+)`", snippet)
+        for command in matches:
+            normalized = command.strip()
+            if not normalized:
+                continue
+            if any(
+                normalized.startswith(prefix)
+                for prefix in ("docagent", "python", "python3", "npm", "pnpm", "yarn", "npx", "pipx", "pytest", "uv")
+            ):
+                if normalized not in commands:
+                    commands.append(normalized)
+    return commands
+
+
+def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: Sequence[str]) -> List[str]:
+    lines: List[str] = []
+    lowered = aggregate_text.lower()
+    commands = extract_commands_from_snippets(snippets)
+
+    if role == "execution":
+        init_command = next((cmd for cmd in commands if "docagent init" in cmd), "")
+        refresh_command = next((cmd for cmd in commands if "docagent refresh" in cmd), "")
+        if init_command and refresh_command:
+            lines.append(
+                f"Documented workflow sequence: run `{init_command}` then `{refresh_command}` to keep docs synchronized."
+            )
+        verify_commands = [
+            cmd
+            for cmd in commands
+            if any(token in cmd for token in ("test", "lint", "build", "check", "verify", "doctor"))
+        ]
+        if verify_commands:
+            summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
+            lines.append(f"Documented verification commands include {summary}.")
+    elif role == "architecture":
+        platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
+        if platforms and "docagent" in lowered:
+            labels = ", ".join(f"`{name}`" for name in platforms)
+            lines.append(f"Platform entry surface is documented around `docagent` for {labels} workflows.")
+        if any(token in lowered for token in ("source of truth", "canonical", "readme.md")):
+            lines.append("Source-of-truth expectations are explicitly documented and should stay aligned with generator behavior.")
+    elif role == "product":
+        if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
+            lines.append("Product usage context emphasizes `human / agent / dual` outputs for CLI coding-agent workflows.")
+        if "docagent init" in lowered and "docagent refresh" in lowered:
+            lines.append("Product expectations center on repeatable `init -> refresh` lifecycle, not one-off document generation.")
+    return lines[:2]
+
+
 def summarize_sources(paths: Sequence[Path], root: Path) -> str:
     labels: List[str] = []
     for path in paths[:2]:
@@ -748,6 +800,7 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
 
     unresolved_pattern = re.compile(r"\b(todo|tbd|pending|open question|unresolved|confirm|decide)\b|\?", re.IGNORECASE)
     explicit_conflict_pattern = re.compile(r"\b(conflict|inconsistent|contradict|not aligned|vs\.?)\b", re.IGNORECASE)
+    collected_snippets: List[str] = []
 
     for path in paths:
         text = read_text(path)
@@ -762,6 +815,7 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         for snippet in snippets:
             if is_low_value_snippet(role, snippet):
                 continue
+            collected_snippets.append(snippet)
             key = normalize_snippet_key(snippet)
             if not key:
                 continue
@@ -783,6 +837,14 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
                 if path not in existing_paths:
                     existing_paths.append(path)
                 target[key] = (existing_text, existing_paths, existing_score)
+
+    for line in synthesize_role_conclusion_lines(role, aggregate_text, collected_snippets):
+        key = normalize_snippet_key(line)
+        if not key:
+            continue
+        existing = confirmed_groups.get(key)
+        if not existing or existing[2] < 100:
+            confirmed_groups[key] = (line, list(paths), 100)
 
     conflicting: List[str] = []
     package_managers = sorted(set(re.findall(r"\b(npm|pnpm|yarn)\b", aggregate_text)))
