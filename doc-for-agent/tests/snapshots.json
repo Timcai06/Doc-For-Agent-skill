@@ -8,7 +8,7 @@
     "product.md": {
       "contains": [
         "This repository is best understood as a `CLI/tool repository`.",
-        "Primary users are likely developers integrating or running the packaged tooling.",
+        "Primary users are developers integrating or running the packaged tooling.",
         "`cli/src/index.ts`"
       ]
     },
@@ -32,7 +32,7 @@
     "product.md": {
       "contains": [
         "This repository is best understood as a `library/SDK repository`.",
-        "Primary users are likely developers integrating or running the packaged tooling."
+        "Primary users are developers integrating or running the packaged tooling."
       ]
     },
     "architecture.md": {
@@ -49,12 +49,12 @@
     },
     "product.md": {
       "contains": [
-        "This repository appears to ship reusable instructions and scripts for coding agents rather than a standalone product app."
+        "This repository ships reusable instructions and scripts for coding agents rather than a standalone product app."
       ]
     },
     "frontend.md": {
       "contains": [
-        "Primary user interaction likely happens through an AI assistant invoking this skill rather than a browser UI.",
+        "Primary user interaction happens through an AI assistant invoking this skill rather than a browser UI.",
         "`tool-skill/agents/openai.yaml`"
       ]
     },

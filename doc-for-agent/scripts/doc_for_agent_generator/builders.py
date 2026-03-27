@@ -74,33 +74,33 @@ def human_inferred_lines(analysis: RepoAnalysis, role: str) -> list[str]:
     lines: list[str] = []
     if role == "product":
         if analysis.summary:
-            lines.append(f"Project intent inferred from README/code signals: {analysis.summary}")
+            lines.append(f"Project intent from README/code signals: {analysis.summary}")
         if analysis.classification.reasons:
-            lines.append(f"Repo type inferred as `{repo_type_label(analysis.repo_type)}` from: {analysis.classification.reasons[0]}")
+            lines.append(f"Repo type signal: `{repo_type_label(analysis.repo_type)}` ({analysis.classification.reasons[0]})")
         if analysis.routes:
-            lines.append(f"User-facing flow likely includes routes such as {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
+            lines.append(f"User-facing flow includes routes such as {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
         if analysis.endpoints:
-            lines.append(f"Service-facing flow likely includes endpoints such as {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
+            lines.append(f"Service-facing flow includes endpoints such as {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
     elif role == "architecture":
         if analysis.frontend_root and analysis.backend_root:
-            lines.append("Architecture is likely split between a frontend surface and a backend/runtime surface.")
+            lines.append("Architecture is split between a frontend surface and a backend/runtime surface.")
         elif analysis.frontend_root:
-            lines.append("Architecture appears frontend-led with runtime behavior inferred from package scripts and routes.")
+            lines.append("Architecture is frontend-led with runtime behavior anchored in package scripts and routes.")
         elif analysis.backend_root:
-            lines.append("Architecture appears backend-led with runtime behavior inferred from service files and endpoints.")
+            lines.append("Architecture is backend-led with runtime behavior anchored in service files and endpoints.")
         if analysis.routes:
             lines.append(f"Routing structure suggests primary interface paths under {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
         if analysis.endpoints:
             lines.append(f"Endpoint decorators suggest service contract anchors at {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
     elif role == "execution":
         package_manager_label = analysis.package_manager or "npm"
-        lines.append(f"Primary command workflow is inferred around `{package_manager_label}` package scripts and repository-local verify commands.")
+        lines.append(f"Primary command workflow centers on `{package_manager_label}` package scripts and repository-local verify commands.")
         if analysis.frontend_scripts:
             lines.append(
-                f"Frontend workflows likely depend on scripts: {', '.join(f'`{name}`' for name in list(analysis.frontend_scripts.keys())[:4])}."
+                f"Frontend workflows depend on scripts: {', '.join(f'`{name}`' for name in list(analysis.frontend_scripts.keys())[:4])}."
             )
         if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
-            lines.append("Backend setup likely requires Python dependency installation from `requirements.txt`.")
+            lines.append("Backend setup requires Python dependency installation from `requirements.txt`.")
     elif role == "memory":
         if analysis.glossary_entries:
             lines.append("Canonical terminology can be seeded from detected glossary entries and then curated by maintainers.")
@@ -477,7 +477,7 @@ def build_product(analysis: RepoAnalysis) -> str:
         if analysis.skill_meta.skill_file:
             facts.append(f"Primary skill definition file: `{analysis.skill_meta.skill_file.name}`.")
         facts.append(
-            "This repository appears to ship reusable instructions and scripts for coding agents rather than a standalone product app."
+            "This repository ships reusable instructions and scripts for coding agents rather than a standalone product app."
         )
 
     inferences = [
@@ -485,10 +485,10 @@ def build_product(analysis: RepoAnalysis) -> str:
     ]
     if analysis.repo_type == "skill-meta":
         inferences.append(
-            "Primary users are likely maintainers installing or evolving the skill, plus agents that consume the generated guidance."
+            "Primary users are maintainers installing or evolving the skill, plus agents that consume the generated guidance."
         )
     elif analysis.repo_type in {"library-sdk", "cli-tool"}:
-        inferences.append("Primary users are likely developers integrating or running the packaged tooling.")
+        inferences.append("Primary users are developers integrating or running the packaged tooling.")
 
     open_questions = [
         "Confirm the primary audience and the exact outcome they expect from this repository.",
@@ -630,7 +630,7 @@ def build_frontend(analysis: RepoAnalysis) -> str:
     elif analysis.repo_type == "skill-meta":
         if analysis.skill_meta.agent_manifests:
             facts.append("Agent-facing interface manifests are present.")
-        facts.append("Primary user interaction likely happens through an AI assistant invoking this skill rather than a browser UI.")
+        facts.append("Primary user interaction happens through an AI assistant invoking this skill rather than a browser UI.")
         inferences.append("The closest thing to a frontend here is the installation and invocation surface exposed through skill manifests and prompts.")
     elif analysis.repo_type == "cli-tool":
         best_used_for = [
