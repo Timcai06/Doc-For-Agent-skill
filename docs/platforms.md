@@ -17,6 +17,7 @@ Use `docagent init --ai ...` to choose your platform entrypoint.
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 After init, use `refresh --output-mode agent|human|dual` based on the docs audience.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
+Platform selection is separate from doc audience: this is not AGENTS-only.
 
 ## Multi-Agent Setup
 

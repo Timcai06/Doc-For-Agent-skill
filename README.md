@@ -8,6 +8,7 @@ It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar
 
 It supports a dual documentation system: `agent`, `human`, or `dual` outputs.
 Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, and `dual` writes both.
+This is not an AGENTS-only tool: choose output mode by audience.
 
 The product path is short:
 

@@ -190,6 +190,7 @@ def render_quickstart(target_root: Path) -> str:
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
         "- Optional modes: `--output-mode human` or `--output-mode dual`",
         "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both",
+        "- Not AGENTS-only: choose output mode based on your docs audience",
         "- Verify:",
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",

@@ -17,6 +17,7 @@
 `init` 会自动处理各平台适配文件，你只需要选择 `--ai`。
 初始化后，根据文档受众选择 `refresh --output-mode agent|human|dual`。
 模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出。
+平台选择与文档受众是两件事：这不是 AGENTS-only 工具。
 
 ## 多 Agent 安装
 

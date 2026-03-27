@@ -8,6 +8,7 @@
 
 它支持双文档系统输出：`agent`、`human` 或 `dual`。
 模式映射：`agent` 写入 `AGENTS/`，`human` 写入 `docs/`，`dual` 同时写入两者。
+它不是 AGENTS-only 工具：应按文档受众选择输出模式。
 
 产品路径很短：
 
