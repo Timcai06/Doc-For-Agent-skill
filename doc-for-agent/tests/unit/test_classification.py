@@ -144,6 +144,8 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("Execution constraints:" in line for line in execution_confirmed))
             self.assertTrue(any("Verification gate:" in line for line in execution_confirmed))
             self.assertTrue(any("on failures," in line for line in execution_confirmed if line.startswith("Execution constraints:")))
+            self.assertTrue(any("prioritize lifecycle commands" in line for line in execution_confirmed if line.startswith("Execution constraints:")))
+            self.assertTrue(any("roll back to the last known-good generated docs state" in line for line in execution_confirmed if line.startswith("Execution constraints:")))
             self.assertTrue(any("CLI boundary:" in line for line in architecture_confirmed))
             self.assertTrue(any("Source-of-truth boundary:" in line for line in architecture_confirmed))
             self.assertTrue(any("build-path anchors" in line for line in architecture_confirmed if line.startswith("Source-of-truth boundary:")))
