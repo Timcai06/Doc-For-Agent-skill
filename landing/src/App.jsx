@@ -160,10 +160,25 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">The Dual-Doc Advantage</span>
             <h2>One engine. Two core audiences. ZERO drift.</h2>
-            <p className="feature-desc">By using a unified analysis engine, we ensure your internal machine truth and external human guides stay perfectly synchronized. No drift, no duplication.</p>
+            <p className="feature-desc">By using a unified analysis engine, we maintain perfect synchronization between internal machine truth and external human guides.</p>
           </div>
 
-          <div className="dual-grid scroll-reveal">
+          <div className="sync-diagram scroll-reveal">
+             <div className="sync-part">
+               <div className="circle-pulse accent" />
+               <strong>Unified Analysis Engine</strong>
+               <p>Deep scan of directory structure, AST, and legacy artifacts.</p>
+             </div>
+             <div className="sync-arrow">
+               <svg width="40" height="24" viewBox="0 0 40 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h30"/><path d="m28 5 7 7-7 7"/></svg>
+             </div>
+             <div className="sync-results">
+               <div className="res-card agent"><strong>/AGENTS/</strong> Machine Truth</div>
+               <div className="res-card human"><strong>/docs/</strong> Human Narrative</div>
+             </div>
+          </div>
+
+          <div className="dual-grid scroll-reveal" style={{ marginTop: '64px' }}>
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (The Context)</div>
               <h3>/AGENTS/ Baseline</h3>
