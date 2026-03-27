@@ -1,276 +1,254 @@
-import React from 'react';
-import { LogoMark } from './components/LogoMark';
+import React, { useEffect } from 'react';
 
-const steps = [
-  {
-    id: '01',
-    label: 'Install',
-    title: 'Shortest path to start',
-    body: 'One CLI for Node and Python environments. Universal docagent command surface.',
-    command: 'npm install -g doc-for-agent',
-  },
-  {
-    id: '02',
-    label: 'Init',
-    title: 'Initialize your agent context',
-    body: 'Deep-scan your repository and generate your first source-of-truth documentation system.',
-    command: 'docagent init --ai codex --target .',
-  },
-  {
-    id: '03',
-    label: 'Refresh',
-    title: 'Maintain the lifecycle',
-    body: 'As your code evolves, your docs stay in sync. Reliable, repeatable updates.',
-    command: 'docagent refresh --root . --output-mode dual',
-  },
+// --- Icon Components (Inline SVG for Zero-Dependency) ---
+const IconInstall = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+);
+const IconInit = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+);
+const IconRefresh = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+);
+const IconDoctor = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"/><path d="m3.34 19 1.4-1.4"/><path d="m19.07 4.93-1.4 1.4"/><path d="M7.5 7.5c1.4-1.4 4.5-.4 4.5.5C12 9 10 11 10 12s2 2 3 3c.9 0 1.9 3.1.5 4.5-1.4 1.4-4.5.4-4.5-.5 0-1 2-3 2-4s-2-2-3-3c-.9 0-1.9-3.1-.5-4.5Z"/></svg>
+);
+const IconMigrate = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
+);
+
+const lifecycleSteps = [
+  { id: 'init', label: 'Init', icon: <IconInit />, desc: 'Deep-scan repository to establish your first knowledge baseline.' },
+  { id: 'doctor', label: 'Doctor', icon: <IconDoctor />, desc: 'Identify health gaps and inconsistencies in your current docs.' },
+  { id: 'refresh', label: 'Refresh', icon: <IconRefresh />, desc: 'Sync documentation automatically as your code evolving.' },
+  { id: 'migrate', label: 'Migrate', icon: <IconMigrate />, desc: 'Absorb legacy notes into a systemized source-of-truth.' },
 ];
 
 const platforms = [
-  { name: 'Claude Code', flag: 'claude' },
-  { name: 'Codex / Cursor', flag: 'codex' },
-  { name: 'CodeBuddy', flag: 'codex' },
-  { name: 'Continue', flag: 'continue' },
-  { name: 'GitHub Copilot', flag: 'copilot' },
+  { name: 'Claude Code', cmd: 'claude' },
+  { name: 'Codex / Cursor', cmd: 'codex' },
+  { name: 'CodeBuddy', cmd: 'codex' },
+  { name: 'Continue', cmd: 'continue' },
+  { name: 'GitHub Copilot', cmd: 'copilot' },
 ];
 
 function App() {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="page-shell">
       <div className="page-backdrop" aria-hidden="true" />
       
       <header className="topbar">
         <a className="brand" href="#hero">
-          <LogoMark />
-          <span>
-            <strong>doc-for-agent</strong>
-            <small>v1.1.0 "Lifecycle"</small>
-          </span>
+          <strong>doc-for-agent</strong>
+          <small>v1.2.0 "Systemic"</small>
         </a>
-        <nav className="nav-links" aria-label="Primary">
-          <a href="#how-it-works">How it works</a>
+        <nav className="nav-links">
+          <a href="#lifecycle">Lifecycle</a>
+          <a href="#dual-docs">Dual-Docs</a>
           <a href="#comparison">Stability</a>
-          <a href="#dual-system">Dual-Docs</a>
           <a href="#platforms">Platforms</a>
-          <a className="nav-cta" href="#cta">Get Started</a>
+          <a className="nav-cta" href="#cta">Install CLI</a>
         </nav>
       </header>
 
       <main>
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
-          <div className="hero-copy">
-            <span className="eyebrow">Context is for repositories, not just for chats</span>
+          <div className="hero-copy scroll-reveal">
+            <span className="eyebrow">Beyond Prompting</span>
             <h1>
-              Build documentation that <span style={{ color: 'var(--primary)' }}>keeps your agents sharp.</span>
+              Turn raw code into <br />
+              <span style={{ color: 'var(--primary)' }}>Systemized Knowledge.</span>
             </h1>
             <p className="hero-text">
-              doc-for-agent turns raw codebases into systemized knowledge. 
-              Move from single-use sessions to a durable documentation system that works across every Claude Code, Codex, and Copilot workflow.
+              Stop relying on one-off chat sessions. doc-for-agent builds a durable documentation lifecycle that keeps your AI agents sharp and your human team in sync.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#how-it-works">Get the lifecycle</a>
-              <a className="button button-secondary" href="#comparison">Why not just prompt?</a>
+              <a className="button button-primary" href="#lifecycle">Explore the Lifecycle</a>
+              <a className="button button-secondary" href="https://github.com/Doc-For-Agent">View Source</a>
             </div>
           </div>
 
-          <div className="hero-preview">
+          <div className="hero-preview scroll-reveal">
             <div className="glass-card floating">
-              <div className="code-window">
-                <div className="code-header">
-                  <span style={{ fontSize: '0.7rem', color: 'var(--muted)', marginLeft: '8px' }}>docagent init</span>
-                  <div className="dot red" style={{ marginLeft: 'auto' }} />
-                  <div className="dot yellow" />
-                  <div className="dot green" />
-                </div>
-                <div className="code-body">
-                  <code style={{ fontSize: '0.9rem' }}>
-                    <span style={{ color: 'var(--primary)' }}>$</span> docagent init --ai codex<br /><br />
-                    <span style={{ color: '#94a3b8' }}>[1/3] Analyzing repo structure...</span><br />
-                    <span style={{ color: '#10b981' }}>✓ Found supporting docs in /legacy</span><br />
-                    <span style={{ color: '#10b981' }}>✓ Identified 12 core entry points</span><br />
-                    <span style={{ color: '#94a3b8' }}>[2/3] Synthesizing knowledge...</span><br />
-                    <span style={{ color: '#10b981' }}>✓ Created systemized docs/</span><br />
-                    <span style={{ color: '#10b981' }}>✓ Created AGENTS/ source-of-truth</span><br /><br />
-                    <span style={{ color: '#3b82f6' }}>Done. Your agent is now context-complete.</span>
-                  </code>
-                </div>
+              <div className="code-header">
+                <div className="dot red" />
+                <div className="dot yellow" />
+                <div className="dot green" />
+                <span style={{ marginLeft: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>docagent init --ai codex</span>
+              </div>
+              <div className="code-body">
+                <div style={{ color: 'var(--primary)', marginBottom: '8px' }}>$ docagent init --ai codex</div>
+                <div style={{ color: 'var(--text-muted)' }}>[1/3] Analyzing repo architecture...</div>
+                <div style={{ color: 'var(--accent)' }}>✓ Detected 4 microservices</div>
+                <div style={{ color: 'var(--accent)' }}>✓ Found legacy docs in /wiki</div>
+                <div style={{ color: 'var(--text-muted)' }}>[2/3] Synthesizing Dual-Docs...</div>
+                <div style={{ color: '#fff' }}>+ Created /AGENTS/ (Source of Truth)</div>
+                <div style={{ color: '#fff' }}>+ Structured /docs/ (Human Onboarding)</div>
+                <div style={{ color: 'var(--warning)', marginTop: '8px' }}>Done. Your agent context is now grounded.</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* CONVERSION PATH SECTION */}
-        <section className="section" id="how-it-works">
-          <div className="section-head">
-            <span className="eyebrow">Installation to Refresh</span>
-            <h2>One path, three visible steps</h2>
-            <p className="feature-desc">The shortest path for terminal-first teams that want repo docs to stay usable across sessions.</p>
+        {/* LIFECYCLE SECTION */}
+        <section className="section" id="lifecycle">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">The Documentation Lifecycle</span>
+            <h2>Sustainable Context over One-off Prompts.</h2>
+            <p className="feature-desc">
+              Don't just generate docs once and let them rot. Use our CLI to maintain a living knowledge system.
+            </p>
           </div>
           
-          <div className="steps-visual">
-            {steps.map((step, index) => (
-              <React.Fragment key={step.id}>
-                <div className="step-node">
-                  <div className="step-circle">{step.id}</div>
-                  <h3 className="feature-title">{step.label}</h3>
-                  <p className="feature-desc" style={{ fontSize: '0.9rem' }}>{step.body}</p>
+          <div className="lifecycle-path scroll-reveal">
+            <div className="steps-row">
+              {lifecycleSteps.map(step => (
+                <div className="step-card" key={step.id}>
+                  <div className="step-icon">{step.icon}</div>
+                  <h3>{step.label}</h3>
+                  <p>{step.desc}</p>
                 </div>
-                {index < steps.length - 1 && <div className="step-arrow" />}
-              </React.Fragment>
-            ))}
+              ))}
+            </div>
+            
+            <div className="code-window" style={{ width: '100%', maxWidth: '600px' }}>
+              <div className="code-body" style={{ textAlign: 'center', fontSize: '1.2rem' }}>
+                <code>npm install -g <span style={{ color: 'var(--primary)' }}>doc-for-agent</span></code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* DUAL DOCS SECTION */}
+        <section className="section" id="dual-docs">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">The Dual-Doc Model</span>
+            <h2>One engine, two audiences.</h2>
+            <p className="feature-desc">
+              We separate "Agent State" from "Human Guides" to ensure maximum efficiency for both.
+            </p>
           </div>
 
-          <div className="bento-grid" style={{ marginTop: '64px' }}>
-            {steps.map((step) => (
-              <div className="bento-item glass-card" key={step.id}>
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '16px' }}>{step.title}</h3>
-                <div className="code-window" style={{ background: '#08090a' }}>
-                  <div className="code-body" style={{ padding: '12px' }}>
-                    <code><span style={{ color: 'var(--primary)' }}>$</span> {step.command}</code>
-                  </div>
-                </div>
+          <div className="bento-grid scroll-reveal">
+            <div className="bento-item wide">
+              <h3 style={{ color: 'var(--primary)' }}>/AGENTS</h3>
+              <p style={{ marginBottom: '24px' }}>Machine-readable source of truth optimized for CLI coding agents like Claude Code and Codex.</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <ul className="feature-desc" style={{ paddingLeft: '20px', fontSize: '0.9rem' }}>
+                  <li>Strict execution rules</li>
+                  <li>High-density repo maps</li>
+                </ul>
+                <ul className="feature-desc" style={{ paddingLeft: '20px', fontSize: '0.9rem' }}>
+                  <li>Multi-session context</li>
+                  <li>Implicit knowledge capture</li>
+                </ul>
               </div>
-            ))}
+            </div>
+            <div className="bento-item">
+              <h3 style={{ color: 'var(--accent)' }}>/docs</h3>
+              <p>Team-onboarding narratives. Clean, readable, and structured for human maintainers.</p>
+            </div>
+            <div className="bento-item">
+              <h3>Zero-Doc Recovery</h3>
+              <p>Reverse-engineer "ghost repositories" into structured baselines in seconds.</p>
+            </div>
+            <div className="bento-item wide">
+              <h3>Intelligent Migration</h3>
+              <p>Deduplicate scattered READMEs, outdated wikis, and hidden notes into a unified lifecycle model with zero manual copy-pasting.</p>
+            </div>
           </div>
         </section>
 
         {/* COMPARISON SECTION */}
         <section className="section" id="comparison">
-          <div className="glass-card" style={{ padding: '64px' }}>
-            <div className="section-head">
-              <span className="eyebrow">Stability vs. Prompting</span>
-              <h2>Why use a system tool instead of just prompting?</h2>
-              <p className="feature-desc">Temporary prompts are easy. Long-term maintenance is hard.</p>
-            </div>
-
-            <div className="table-container" style={{ overflowX: 'auto' }}>
-              <table className="comparison-table">
-                <thead>
-                  <tr>
-                    <th>Feature</th>
-                    <th>Direct LLM Prompting</th>
-                    <th>doc-for-agent system</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Consistency</td>
-                    <td className="status-bad">Random structure per session</td>
-                    <td className="status-good">Unified, repeatable format</td>
-                  </tr>
-                  <tr>
-                    <td>Update Model</td>
-                    <td className="status-bad">One-shot / Copy-paste</td>
-                    <td className="status-good">Command-based lifecycle (refresh)</td>
-                  </tr>
-                  <tr>
-                    <td>Knowledge Capture</td>
-                    <td className="status-bad">Misses non-code context</td>
-                    <td className="status-good">Absorbs human docs + code structure</td>
-                  </tr>
-                  <tr>
-                    <td>Handoff</td>
-                    <td className="status-bad">Implicit / Hidden in chat</td>
-                    <td className="status-good">Explicit AGENTS/ source of truth</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* DUAL SYSTEM SECTION */}
-        <section className="section" id="dual-system">
-          <div className="section-head">
-            <span className="eyebrow">The Dual-Doc Advantage</span>
-            <h2>Synchronization as your new standard</h2>
-            <p className="feature-desc">Stop splitting your effort. Generate a single source of truth that serves human maintainers and AI coding agents simultaneously.</p>
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">Stability Audit</span>
+            <h2>Why a system tool?</h2>
+            <p className="feature-desc">Compare systemic documentation with ad-hoc prompting.</p>
           </div>
 
-          <div className="bento-grid">
-            <div className="bento-item wide glass-card">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-                <div className="output-column">
-                  <h3 className="feature-title" style={{ color: 'var(--primary)' }}>/docs</h3>
-                  <p className="feature-desc" style={{ marginBottom: '16px' }}><strong>Target:</strong> Maintainers & Onboarding</p>
-                  <ul className="feature-list feature-desc">
-                    <li>Narrative onboarding docs</li>
-                    <li>Module dependency graphs</li>
-                    <li>Decision records & rationale</li>
-                  </ul>
-                </div>
-                <div className="output-column">
-                  <h3 className="feature-title" style={{ color: 'var(--accent)' }}>/AGENTS</h3>
-                  <p className="feature-desc" style={{ marginBottom: '16px' }}><strong>Target:</strong> AI Coding Assistants</p>
-                  <ul className="feature-list feature-desc">
-                    <li>Strict execution guardrails</li>
-                    <li>High-density repo maps</li>
-                    <li>Multi-session state tracking</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bento-item glass-card accent-hover">
-              <h3 className="feature-title">The "Ghost Repo" Fix</h3>
-              <p className="feature-desc">Zero documentation? No problem. docagent reverse-engineers your code artifacts into a systemized baseline in seconds.</p>
-            </div>
-            
-            <div className="bento-item glass-card accent-hover">
-              <h3 className="feature-title">The "Messy Attic" Fix</h3>
-              <p className="feature-desc">Scattered READMEs and outdated notes get absorbed, deduplicated, and unified into a clean, refreshable lifecycle model.</p>
-            </div>
-
-            <div className="bento-item wide glass-card">
-              <h3 className="feature-title">The Stability Lifecycle</h3>
-              <div className="command-pills" style={{ marginTop: '16px' }}>
-                {['init', 'doctor', 'refresh', 'migrate'].map(cmd => (
-                  <code key={cmd} className="cmd-pill">
-                    docagent {cmd}
-                  </code>
-                ))}
-              </div>
-              <p className="feature-desc" style={{ marginTop: '16px' }}>
-                Move from "initial generation" to "continuous health." The doc-for-agent lifecycle ensures your agent context stays as fresh as your main branch.
-              </p>
-            </div>
+          <div className="comparison-container scroll-reveal">
+            <table className="comparison-table">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Ad-hoc Prompting</th>
+                  <th>Doc-for-Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Repeatability</td>
+                  <td className="status-bad">Session-dependent random</td>
+                  <td className="status-good"><span className="status-check">✓</span> Pattern-enforced consistency</td>
+                </tr>
+                <tr>
+                  <td>Sync State</td>
+                  <td className="status-bad">Manual refresh only</td>
+                  <td className="status-good"><span className="status-check">✓</span> Integrated refresh lifecycle</td>
+                </tr>
+                <tr>
+                  <td>Legacy Context</td>
+                  <td className="status-bad">Often ignored or hallucinated</td>
+                  <td className="status-good"><span className="status-check">✓</span> Deep-scan migration engine</td>
+                </tr>
+                <tr>
+                  <td>Multi-Agent</td>
+                  <td className="status-bad">Locked to one platform</td>
+                  <td className="status-good"><span className="status-check">✓</span> Multi-platform ground truth</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
         {/* PLATFORMS SECTION */}
         <section className="section" id="platforms">
-          <div className="section-head">
-            <span className="eyebrow">Platform Support</span>
-            <h2>One interface for every coding agent</h2>
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">Interoperability</span>
+            <h2>One command, all platforms.</h2>
           </div>
-          <div className="platform-grid">
-            {platforms.map((p) => (
-              <div className="platform-card" key={p.name}>
-                <span style={{ fontWeight: 600 }}>{p.name}</span>
-                <code>docagent init --ai {p.flag}</code>
+          <div className="platform-grid scroll-reveal">
+            {platforms.map(p => (
+              <div className="platform-pill" key={p.name}>
+                <span style={{ fontWeight: 700 }}>{p.name}</span>
+                <code>--ai {p.cmd}</code>
               </div>
             ))}
           </div>
         </section>
 
         {/* CTA SECTION */}
-        <section className="section cta-section" id="cta">
-          <div className="glass-card" style={{ textAlign: 'center', padding: '80px 40px', background: 'linear-gradient(135deg, var(--bg) 0%, var(--primary-glow) 100%)', border: '1px solid var(--primary)' }}>
-            <h2 style={{ fontSize: '3rem' }}>Ready to systemize your repository?</h2>
-            <p className="hero-text" style={{ margin: '24px auto' }}>
-              Join the developers who prioritize durable context over single-use prompts. 
-              Install doc-for-agent in minutes and start your documentation lifecycle today.
+        <section className="section" id="cta">
+          <div className="cta-card scroll-reveal">
+            <h2>Ready to systemize?</h2>
+            <p className="hero-text" style={{ margin: '0 auto 48px' }}>
+              Join forward-thinking teams moving from chat history to durable repository knowledge.
             </p>
             <div className="hero-actions" style={{ justifyContent: 'center' }}>
-              <a className="button button-primary" href="#how-it-works">Get Started for Free</a>
-              <a className="button button-secondary" href="https://github.com/Doc-For-Agent">View on GitHub</a>
+              <a className="button button-primary" href="#lifecycle">Start the Lifecycle</a>
+              <a className="button button-secondary" href="https://github.com/Doc-For-Agent">GitHub Repository</a>
             </div>
           </div>
         </section>
       </main>
 
-      <footer style={{ padding: '48px 0', textAlign: 'center', borderTop: '1px solid var(--line)', color: 'var(--muted)', fontSize: '0.9rem' }}>
-        <p>&copy; 2026 doc-for-agent. Dedicated to the Agentic Era.</p>
+      <footer>
+        <p>&copy; 2026 doc-for-agent. Purpose-built for the Agentic Era.</p>
       </footer>
     </div>
   );
