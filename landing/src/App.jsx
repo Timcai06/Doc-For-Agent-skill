@@ -159,8 +159,8 @@ function App() {
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
             <span className="eyebrow">The Dual-Doc Advantage</span>
-            <h2>One engine. Two core audiences. ZERO drift.</h2>
-            <p className="feature-desc">By using a unified analysis engine, we maintain perfect synchronization between internal machine truth and external human guides.</p>
+            <h2>One engine. Two core audiences. Less drift.</h2>
+            <p className="feature-desc">By using a unified analysis engine, we keep agent-facing rules and human-facing guides synchronized through the same repository scan.</p>
           </div>
 
           <div className="sync-diagram scroll-reveal">
@@ -182,14 +182,14 @@ function App() {
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (The Context)</div>
               <h3>/AGENTS/ Baseline</h3>
-              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, Continue, and Copilot to navigate massive codebases with zero-hallucination precision.</p>
+              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, Continue, and Copilot workflows to navigate repositories with lower ambiguity.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
                 <li>✓ Cross-session Memory</li>
-                <li>✓ Rapid AST Navigation</li>
+                <li>✓ Faster Repo Navigation</li>
               </ul>
             </div>
-            <div className="dual-card human (The Onboarding)">
+            <div className="dual-card human">
               <div className="card-label">FOR HUMANS (The Narrative)</div>
               <h3>/docs/ Guides</h3>
               <p>Natural narrative for human maintainers. Perfect documentation for team onboarding, architecture reviews, and technical handoffs.</p>
@@ -210,7 +210,7 @@ function App() {
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Repo', desc: 'From zero baseline to professional documentation structure in seconds.' },
+              { type: 'Low-Doc Repo', desc: 'From a thin baseline to a structured documentation system with one command path.' },
               { type: 'Messy-Doc Repo', desc: 'Inhale scattered READMEs and systemize them into a durable Dual-Doc system.' },
               { type: 'Agent-Ready Repo', desc: 'Maintain peak efficiency for every agent session with automated lifecycle sync.' }
             ].map(s => (
