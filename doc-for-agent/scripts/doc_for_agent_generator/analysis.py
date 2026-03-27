@@ -851,6 +851,15 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             for cmd in commands
             if any(token in cmd for token in ("test", "lint", "build", "check", "verify", "doctor"))
         ]
+        preferred_verify_order = ("doctor", "lint", "typecheck", "test", "build", "check", "verify")
+        ordered_verify_commands: List[str] = []
+        for token in preferred_verify_order:
+            for cmd in verify_commands:
+                if token in cmd and cmd not in ordered_verify_commands:
+                    ordered_verify_commands.append(cmd)
+        for cmd in verify_commands:
+            if cmd not in ordered_verify_commands:
+                ordered_verify_commands.append(cmd)
         init_command = find_docagent_command(commands, "init")
         refresh_command = find_docagent_command(commands, "refresh")
         doctor_command = find_docagent_command(commands, "doctor")
@@ -874,9 +883,27 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             )
         elif generate_command:
             lines.append(f"Execution contract: `{generate_command}` is treated as the generation step in this repository workflow.")
-        if verify_commands:
-            summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
+        if ordered_verify_commands:
+            summary = ", ".join(f"`{cmd}`" for cmd in ordered_verify_commands[:3])
             lines.append(f"Verification gate: workflow changes are not complete until {summary} pass.")
+            decision_order = "; ".join(f"{index + 1}) `{cmd}`" for index, cmd in enumerate(ordered_verify_commands[:3]))
+            lines.append(
+                f"Verification order: {decision_order}; stop at the first failing command before running later checks."
+            )
+        triage_steps: List[str] = []
+        if doctor_command or "docagent doctor" in lowered:
+            triage_steps.append("run `docagent doctor` first to catch install/config drift")
+        elif ordered_verify_commands:
+            triage_steps.append(f"rerun the first failing gate (`{ordered_verify_commands[0]}`) to isolate command scope")
+        if "readme.md" in lowered:
+            triage_steps.append("reconcile command context with `README.md`")
+        if "quickstart" in lowered:
+            triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
+        if any(token in lowered for token in ("ci", "github actions", "workflow")):
+            triage_steps.append("inspect CI logs for command/environment mismatches")
+        triage_steps.append("if failures persist, roll back generated docs to last known-good state and rerun `docagent refresh`")
+        triage_priority = "; ".join(f"{index + 1}) {step}" for index, step in enumerate(triage_steps))
+        lines.append(f"Failure triage priority: {triage_priority}.")
         constraints: List[str] = []
         if any("--target" in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("keep `--target <repo-root>` explicit when commands run outside the target repo")
@@ -886,22 +913,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if any("--ai " in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("declare `--ai <platform>` explicitly so platform routing stays deterministic")
         if constraints:
-            triage_steps: List[str] = []
-            triage_steps.append("prioritize lifecycle commands (`docagent init/refresh/doctor`) before ad-hoc script edits")
-            if doctor_command or "docagent doctor" in lowered:
-                triage_steps.append("run `docagent doctor` for install/config drift checks")
-                triage_steps.append("if `docagent doctor` fails, fix install/config drift before rerunning verify commands")
-            if "readme.md" in lowered:
-                triage_steps.append("reconcile command context with `README.md`")
-            if "quickstart" in lowered:
-                triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
-            if any(token in lowered for token in ("ci", "github actions", "workflow")):
-                triage_steps.append("inspect CI logs for command/environment mismatches")
-            triage_steps.append("if failures persist, roll back to the last known-good generated docs state, then rerun `docagent refresh`")
-            if triage_steps:
-                lines.append(f"Execution constraints: {'; '.join(constraints)}; on failures, {'; '.join(triage_steps)}.")
-            else:
-                lines.append(f"Execution constraints: {'; '.join(constraints)}.")
+            lines.append(f"Execution constraints: {'; '.join(constraints)}.")
     elif role == "architecture":
         platform_facts = collect_platform_command_facts(snippets)
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
@@ -918,13 +930,19 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             if build_anchors:
                 anchors = ", ".join(build_anchors[:2])
                 lines.append(
-                    f"Source-of-truth boundary: confirm {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
+                    f"Source-of-truth boundary: on conflicts, arbitrate against {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
                 )
                 lines.append(
                     f"Build-path rule: if platform entry or packaging behavior breaks, inspect {anchors} before changing adapter/config mappings."
                 )
+                lines.append(
+                    f"Conflict handling order: 1) check {labels}; 2) validate build anchors ({anchors}); 3) then edit adapter/config mappings."
+                )
             else:
-                lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
+                lines.append(
+                    f"Source-of-truth boundary: on conflicts, arbitrate against {labels} before changing CLI entry, adapter wiring, or distribution behavior."
+                )
+                lines.append(f"Conflict handling order: 1) check {labels}; 2) then edit adapter/config mappings.")
         if platform_facts or ("docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform"))):
             if platform_facts:
                 labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
@@ -940,6 +958,9 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         migrate_command = find_docagent_command(commands, "migrate")
         if "docagent" in lowered and any(token in lowered for token in ("coding-agent", "codex", "claude", "continue", "copilot", "cli")):
             lines.append("Product positioning: this repository is scoped for CLI coding-agent workflows, not a standalone end-user application.")
+            lines.append(
+                "Positioning guardrail: describe `docagent` as an ongoing documentation system (`init/refresh/doctor/migrate`), not a one-shot markdown generator."
+            )
         if all(token in lowered for token in ("initialize", "migrate", "refresh")) or all(
             token in lowered for token in ("init", "migrate", "refresh")
         ):
@@ -962,9 +983,9 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
             lines.append("Product usage context emphasizes `human / agent / dual` outputs within the same workflow contract.")
     limit_by_role = {
-        "product": 3,
-        "architecture": 4,
-        "execution": 3,
+        "product": 4,
+        "architecture": 5,
+        "execution": 5,
         "memory": 3,
     }
     return lines[: limit_by_role.get(role, 3)]
