@@ -1,5 +1,13 @@
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
-from .builders import SUPPORTED_DOC_PROFILES, SUPPORTED_OUTPUT_MODES, generate_docs, generate_human_docs, repo_type_label
+from .builders import (
+    SUPPORTED_DOC_PROFILES,
+    SUPPORTED_HUMAN_LOCALES,
+    SUPPORTED_OUTPUT_MODES,
+    generate_docs,
+    generate_human_docs,
+    repo_type_label,
+    resolve_human_output_root,
+)
 from .engine import (
     SUPPORTED_ENGINE_ACTIONS,
     EngineExecutionResult,
@@ -23,6 +31,7 @@ __all__ = [
     "MANUAL_START",
     "SUPPORTED_REPO_TYPES",
     "SUPPORTED_DOC_PROFILES",
+    "SUPPORTED_HUMAN_LOCALES",
     "SUPPORTED_OUTPUT_MODES",
     "SUPPORTED_ENGINE_ACTIONS",
     "EngineExecutionResult",
@@ -43,6 +52,7 @@ __all__ = [
     "suggest_profile",
     "write_strategy_for_mode",
     "repo_type_label",
+    "resolve_human_output_root",
     "read_text",
     "write_file",
 ]

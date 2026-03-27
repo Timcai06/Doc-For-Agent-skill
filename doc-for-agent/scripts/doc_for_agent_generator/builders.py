@@ -10,12 +10,21 @@ from .utils import find_files, load_json, rel_path
 
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
+SUPPORTED_HUMAN_LOCALES = ("en", "zh")
+HUMAN_LOCALE_OUTPUT_ROOTS = {
+    "en": "docs",
+    "zh": "docs.zh",
+}
 
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:
     if not items:
         return f"- {empty_line}"
     return "\n".join(f"- {item}" for item in items)
+
+
+def resolve_human_output_root(human_locale: str) -> str:
+    return HUMAN_LOCALE_OUTPUT_ROOTS.get(human_locale, HUMAN_LOCALE_OUTPUT_ROOTS["en"])
 
 
 def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> str:
@@ -2377,10 +2386,11 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 """
 
 
-def generate_human_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+def generate_human_docs(analysis: RepoAnalysis, human_locale: str = "en") -> Dict[str, str]:
+    output_root = resolve_human_output_root(human_locale)
     return {
-        "docs/overview.md": build_human_overview(analysis),
-        "docs/architecture.md": build_human_architecture(analysis),
-        "docs/workflows.md": build_human_workflows(analysis),
-        "docs/glossary.md": build_human_glossary(analysis),
+        f"{output_root}/overview.md": build_human_overview(analysis),
+        f"{output_root}/architecture.md": build_human_architecture(analysis),
+        f"{output_root}/workflows.md": build_human_workflows(analysis),
+        f"{output_root}/glossary.md": build_human_glossary(analysis),
     }

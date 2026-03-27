@@ -8,11 +8,13 @@ from typing import Dict, Iterable, Optional
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
 from .builders import (
     SUPPORTED_DOC_PROFILES,
+    SUPPORTED_HUMAN_LOCALES,
     SUPPORTED_OUTPUT_MODES,
     generate_docs,
     generate_human_docs,
     infer_source_of_truth_lines,
     repo_type_label,
+    resolve_human_output_root,
 )
 from .markdown import MANUAL_END, MANUAL_START, merge_markdown
 from .models import RepoAnalysis
@@ -42,6 +44,7 @@ class EngineRequest:
     root: Path
     mode: str = "refresh"
     output_mode: str = "dual"
+    human_locale: str = "en"
     profile: str = "bootstrap"
     project_name: str = ""
     repo_type_override: Optional[str] = None
@@ -85,6 +88,10 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         raise ValueError(f"Unsupported mode `{request.mode}`. Supported: {', '.join(SUPPORTED_ENGINE_ACTIONS)}")
     if request.output_mode not in SUPPORTED_OUTPUT_MODES:
         raise ValueError(f"Unsupported output mode `{request.output_mode}`. Supported: {', '.join(SUPPORTED_OUTPUT_MODES)}")
+    if request.human_locale not in SUPPORTED_HUMAN_LOCALES:
+        raise ValueError(
+            f"Unsupported human locale `{request.human_locale}`. Supported: {', '.join(SUPPORTED_HUMAN_LOCALES)}"
+        )
     effective_profile = effective_profile_for_mode(request.mode, request.profile)
     if effective_profile not in SUPPORTED_DOC_PROFILES:
         raise ValueError(f"Unsupported profile `{request.profile}`. Supported: {', '.join(SUPPORTED_DOC_PROFILES)}")
@@ -97,6 +104,7 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         root=root,
         mode=request.mode,
         output_mode=request.output_mode,
+        human_locale=request.human_locale,
         profile=effective_profile,
         project_name=project_name,
         repo_type_override=request.repo_type_override,
@@ -151,7 +159,12 @@ def apply_layered_migration_overlays(analysis: RepoAnalysis, files: Dict[str, st
     return migrated
 
 
-def collect_output_plan(root: Path, analysis: RepoAnalysis, output_mode: str) -> tuple[Dict[str, str], list[Path]]:
+def collect_output_plan(
+    root: Path,
+    analysis: RepoAnalysis,
+    output_mode: str,
+    human_locale: str,
+) -> tuple[Dict[str, str], list[Path]]:
     planned: Dict[str, str] = {}
     archive_candidates: list[Path] = []
 
@@ -163,7 +176,7 @@ def collect_output_plan(root: Path, analysis: RepoAnalysis, output_mode: str) ->
         archive_candidates = list(analysis.docs_inventory.archive_candidates)
 
     if output_mode in {"human", "dual"}:
-        human_files = generate_human_docs(analysis)
+        human_files = generate_human_docs(analysis, human_locale=human_locale)
         for name, content in human_files.items():
             planned[str(root / name)] = content
 
@@ -178,9 +191,14 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
         repo_type_override=normalized_request.repo_type_override,
         doc_profile=normalized_request.profile,
     )
-    files, archive_candidates = collect_output_plan(normalized_request.root, analysis, normalized_request.output_mode)
+    files, archive_candidates = collect_output_plan(
+        normalized_request.root,
+        analysis,
+        normalized_request.output_mode,
+        normalized_request.human_locale,
+    )
     agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
-    docs_dir = normalized_request.root / "docs"
+    docs_dir = normalized_request.root / resolve_human_output_root(normalized_request.human_locale)
     return GenerationPlan(
         request=normalized_request,
         analysis=analysis,
@@ -287,6 +305,7 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         f"- Backend root: `{analysis.backend_root}`" if analysis.backend_root else "- Backend root: not detected",
         f"- Package manager: `{analysis.package_manager}`",
         f"- Output mode: `{plan.request.output_mode}`",
+        f"- Human locale: `{plan.request.human_locale}` (output root: `{plan.docs_dir}`)",
         "- Recommended output mode: `dual` (AGENTS + docs).",
         f"- Suggested profile: `{suggested_profile}`",
         f"- Documentation state: `{analysis.docs_inventory.detected_state}`",

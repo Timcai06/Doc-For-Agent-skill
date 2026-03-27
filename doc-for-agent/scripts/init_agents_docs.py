@@ -10,6 +10,7 @@ from doc_for_agent_generator import (
     MANUAL_START,
     SUPPORTED_DOC_PROFILES,
     SUPPORTED_ENGINE_ACTIONS,
+    SUPPORTED_HUMAN_LOCALES,
     SUPPORTED_OUTPUT_MODES,
     SUPPORTED_REPO_TYPES,
     EngineRequest,
@@ -85,6 +86,12 @@ def main() -> None:
         default="dual",
         help="Choose which documentation system to generate: agent, human, or dual (recommended default).",
     )
+    parser.add_argument(
+        "--human-locale",
+        choices=SUPPORTED_HUMAN_LOCALES,
+        default="en",
+        help="Locale-aware human docs output root mapping only (`en` -> `docs/`, `zh` -> `docs.zh/`); no translation applied.",
+    )
     args = parser.parse_args()
 
     root = Path(args.root).expanduser().resolve()
@@ -92,6 +99,7 @@ def main() -> None:
         root=root,
         mode=args.mode,
         output_mode=args.output_mode,
+        human_locale=args.human_locale,
         profile=args.profile,
         project_name=args.project_name or "",
         repo_type_override=args.repo_type,

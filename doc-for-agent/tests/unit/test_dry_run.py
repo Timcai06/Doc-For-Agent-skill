@@ -276,6 +276,35 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("Rule 1:", workflows)
             self.assertIn("## Maintenance Workflow", workflows)
 
+    def test_human_locale_zh_routes_outputs_to_docs_zh(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-human-zh-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "backend_service"
+            shutil.copytree(TEST_ROOT / "fixtures" / "backend_service", sandbox_root)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(GENERATOR),
+                    "--root",
+                    str(sandbox_root),
+                    "--mode",
+                    "generate",
+                    "--output-mode",
+                    "human",
+                    "--human-locale",
+                    "zh",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertIn("Generated human docs in:", result.stdout)
+            self.assertIn("docs.zh", result.stdout)
+            self.assertTrue((sandbox_root / "docs.zh/overview.md").exists())
+            self.assertTrue((sandbox_root / "docs.zh/architecture.md").exists())
+            self.assertFalse((sandbox_root / "docs/overview.md").exists())
+
     def test_dual_output_mode_dry_run_reports_agents_and_human_paths(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dual-mode-") as tmpdir:
             sandbox_root = Path(tmpdir) / "web_app"

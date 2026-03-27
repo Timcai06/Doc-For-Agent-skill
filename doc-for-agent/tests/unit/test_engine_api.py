@@ -26,6 +26,7 @@ class EngineApiTests(unittest.TestCase):
     def test_engine_request_defaults_to_dual_output_mode(self) -> None:
         request = EngineRequest(root=Path("/tmp/doc-for-agent-default-output"))
         self.assertEqual(request.output_mode, "dual")
+        self.assertEqual(request.human_locale, "en")
 
     def test_mode_semantics_helpers_are_stable(self) -> None:
         self.assertEqual(write_strategy_for_mode("refresh"), "refresh")
@@ -55,6 +56,7 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue(any("Suggested command:" in line for line in explanation))
             self.assertTrue(any("Recommended output mode: `dual`" in line for line in explanation))
             self.assertTrue(any("--output-mode dual" in line for line in explanation if line.startswith("Suggested command:")))
+            self.assertTrue(any("Human locale: `en`" in line for line in explanation))
 
     def test_migrate_mode_uses_refresh_write_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-migrate-") as tmpdir:
@@ -223,6 +225,27 @@ class EngineApiTests(unittest.TestCase):
             self.assertNotIn("(sources:", overview)
             self.assertNotIn("(sources:", architecture)
             self.assertNotIn("(sources:", workflows)
+
+    def test_human_locale_zh_writes_docs_zh_output_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-human-zh-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            result = execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="dual",
+                    human_locale="zh",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            self.assertIn("AGENTS + human docs", result.summary)
+            self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "docs.zh" / "architecture.md").exists())
+            self.assertFalse((sandbox_root / "docs" / "overview.md").exists())
 
 
 if __name__ == "__main__":
