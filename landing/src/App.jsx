@@ -439,13 +439,17 @@ function App() {
         {/* CTA */}
         <section className="section" id="cta">
           <div className="cta-card scroll-reveal main-cta">
-            <div className="eyebrow" style={{ color: '#fff' }}>Grounded Development</div>
-            <h2>Protect your repo from knowledge drift.</h2>
-            <p className="hero-text" style={{ margin: '0 auto 48px' }}>Move from ephemeral chat history to a durable knowledge system.</p>
-            <div className="hero-actions" style={{ justifyContent: 'center' }}>
-              <div className="install-box">
+            <div className="eyebrow" style={{ color: '#fff', opacity: 0.8 }}>Sustainable Knowledge LifeCycle</div>
+            <h2>Protect your repo <br /> from knowledge drift.</h2>
+            <p className="hero-text" style={{ margin: '0 auto 48px', opacity: 0.9 }}>Stop settling for ephemeral chat history. Establish your baseline today.</p>
+            
+            <div className="mega-install-container">
+              <div className="install-box mega">
+                <span className="install-prompt">$</span>
                 <code>npm install -g doc-for-agent</code>
+                <div className="install-glow" />
               </div>
+              <p className="install-hint">Works with Claude Code, Codex, Continue, and Copilot.</p>
             </div>
           </div>
         </section>
