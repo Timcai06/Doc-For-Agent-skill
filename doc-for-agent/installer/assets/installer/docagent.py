@@ -242,7 +242,7 @@ def print_update_summary(target_root: Path, platforms: Sequence[str], installed_
 
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
-    primary_commands = "init, doctor, refresh, generate, update, versions"
+    primary_commands = "init, refresh, doctor, generate, update, versions"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
         prog=metadata.installer_command,
