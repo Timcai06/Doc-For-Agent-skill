@@ -31,6 +31,12 @@ docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
 docagent refresh --root <repo-root> --output-mode agent
 ```
 
+Need a guided doc entry map? Run:
+
+```bash
+docagent quickstart --target <repo-root>
+```
+
 ## Pick Your Agent
 
 | If you use... | Run this first |
@@ -79,6 +85,6 @@ docagent all --target <repo-root>
 
 ## Docs
 
-- [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md)
-- [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md)
+- [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md) (start here)
+- [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md) (choose `--ai`)
 - [Maintainer Guide](docs/maintainers.md)
