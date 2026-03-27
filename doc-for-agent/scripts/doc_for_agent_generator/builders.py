@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import Dict, Sequence
 
+from .analysis import supporting_doc_roles
 from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
@@ -318,29 +319,8 @@ def detect_package_metadata_paths(root: Path) -> list[Path]:
 def supporting_docs_for_role(analysis: RepoAnalysis, role: str) -> list[Path]:
     role_paths: list[Path] = []
     for path in analysis.docs_inventory.reference_only_docs:
-        normalized = rel_path(path, analysis.root).lower()
-        if role == "product":
-            if (
-                normalized == "readme.md"
-                or normalized.startswith("docs/product/")
-                or normalized.startswith("specs/")
-                or normalized.startswith("docs/")
-            ):
-                role_paths.append(path)
-        elif role == "architecture":
-            if (
-                normalized.startswith("docs/architecture/")
-                or "/architecture/" in normalized
-                or normalized.startswith("docs/adr")
-                or "adr" in path.name.lower()
-            ):
-                role_paths.append(path)
-        elif role == "execution":
-            if normalized.startswith("plan/") or normalized.startswith("roadmap/") or "runbook" in path.name.lower():
-                role_paths.append(path)
-        elif role == "memory":
-            if any(token in normalized for token in ("progress", "lessons", "handoff", "status")):
-                role_paths.append(path)
+        if role in supporting_doc_roles(path, analysis.root):
+            role_paths.append(path)
     return role_paths
 
 

@@ -521,6 +521,8 @@ def extract_supporting_doc_snippets(text: str) -> List[str]:
             continue
         if in_code_block or not stripped:
             continue
+        if stripped.startswith("|") and stripped.endswith("|"):
+            continue
 
         candidate = ""
         if stripped.startswith("#"):
@@ -622,7 +624,7 @@ def extract_distribution_snippets(text: str, role: str) -> List[str]:
             continue
         if in_code_block or not stripped:
             continue
-        plain = re.sub(r"^[-*]\s+", "", stripped)
+        plain = normalize_distribution_snippet_line(stripped)
         lowered = plain.lower()
         if len(plain) < 20 or len(plain) > 180:
             continue
@@ -634,6 +636,28 @@ def extract_distribution_snippets(text: str, role: str) -> List[str]:
         if len(snippets) >= 4:
             break
     return snippets
+
+
+def normalize_distribution_snippet_line(line: str) -> str:
+    stripped = re.sub(r"^[-*]\s+", "", line.strip())
+    if not stripped:
+        return ""
+    if stripped.startswith("|") and stripped.endswith("|"):
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if not cells or all(not cell for cell in cells):
+            return ""
+        lowered_cells = [cell.lower() for cell in cells]
+        if all(set(cell) <= {"-", ":"} for cell in lowered_cells if cell):
+            return ""
+        if len(cells) >= 2 and any("docagent" in cell.lower() for cell in cells):
+            platform = cells[0]
+            command = next((cell for cell in cells[1:] if "docagent" in cell.lower()), "")
+            summary = next((cell for cell in cells[1:] if cell and cell != command), "")
+            if command and summary:
+                return f"{platform} uses {command} ({summary})"
+            if command:
+                return f"{platform} uses {command}"
+    return stripped
 
 
 def snippet_priority(role: str, snippet: str) -> int:

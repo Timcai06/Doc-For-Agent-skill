@@ -47,6 +47,27 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertIn("unified CLI surface", architecture_confirmed[0])
             self.assertIn("README.md", analysis.supporting_doc_provenance.get("execution", []))
 
+    def test_architecture_distribution_synthesis_normalizes_markdown_table_rows(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-platform-table-") as tmpdir:
+            root = Path(tmpdir) / "platform-table-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Platform Table Repo\n\n"
+                    "| Agent | Command |\n"
+                    "| --- | --- |\n"
+                    "| Codex | docagent init --ai codex --target <repo-root> |\n"
+                    "| Claude Code | docagent init --ai claude --target <repo-root> |\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Platform Table Repo")
+            architecture_confirmed = analysis.supporting_doc_insights.get("architecture", {}).get("confirmed", [])
+
+            self.assertTrue(any("Codex uses docagent init --ai codex --target <repo-root>" in line for line in architecture_confirmed))
+            self.assertFalse(any(line.strip().startswith("|") for line in architecture_confirmed))
+
     def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-command-priority-") as tmpdir:
             root = Path(tmpdir) / "command-priority-repo"

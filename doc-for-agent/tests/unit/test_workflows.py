@@ -149,6 +149,46 @@ class WorkflowGenerationTests(unittest.TestCase):
             self.assertIn("`plan/roadmap.md`", plan)
             self.assertIn("`notes/status.md`", lessons)
 
+    def test_layered_docs_reference_readme_and_quickstart_for_execution_and_architecture(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-exec-arch-docs-") as tmpdir:
+            root = Path(tmpdir) / "layered-exec-arch-docs"
+            (root / "docs").mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Layered Exec Arch Docs\n\n"
+                    "Use docagent init --ai codex --target <repo-root> to install for Codex.\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "docs/quickstart.md").write_text(
+                (
+                    "# Quickstart\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex --target <repo-root>\n"
+                    "docagent refresh --root <repo-root>\n"
+                    "```\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "docs/platforms.md").write_text(
+                (
+                    "# Platforms\n\n"
+                    "| Agent | Command |\n"
+                    "| --- | --- |\n"
+                    "| Codex | docagent init --ai codex --target <repo-root> |\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Layered Exec Arch Docs", doc_profile="layered")
+            architecture = build_layered_architecture_compatibility(analysis)
+            plan = build_layered_implementation_plan(analysis)
+
+            self.assertIn("`README.md`", architecture)
+            self.assertIn("`README.md`", plan)
+            self.assertIn("`docs/quickstart.md`", plan)
+            self.assertIn("`docs/platforms.md`", plan)
+
     def test_layered_docs_synthesize_confirmed_conflicting_and_unresolved_insights(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-synthesis-") as tmpdir:
             root = Path(tmpdir) / "layered-synthesis"
