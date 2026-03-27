@@ -27,6 +27,8 @@ From repository entry docs, use this order:
 3. `docs/quickstart.md`
 4. `docs/platforms.md`
 
+If you prefer Chinese docs, use the `.zh.md` counterparts in the same order.
+
 ## Local Preview
 
 ```bash

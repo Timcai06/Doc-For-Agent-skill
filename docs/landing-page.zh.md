@@ -23,9 +23,11 @@
 从仓库入口文档开始，建议按这个顺序：
 
 1. `README.md`
-2. `docs/landing-page.md`
-3. `docs/quickstart.md`
-4. `docs/platforms.md`
+2. `docs/landing-page.zh.md`
+3. `docs/quickstart.zh.md`
+4. `docs/platforms.zh.md`
+
+如果你更习惯英文文档，可按同样顺序使用不带 `.zh.md` 的版本。
 
 ## 本地预览
 
