@@ -505,6 +505,7 @@ def normalize_snippet_key(text: str) -> str:
 
 
 def clean_doc_line(line: str) -> str:
+    line = re.sub(r"^#+\s*", "", line.strip())
     line = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1", line)
     line = line.replace("`", "")
     line = re.sub(r"\s+", " ", line.strip())
@@ -631,6 +632,8 @@ def extract_distribution_snippets(text: str, role: str) -> List[str]:
         if not any(token in lowered for token in tokens):
             continue
         cleaned = clean_doc_line(plain)
+        if len(cleaned) < 20:
+            continue
         if cleaned and cleaned not in snippets:
             snippets.append(cleaned)
         if len(snippets) >= 4:
@@ -689,12 +692,36 @@ def is_low_value_snippet(role: str, snippet: str) -> bool:
     lowered = snippet.lower()
     if role == "execution" and snippet.startswith("Run `"):
         return False
+    if snippet.endswith(":") and len(snippet.split()) <= 8:
+        return True
+    generic_titles = (
+        "platform guide",
+        "quickstart",
+        "install matrix",
+        "product cli",
+        "pick your agent",
+        "docs",
+        "next command",
+        "distribution model",
+        "multi agent setup",
+        "init",
+        "refresh",
+        "verify",
+        "install",
+    )
+    if lowered in generic_titles:
+        return True
+    word_count = len(lowered.split())
+    if role in {"product", "architecture"} and word_count <= 2 and "docagent" not in lowered:
+        return True
     low_value_prefixes = (
         "this repository contains",
         "additional documentation context",
         "another long descriptive line",
         "yet another descriptive",
         "final descriptive line",
+        "platform table repo",
+        "layered docs",
     )
     if any(lowered.startswith(prefix) for prefix in low_value_prefixes):
         return True
