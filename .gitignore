@@ -11,6 +11,8 @@ __pycache__/
 # Local build and packaging artifacts.
 /build/
 /dist/
+node_modules/
+landing/dist/
 *.egg-info/
 
 # Packaging experiments are not part of main's source of truth yet.
