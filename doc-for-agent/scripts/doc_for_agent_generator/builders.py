@@ -281,6 +281,10 @@ def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
     return fallback_by_role.get(role, [])
 
 
+def enumerate_rules(lines: Sequence[str]) -> list[str]:
+    return [f"Rule {index + 1}: {line}" for index, line in enumerate(lines)]
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -1158,7 +1162,7 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
-    top_rules = role_first_screen_rules(analysis, "product")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
     return f"""# Core Goals
 
@@ -1426,7 +1430,7 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
-    top_rules = role_first_screen_rules(analysis, "architecture")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
@@ -1546,7 +1550,7 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
-    top_rules = role_first_screen_rules(analysis, "execution")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Implementation Plan
 
@@ -1740,7 +1744,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
-    top_rules = role_first_screen_rules(analysis, "product")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
     core = []
     if analysis.summary:
@@ -1843,7 +1847,7 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     )
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
-    top_rules = role_first_screen_rules(analysis, "architecture")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
     boundaries = [
         "Treat source-of-truth files as canonical when supporting docs disagree.",
         "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
@@ -1940,7 +1944,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     )
     provenance = supporting_doc_provenance_lines(analysis, "execution")
     synthesis_summary = synthesis_summary_lines(analysis, "execution")
-    top_rules = role_first_screen_rules(analysis, "execution")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     if analysis.frontend_root:
         frontend_prefix = (
