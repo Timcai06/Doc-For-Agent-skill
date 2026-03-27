@@ -1,5 +1,7 @@
 # doc-for-agent
 
+English | [简体中文](README.zh.md)
+
 `doc-for-agent` is a unified CLI for CLI coding-agent users.
 
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
@@ -77,6 +79,6 @@ docagent all --target <repo-root>
 
 ## Docs
 
-- [Quickstart](docs/quickstart.md)
-- [Platform Guide](docs/platforms.md)
+- [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md)
+- [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md)
 - [Maintainer Guide](docs/maintainers.md)

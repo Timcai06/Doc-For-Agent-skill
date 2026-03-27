@@ -170,6 +170,22 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn('forwardedArgs.push("quickstart")', wrapper_text)
         self.assertIn('npm install -g doc-for-agent', wrapper_text)
 
+    def test_user_facing_docs_have_bilingual_counterparts(self) -> None:
+        repo_root = TEST_ROOT.parents[1]
+        required_pairs = [
+            (repo_root / "README.md", repo_root / "README.zh.md"),
+            (repo_root / "docs" / "quickstart.md", repo_root / "docs" / "quickstart.zh.md"),
+            (repo_root / "docs" / "platforms.md", repo_root / "docs" / "platforms.zh.md"),
+        ]
+        for english, chinese in required_pairs:
+            self.assertTrue(english.exists(), f"Missing English doc: {english}")
+            self.assertTrue(chinese.exists(), f"Missing Chinese doc: {chinese}")
+
+            english_text = english.read_text(encoding="utf-8")
+            chinese_text = chinese.read_text(encoding="utf-8")
+            self.assertIn("docagent init --ai", english_text)
+            self.assertIn("docagent init --ai", chinese_text)
+
     def test_quickstart_command_prints_unified_entry_guidance(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-quickstart-") as tmpdir:
             stdout = io.StringIO()

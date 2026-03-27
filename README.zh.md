@@ -1,0 +1,85 @@
+# doc-for-agent
+
+[English](README.md) | 简体中文
+
+`doc-for-agent` 是一个面向 CLI coding-agent 用户的统一 CLI。
+
+适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
+
+产品路径很短：
+
+1. 安装
+2. `init`
+3. `refresh`
+
+## 30 秒开始
+
+先安装一次：
+
+```bash
+# Node 用户
+npm install -g doc-for-agent
+
+# Python 用户
+pipx install doc-for-agent
+```
+
+在仓库中开始：
+
+```bash
+docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
+docagent refresh --root <repo-root> --output-mode agent
+```
+
+## 按 Agent 选入口
+
+| 你使用... | 先执行 |
+| --- | --- |
+| Claude Code | `docagent init --ai claude --target <repo-root>` |
+| Codex | `docagent init --ai codex --target <repo-root>` |
+| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
+| Continue | `docagent init --ai continue --target <repo-root>` |
+| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+| 多个 Agent | `docagent init --ai all --target <repo-root>` |
+
+## 安装矩阵
+
+| 用户类型 | 安装方式 | 起步命令 |
+| --- | --- | --- |
+| Node-first（全局） | `npm install -g doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Node-first（一次性） | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target <repo-root>` |
+| Python-first（推荐） | `pipx install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Python-first（venv/system） | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+
+## Product CLI v1
+
+主命令：
+
+```bash
+docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
+docagent doctor --target <repo-root>
+docagent refresh --root <repo-root> --output-mode agent|human|dual
+docagent generate --root <repo-root> --mode refresh --output-mode agent|human|dual
+docagent update --target <repo-root>
+docagent versions --target <repo-root>
+```
+
+工具命令：
+
+```bash
+docagent quickstart --target <repo-root>
+```
+
+兼容命令（保留）：
+
+```bash
+docagent install --platform codex --target <repo-root>
+docagent all --target <repo-root>
+```
+
+## 文档
+
+- [Quickstart（英文）](docs/quickstart.md) / [Quickstart（中文）](docs/quickstart.zh.md)
+- [Platform Guide（英文）](docs/platforms.md) / [Platform Guide（中文）](docs/platforms.zh.md)
+- [Maintainer Guide](docs/maintainers.md)
+

@@ -1,30 +1,30 @@
-# doc-for-agent Quickstart
+# doc-for-agent 快速开始
 
-Language: English | [简体中文](quickstart.zh.md)
+[English](quickstart.md) | 简体中文
 
-This page is for first-time product users.
+本页面向第一次使用产品的用户。
 
-Use one mental model:
+只记住一个模型：
 
-1. install
+1. 安装
 2. init
 3. refresh
 
-## Install
+## 安装
 
-Node:
+Node：
 
 ```bash
 npm install -g doc-for-agent
 ```
 
-Python:
+Python：
 
 ```bash
 pipx install doc-for-agent
 ```
 
-One-off Node run:
+Node 一次性运行：
 
 ```bash
 npx -y doc-for-agent
@@ -32,7 +32,7 @@ npx -y doc-for-agent
 
 ## Init
 
-Pick one:
+按需选择：
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
@@ -43,7 +43,7 @@ docagent init --ai copilot --target <repo-root>
 docagent init --ai all --target <repo-root>
 ```
 
-CodeBuddy users usually start with:
+CodeBuddy 用户通常从下面开始：
 
 ```bash
 docagent init --ai codex --target <repo-root>
@@ -51,32 +51,33 @@ docagent init --ai codex --target <repo-root>
 
 ## Refresh
 
-Agent docs:
+只生成 agent 文档：
 
 ```bash
 docagent refresh --root <repo-root> --output-mode agent
 ```
 
-Human docs:
+只生成 human 文档：
 
 ```bash
 docagent refresh --root <repo-root> --output-mode human
 ```
 
-Both:
+同时生成两套：
 
 ```bash
 docagent refresh --root <repo-root> --output-mode dual
 ```
 
-## Verify
+## 验证
 
 ```bash
 docagent doctor --target <repo-root>
 docagent versions --target <repo-root>
 ```
 
-See also:
+另见：
 
-- [Platform Guide](platforms.md)
+- [Platform Guide（英文）](platforms.md) / [Platform Guide（中文）](platforms.zh.md)
 - [Maintainer Guide](maintainers.md)
+
