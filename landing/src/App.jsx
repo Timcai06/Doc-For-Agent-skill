@@ -72,9 +72,22 @@ const commands = [
 
 const heroCases = [
   {
+    label: 'Agent Skill',
+    title: 'Codex / Agentic Workflow',
+    command: 'tim@macBook ~ % @codex Use docagent to audit this branch.',
+    output: [
+      { text: 'Codex: Calling doc-for-agent skill...', color: 'var(--primary)' },
+      { text: '$ docagent doctor --root .', color: 'var(--text-secondary)' },
+      { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
+      { text: '✓ No drift detected in 24 files.', color: 'var(--accent)' },
+      { text: '[2/2] Status: Systemic Integrity Confirmed.', color: 'var(--accent)' },
+      { text: 'Codex: Doc-for-agent confirms your context is grounded.', color: 'var(--primary)' },
+    ]
+  },
+  {
     label: 'docagent init',
     title: 'Initialize System',
-    command: '$ docagent init --ai codex',
+    command: 'tim@macBook ~ % docagent init --ai codex',
     output: [
       { text: '[1/3] Analyzing repo architecture...', color: 'var(--text-secondary)' },
       { text: '✓ Detected 4 microservices', color: 'var(--accent)' },
@@ -85,22 +98,9 @@ const heroCases = [
     ]
   },
   {
-    label: 'docagent doctor',
-    title: 'Health Audit',
-    command: '$ docagent doctor --root .',
-    output: [
-      { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
-      { text: '! 1 drift found in /src/api/auth.js', color: 'var(--warning)' },
-      { text: '  - Code: Omit refreshToken', color: 'var(--text-muted)' },
-      { text: '  - Doc says: Returns refreshToken', color: 'var(--text-muted)' },
-      { text: '✓ Stability confirmed elsewhere.', color: 'var(--accent)' },
-      { text: '[2/2] Ready for auto-sync.', color: 'var(--primary)' },
-    ]
-  },
-  {
     label: 'docagent refresh',
     title: 'Sync Lifecycle',
-    command: '$ docagent refresh --output-mode dual',
+    command: 'tim@macBook ~ % docagent refresh --ai all',
     output: [
       { text: '[1/2] Scanning branch feature/v2...', color: 'var(--text-secondary)' },
       { text: '✓ 14 files changed', color: 'var(--accent)' },
@@ -116,12 +116,13 @@ function App() {
   const [activeArtifact, setActiveArtifact] = useState('agent');
   const [activeHeroCase, setActiveHeroCase] = useState(0);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveHeroCase((prev) => (prev + 1) % heroCases.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+  // Auto-switching disabled as per user request
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setActiveHeroCase((prev) => (prev + 1) % heroCases.length);
+  //   }, 5000);
+  //   return () => clearInterval(timer);
+  // }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -157,18 +158,17 @@ function App() {
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
           <div className="hero-copy scroll-reveal">
-            <span className="eyebrow">Real-World Proof</span>
+            <span className="eyebrow">Universal Agentic Skill</span>
             <h1>
               Proof-of-Documentation <br />
               <span style={{ color: 'var(--primary)' }}>for AI Workflows.</span>
             </h1>
             <p className="hero-text">
-              Create a durable, systemic knowledge base that persists across Claude Code, Codex, and Copilot sessions. 
-              <strong> Repo-analysis, artifact sync, real stability.</strong>
+              The purpose-built documentation skill for CLI coding agents. Maintain systemic ground truth within <strong>Codex, Claude Code, and Copilot sessions.</strong>
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#artifacts">See the Artifacts</a>
-              <a className="button button-secondary" href="#scenarios">Case Studies</a>
+              <a className="button button-secondary" href="#scenarios">Handoff Scenarios</a>
             </div>
           </div>
 
@@ -196,8 +196,8 @@ function App() {
                 ))}
               </div>
               <div className="code-body terminal-body">
-                <div className="terminal-line command">
-                  <span className="prompt">tim@macBook ~ %</span> {heroCases[activeHeroCase].command}
+                <div className="terminal-line command" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px', marginBottom: '16px' }}>
+                  <span className="prompt" style={{ color: 'var(--accent)' }}>%</span> {heroCases[activeHeroCase].command.split('%')[1]?.trim() || heroCases[activeHeroCase].command}
                 </div>
                 <div className="terminal-output">
                   {heroCases[activeHeroCase].output.map((line, i) => (
