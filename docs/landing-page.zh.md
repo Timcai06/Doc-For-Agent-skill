@@ -37,7 +37,7 @@ npm run dev
 
 ## 另见
 
-看完这里后，先去 Quickstart，再去 Platform Guide。
+看完这里后，先去“快速开始”，再去“平台指南”。
 
-- [Quickstart（英文）](quickstart.md) / [Quickstart（中文）](quickstart.zh.md)
+- [Quickstart（英文）](quickstart.md) / [快速开始（中文）](quickstart.zh.md)
 - [Platform Guide（英文）](platforms.md) / [平台指南（中文）](platforms.zh.md)
