@@ -192,7 +192,7 @@ def render_quickstart(target_root: Path) -> str:
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",
         "- Supported `--ai` values: claude, codex, continue, copilot, all",
-        "- More details: see docs/platforms.md",
+        "- More details: docs/platforms.md (EN) / docs/platforms.zh.md (ZH)",
     ]
     return "\n".join(lines)
 
