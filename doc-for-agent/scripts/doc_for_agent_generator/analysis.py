@@ -792,6 +792,9 @@ def extract_source_of_truth_paths(snippets: Sequence[str], aggregate_text: str) 
         "package.json",
         "pyproject.toml",
         "requirements.txt",
+        "docs/platforms.md",
+        "docs/platforms.zh.md",
+        "docs/quickstart.md",
     )
     lowered = aggregate_text.lower()
     for filename in common_files:
@@ -843,6 +846,11 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
     commands = extract_commands_from_snippets(snippets)
 
     if role == "execution":
+        verify_commands = [
+            cmd
+            for cmd in commands
+            if any(token in cmd for token in ("test", "lint", "build", "check", "verify", "doctor"))
+        ]
         init_command = find_docagent_command(commands, "init")
         refresh_command = find_docagent_command(commands, "refresh")
         doctor_command = find_docagent_command(commands, "doctor")
@@ -851,6 +859,10 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             if doctor_command:
                 lines.append(
                     f"Execution contract: `{init_command}` -> `{refresh_command}` -> `{doctor_command}` is the documented command order for setup, sync, and drift checks."
+                )
+            elif verify_commands:
+                lines.append(
+                    f"Execution contract: `{init_command}` -> `{refresh_command}` -> verify with `{verify_commands[0]}` is the documented order for setup and release readiness."
                 )
             else:
                 lines.append(
@@ -862,11 +874,6 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             )
         elif generate_command:
             lines.append(f"Execution contract: `{generate_command}` is treated as the generation step in this repository workflow.")
-        verify_commands = [
-            cmd
-            for cmd in commands
-            if any(token in cmd for token in ("test", "lint", "build", "check", "verify", "doctor"))
-        ]
         if verify_commands:
             summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
             lines.append(f"Verification gate: workflow changes are not complete until {summary} pass.")
@@ -881,6 +888,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if constraints:
             lines.append(f"Execution constraints: {'; '.join(constraints)}.")
     elif role == "architecture":
+        platform_facts = collect_platform_command_facts(snippets)
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
         if platforms and "docagent" in lowered:
             labels = ", ".join(f"`{name}`" for name in platforms)
@@ -889,8 +897,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if source_paths and any(token in lowered for token in ("source of truth", "canonical", "readme.md", "entry", "distribution")):
             labels = ", ".join(f"`{path}`" for path in source_paths[:3])
             lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
-        if "docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform")):
-            platform_facts = collect_platform_command_facts(snippets)
+        if platform_facts or ("docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform"))):
             if platform_facts:
                 labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
                 lines.append(
@@ -901,6 +908,8 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
                     "Distribution structure: platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized."
                 )
     elif role == "product":
+        doctor_command = find_docagent_command(commands, "doctor")
+        migrate_command = find_docagent_command(commands, "migrate")
         if "docagent" in lowered and any(token in lowered for token in ("coding-agent", "codex", "claude", "continue", "copilot", "cli")):
             lines.append("Product positioning: this repository is scoped for CLI coding-agent workflows, not a standalone end-user application.")
         if all(token in lowered for token in ("initialize", "migrate", "refresh")) or all(
@@ -908,7 +917,12 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         ):
             lines.append("Repository adaptation scope: cover initialize, migrate, and refresh paths so existing and messy docs can converge to one system.")
         if "docagent init" in lowered and "docagent refresh" in lowered:
-            lines.append("Retention value: prioritize repeatable `init -> refresh` lifecycle updates over one-shot document generation.")
+            if doctor_command or "docagent doctor" in lowered:
+                lines.append("Retention value: prioritize repeatable `init -> refresh -> doctor` lifecycle checks over one-shot document generation.")
+            elif migrate_command or "migrate" in lowered:
+                lines.append("Retention value: prioritize repeatable `init -> refresh` updates plus `migrate` for legacy-doc consolidation.")
+            else:
+                lines.append("Retention value: prioritize repeatable `init -> refresh` lifecycle updates over one-shot document generation.")
         if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
             lines.append("Product usage context emphasizes `human / agent / dual` outputs within the same workflow contract.")
     return lines[:3]
