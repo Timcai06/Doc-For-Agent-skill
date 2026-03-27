@@ -7,8 +7,8 @@ const Artifacts = {
     content: `# Architecture Overview\n\n## Narrative Context\nThis repository implements a rule-based documentation engine. It prioritizes clarity for human onboarding.\n\n## Core Logic\n- Unified Scan: One pass for both target outputs.\n- Drift Detection: Automated sync checks.\n\n## How to Maintain\nUse \`docagent refresh\` after significant AST changes.`
   },
   agent: {
-    title: "AGENTS/00-context/002-rules.md",
-    content: `# Execution Rules\n\n## Path Mapping\n- Source: /src/core\n- Documentation: /docs\n\n## Constraints (Machine Truth)\n- STRICT: Do not modify index.js directly.\n- REQUIRED: Run @docagent-doctor before every task.\n- INVARIANT: All skills must reside in /AGENTS/skills.`
+    title: "AGENTS/03-execution/008-implementation-plan.md",
+    content: `# Workflows\n\n## Top Rules\n- Verify before merge.\n- Use the documented command path.\n- Escalate source-of-truth conflicts.\n\n## Run\n- \`docagent doctor --target .\`\n- \`docagent refresh --root . --output-mode dual\``
   }
 };
 
@@ -108,7 +108,7 @@ function App() {
               <span style={{ color: 'var(--primary)' }}>Between Code and Agents.</span>
             </h1>
             <p className="hero-text">
-              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent Machine Truth for Agents, Clear Narrative for Humans. Zero drift, full alignment.
+              Transform messy, low-doc repositories into a durable <strong>Dual-Doc system</strong>. Persistent machine truth for agents, clear narrative for humans, and lower drift across sessions.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">Start Lifecycle</a>
@@ -157,7 +157,7 @@ function App() {
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
             <span className="eyebrow">The Dual-Doc Architecture</span>
-            <h2>One scan. Two worlds. Zero drift.</h2>
+            <h2>One scan. Two worlds. Less drift.</h2>
             <p className="feature-desc">Why maintain two sets of docs? Because agents need <strong>Execution Rules</strong> while humans need <strong>Architectural Narrative</strong>. We generate both from a single source of truth.</p>
           </div>
 
@@ -191,7 +191,7 @@ function App() {
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (The Context)</div>
               <h3>/AGENTS/ Baseline</h3>
-              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with machine-level precision.</p>
+              <p>Actionable, high-density knowledge maps. Designed for Claude Code, Codex, and Continue to navigate repositories with lower ambiguity.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
                 <li>✓ Cross-session Memory</li>
@@ -201,7 +201,7 @@ function App() {
             <div className="dual-card human">
               <div className="card-label">FOR HUMANS (The Narrative)</div>
               <h3>/docs/ Guides</h3>
-              <p>Natural narrative for human maintainers. Perfect documentation for team onboarding, architecture reviews, and technical handoffs.</p>
+              <p>Natural narrative for human maintainers. Clear documentation for onboarding, architecture reviews, and technical handoffs.</p>
               <ul className="mini-features">
                 <li>✓ Narrative Cohesion</li>
                 <li>✓ Maintenance Logic</li>
@@ -219,9 +219,9 @@ function App() {
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Repo', desc: 'Bootstrap a professional documentation system from raw source code and config files.' },
+              { type: 'Low-Doc Repo', desc: 'Bootstrap a structured documentation system from source code and config files.' },
               { type: 'Messy-Doc Repo', desc: 'Inhale scattered, outdated READMEs and systemize them into a durable structured baseline.' },
-              { type: 'Scaling Repo', desc: 'Maintain peak alignment for every agent session with automated, recurring lifecycle sync.' }
+              { type: 'Scaling Repo', desc: 'Maintain stronger alignment for repeated agent work with a repeatable refresh cycle.' }
             ].map(s => (
               <div key={s.type} className="scenario-pill glass-card">
                 <strong>{s.type}</strong>
@@ -324,7 +324,7 @@ function App() {
               <div className="step-content">
                 <div className="step-badge">03</div>
                 <h3>Active Refresh</h3>
-                <p>The core of sustainability. Sync knowledge as code evolves, zero-manual overhead.</p>
+                <p>The core of sustainability. Sync knowledge as code evolves with lower manual overhead.</p>
                 <div className="command-box highlight">
                   <code>docagent refresh</code>
                   <span className="recurring-tag">RECURRING</span>
