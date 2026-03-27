@@ -49,7 +49,7 @@ def synthesis_summary_lines(analysis: RepoAnalysis, role: str) -> list[str]:
         f"Synthesized statements: `{confirmed_count}` confirmed, `{conflicting_count}` conflicting, `{unresolved_count}` unresolved",
     ]
     if not role_sources:
-        lines.append("No supporting docs matched this role; content below is inferred from repository structure and code signals.")
+        lines.append("No supporting docs matched this role; content below is derived from repository structure and code signals.")
     return lines
 
 
@@ -1718,9 +1718,9 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
 
-### Inferred Signals
+### Derived Signals
 
-{format_bullets(inferred, "No additional inferred product signals were detected from repository structure.")}
+{format_bullets(inferred, "No additional derived product signals were detected from repository structure.")}
 
 ### Open Questions
 
@@ -1732,7 +1732,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 ## Current Priorities
 
-{format_bullets(priorities, "No immediate priorities were inferred automatically.")}
+{format_bullets(priorities, "No immediate priorities were derived automatically.")}
 
 ## Documentation Gaps To Close
 
@@ -1740,15 +1740,15 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
@@ -1810,9 +1810,9 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
 
-### Inferred Signals
+### Derived Signals
 
-{format_bullets(inferred, "No additional inferred architecture signals were detected from repository structure.")}
+{format_bullets(inferred, "No additional derived architecture signals were detected from repository structure.")}
 
 ### Open Questions
 
@@ -1824,19 +1824,19 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 ## Stability Boundaries
 
-{format_bullets(boundaries, "No architecture boundaries were inferred automatically.")}
+{format_bullets(boundaries, "No architecture boundaries were derived automatically.")}
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
@@ -1956,9 +1956,9 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 {format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
 
-### Inferred Signals
+### Derived Signals
 
-{format_bullets(inferred, "No additional inferred execution signals were detected from repository structure.")}
+{format_bullets(inferred, "No additional derived execution signals were detected from repository structure.")}
 
 ### Open Questions
 
@@ -1970,19 +1970,19 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 ## Operational Notes
 
-{format_bullets(operational_notes, "No additional operational notes were inferred automatically.")}
+{format_bullets(operational_notes, "No additional operational notes were derived automatically.")}
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
@@ -2011,7 +2011,7 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
     if analysis.endpoints:
         candidate_terms.extend(f"- `endpoint:{endpoint}`" for endpoint in analysis.endpoints[:4])
     if not candidate_terms:
-        candidate_terms.append("- No additional term candidates were inferred from routes/endpoints.")
+        candidate_terms.append("- No additional term candidates were derived from routes/endpoints.")
     maintenance = human_maintenance_lines(analysis, "memory", len(unresolved), len(conflicting))
     update_triggers = human_update_trigger_lines(analysis, "memory")
     bootstrap_backlog = human_bootstrap_backlog_lines("memory", bool(provenance))
@@ -2035,9 +2035,9 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 {chr(10).join(candidate_terms)}
 
-## Inferred Terminology Signals
+## Derived Terminology Signals
 
-{format_bullets(inferred, "No additional inferred terminology signals were detected from repository structure.")}
+{format_bullets(inferred, "No additional derived terminology signals were detected from repository structure.")}
 
 ## Unresolved Terminology Items
 
@@ -2049,15 +2049,15 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were inferred automatically.")}
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were inferred automatically.")}
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were inferred automatically.")}
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
