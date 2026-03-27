@@ -88,8 +88,8 @@ docagent all --target <repo-root>
 入口文档路径：
 
 1. [Landing Page（英文）](docs/landing-page.md) / [落地页说明（中文）](docs/landing-page.zh.md)
-2. [Quickstart（英文）](docs/quickstart.md) / [Quickstart（中文）](docs/quickstart.zh.md)
-3. [Platform Guide（英文）](docs/platforms.md) / [Platform Guide（中文）](docs/platforms.zh.md)
+2. [Quickstart（英文）](docs/quickstart.md) / [快速开始（中文）](docs/quickstart.zh.md)
+3. [Platform Guide（英文）](docs/platforms.md) / [平台指南（中文）](docs/platforms.zh.md)
 
 维护文档：
 

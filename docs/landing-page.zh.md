@@ -40,4 +40,4 @@ npm run dev
 看完这里后，先去 Quickstart，再去 Platform Guide。
 
 - [Quickstart（英文）](quickstart.md) / [Quickstart（中文）](quickstart.zh.md)
-- [Platform Guide（英文）](platforms.md) / [Platform Guide（中文）](platforms.zh.md)
+- [Platform Guide（英文）](platforms.md) / [平台指南（中文）](platforms.zh.md)
