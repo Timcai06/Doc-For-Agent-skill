@@ -499,6 +499,7 @@ def supporting_doc_roles(path: Path, root: Path) -> List[str]:
         or "/architecture/" in normalized
         or normalized.startswith("docs/adr")
         or "adr" in path.name.lower()
+        or "platform" in path.name.lower()
     ):
         roles.append("architecture")
     if (
@@ -741,6 +742,12 @@ def is_low_value_snippet(role: str, snippet: str) -> bool:
         return True
     low_value_prefixes = (
         "this repository contains",
+        "this repository appears to",
+        "this project appears to",
+        "it appears to",
+        "it likely",
+        "likely",
+        "inferred",
         "additional documentation context",
         "another long descriptive line",
         "yet another descriptive",
@@ -810,6 +817,26 @@ def is_role_conclusion_line(role: str, line: str) -> bool:
     return any(line.startswith(prefix) for prefix in prefixes)
 
 
+def collect_platform_command_facts(snippets: Sequence[str]) -> List[Tuple[str, str]]:
+    facts: List[Tuple[str, str]] = []
+    seen: set[Tuple[str, str]] = set()
+    pattern = re.compile(r"^\s*([A-Za-z][A-Za-z0-9 +/_-]{1,40})\s+uses\s+(docagent\s+[a-z0-9][^()]+)", re.IGNORECASE)
+    for snippet in snippets:
+        match = pattern.match(snippet.strip())
+        if not match:
+            continue
+        platform = match.group(1).strip()
+        command = match.group(2).strip()
+        key = (platform.lower(), command)
+        if key in seen:
+            continue
+        seen.add(key)
+        facts.append((platform, command))
+        if len(facts) >= 3:
+            break
+    return facts
+
+
 def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: Sequence[str]) -> List[str]:
     lines: List[str] = []
     lowered = aggregate_text.lower()
@@ -821,9 +848,14 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         doctor_command = find_docagent_command(commands, "doctor")
         generate_command = find_docagent_command(commands, "generate")
         if init_command and refresh_command:
-            lines.append(
-                f"Execution contract: run `{init_command}` once to establish docs, then `{refresh_command}` after repo changes to keep outputs synchronized."
-            )
+            if doctor_command:
+                lines.append(
+                    f"Execution contract: `{init_command}` -> `{refresh_command}` -> `{doctor_command}` is the documented command order for setup, sync, and drift checks."
+                )
+            else:
+                lines.append(
+                    f"Execution contract: run `{init_command}` once to establish docs, then `{refresh_command}` after repo changes to keep outputs synchronized."
+                )
         elif init_command and doctor_command:
             lines.append(
                 f"Execution contract: use `{init_command}` for setup and `{doctor_command}` as a repeatable drift check before release."
@@ -837,7 +869,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         ]
         if verify_commands:
             summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
-            lines.append(f"Verification gate: after workflow updates, run {summary} before handoff or release.")
+            lines.append(f"Verification gate: workflow changes are not complete until {summary} pass.")
         constraints: List[str] = []
         if any("--target" in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("keep `--target <repo-root>` explicit when commands run outside the target repo")
@@ -858,9 +890,16 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             labels = ", ".join(f"`{path}`" for path in source_paths[:3])
             lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
         if "docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform")):
-            lines.append(
-                "Distribution structure: platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized."
-            )
+            platform_facts = collect_platform_command_facts(snippets)
+            if platform_facts:
+                labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
+                lines.append(
+                    f"Distribution structure: keep platform mappings in adapter/config docs ({labels}) while CLI contract changes stay centralized."
+                )
+            else:
+                lines.append(
+                    "Distribution structure: platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized."
+                )
     elif role == "product":
         if "docagent" in lowered and any(token in lowered for token in ("coding-agent", "codex", "claude", "continue", "copilot", "cli")):
             lines.append("Product positioning: this repository is scoped for CLI coding-agent workflows, not a standalone end-user application.")

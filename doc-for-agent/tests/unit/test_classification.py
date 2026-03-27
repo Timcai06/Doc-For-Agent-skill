@@ -127,6 +127,9 @@ class RepoClassificationTests(unittest.TestCase):
                     "Keep platform adapters and distribution notes aligned with the main CLI contract.\n"
                     "Codex and Claude use docagent as entrypoint.\n"
                     "Source of truth files include `README.md` and `package.json`.\n"
+                    "| Agent | Command |\n"
+                    "| --- | --- |\n"
+                    "| Codex | docagent init --ai codex --target <repo-root> |\n"
                 ),
                 encoding="utf-8",
             )
@@ -142,6 +145,7 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("CLI boundary:" in line for line in architecture_confirmed))
             self.assertTrue(any("Source-of-truth boundary:" in line for line in architecture_confirmed))
             self.assertTrue(any("Distribution structure:" in line for line in architecture_confirmed))
+            self.assertTrue(any("`Codex` -> `docagent init --ai codex --target <repo-root>`" in line for line in architecture_confirmed))
             self.assertTrue(any("Product positioning:" in line for line in product_confirmed))
             self.assertTrue(any("Repository adaptation scope:" in line for line in product_confirmed))
             self.assertTrue(any("Retention value:" in line for line in product_confirmed))
@@ -212,6 +216,34 @@ class RepoClassificationTests(unittest.TestCase):
 
             self.assertTrue(execution_confirmed)
             self.assertTrue(execution_confirmed[0].startswith(("Execution contract:", "Verification gate:")))
+
+    def test_transition_style_summary_lines_are_filtered_from_confirmed(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-transition-filter-") as tmpdir:
+            root = Path(tmpdir) / "transition-filter-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Transition Filter Repo\n\n"
+                    "This project appears to support multiple agent workflows.\n"
+                    "It likely works as a broad documentation helper.\n"
+                    "Inferred context: this repository may be useful for many teams.\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex\n"
+                    "docagent refresh --output-mode dual\n"
+                    "npm run test\n"
+                    "```\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Transition Filter Repo")
+            product_confirmed = analysis.supporting_doc_insights.get("product", {}).get("confirmed", [])
+            execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
+
+            self.assertFalse(any("appears to" in line.lower() for line in product_confirmed))
+            self.assertFalse(any("likely" in line.lower() for line in product_confirmed))
+            self.assertFalse(any("inferred context" in line.lower() for line in product_confirmed))
+            self.assertTrue(any("Execution contract:" in line for line in execution_confirmed))
 
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")
