@@ -277,30 +277,59 @@ function App() {
           </div>
         </section>
 
-        {/* SETUP WORKFLOW */}
+        {/* LIFECYCLE PATH SECTION */}
         <section className="section" id="workflow">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Path</span>
+            <span className="eyebrow">The Systemic Lifecycle</span>
             <h2>Install. Init. Refresh.</h2>
+            <p className="feature-desc">Go from a zero-knowledge repository to a deep-context agent workflow in three systemic steps.</p>
           </div>
-          <div className="workflow-grid scroll-reveal">
-            <div className="workflow-card">
-              <div className="step-num">01</div>
-              <h3>Global Install</h3>
-              <p>Equip your environment with the systemic CLI engine.</p>
-              <code>npm install -g doc-for-agent</code>
+          
+          <div className="lifecycle-path scroll-reveal">
+            <div className="lifecycle-step">
+              <div className="step-marker">
+                <div className="marker-dot" />
+                <div className="marker-line" />
+              </div>
+              <div className="step-content">
+                <div className="step-badge">01</div>
+                <h3>Global Install</h3>
+                <p>Equip your CLI environment with the systemic analysis engine.</p>
+                <div className="command-box">
+                  <code>npm install -g doc-for-agent</code>
+                </div>
+              </div>
             </div>
-            <div className="workflow-card">
-              <div className="step-num">02</div>
-              <h3>System Init</h3>
-              <p>Scan baseline and establish your Dual-Doc foundation.</p>
-              <code>docagent init --ai codex</code>
+
+            <div className="lifecycle-step active">
+              <div className="step-marker">
+                <div className="marker-dot" />
+                <div className="marker-line" />
+              </div>
+              <div className="step-content">
+                <div className="step-badge">02</div>
+                <h3>System Bridge (Init)</h3>
+                <p>Scan your legacy code & mess documents. Establish the baseline for every AI agent.</p>
+                <div className="command-box">
+                  <code>docagent init --ai all</code>
+                </div>
+              </div>
             </div>
-            <div className="workflow-card">
-              <div className="step-num">03</div>
-              <h3>Active Refresh</h3>
-              <p>Sync knowledge as code evolves. Zero-manual overhead.</p>
-              <code>docagent refresh</code>
+
+            <div className="lifecycle-step recurring">
+              <div className="step-marker">
+                <div className="marker-dot" />
+                <div className="marker-line dash" />
+              </div>
+              <div className="step-content">
+                <div className="step-badge">03</div>
+                <h3>Active Refresh</h3>
+                <p>The core of sustainability. Sync knowledge as code evolves, zero-manual overhead.</p>
+                <div className="command-box highlight">
+                  <code>docagent refresh</code>
+                  <span className="recurring-tag">RECURRING</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
