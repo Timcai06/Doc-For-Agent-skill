@@ -45,7 +45,10 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
             self.assertTrue(any("Execution contract:" in line for line in execution_confirmed))
             self.assertTrue(any("Verification gate:" in line for line in execution_confirmed))
-            self.assertTrue(any("human, agent, and dual documentation workflows" in line for line in product_confirmed))
+            self.assertTrue(
+                any("human, agent, and dual documentation workflows" in line for line in product_confirmed)
+                or any("Product positioning:" in line for line in product_confirmed)
+            )
             self.assertTrue(any("unified CLI surface" in line for line in architecture_confirmed))
             self.assertTrue(
                 "unified CLI surface" in architecture_confirmed[0]
@@ -142,6 +145,15 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("Product positioning:" in line for line in product_confirmed))
             self.assertTrue(any("Repository adaptation scope:" in line for line in product_confirmed))
             self.assertTrue(any("Retention value:" in line for line in product_confirmed))
+            self.assertFalse(
+                any("(sources:" in line for line in execution_confirmed if line.startswith("Execution "))
+            )
+            self.assertFalse(
+                any("(sources:" in line for line in architecture_confirmed if line.startswith("CLI boundary:"))
+            )
+            self.assertFalse(
+                any("(sources:" in line for line in product_confirmed if line.startswith("Product positioning:"))
+            )
 
     def test_execution_command_facts_are_prioritized_over_generic_doc_noise(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-command-priority-") as tmpdir:
@@ -172,6 +184,34 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("docagent init --ai codex" in line for line in execution_confirmed))
             self.assertTrue(any("docagent refresh --output-mode dual" in line for line in execution_confirmed))
             self.assertFalse(any("broad project context" in line for line in execution_confirmed))
+
+    def test_rule_conclusions_are_ranked_before_generic_summary_snippets(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-rule-priority-") as tmpdir:
+            root = Path(tmpdir) / "rule-priority-repo"
+            root.mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Rule Priority Repo\n\n"
+                    "docagent is the CLI entry for coding-agent workflows.\n"
+                    "Supports human, agent, and dual outputs.\n"
+                    "Use source of truth files before distribution updates.\n\n"
+                    "```bash\n"
+                    "docagent init --ai codex\n"
+                    "docagent refresh --output-mode dual\n"
+                    "npm run test\n"
+                    "```\n\n"
+                    "- This repository contains broad project context and documentation notes.\n"
+                    "- Another long descriptive line intended to look generic.\n"
+                    "- Additional descriptive line that should not outrank rule conclusions.\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Rule Priority Repo")
+            execution_confirmed = analysis.supporting_doc_insights.get("execution", {}).get("confirmed", [])
+
+            self.assertTrue(execution_confirmed)
+            self.assertTrue(execution_confirmed[0].startswith(("Execution contract:", "Verification gate:")))
 
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")

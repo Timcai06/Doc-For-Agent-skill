@@ -43,6 +43,25 @@ GENERATED_HUMAN_DOC_PATHS = {
     "docs/workflows.md",
     "docs/glossary.md",
 }
+ROLE_CONCLUSION_PREFIXES: Dict[str, Tuple[str, ...]] = {
+    "product": (
+        "Product positioning:",
+        "Repository adaptation scope:",
+        "Retention value:",
+        "Product usage context:",
+    ),
+    "architecture": (
+        "CLI boundary:",
+        "Source-of-truth boundary:",
+        "Distribution structure:",
+    ),
+    "execution": (
+        "Execution contract:",
+        "Verification gate:",
+        "Execution constraints:",
+    ),
+    "memory": (),
+}
 
 
 def load_package_metadata(package_path: Path) -> Tuple[Dict[str, str], Dict[str, str]]:
@@ -786,6 +805,11 @@ def extract_output_mode(command: str) -> str:
     return match.group(1).strip()
 
 
+def is_role_conclusion_line(role: str, line: str) -> bool:
+    prefixes = ROLE_CONCLUSION_PREFIXES.get(role, ())
+    return any(line.startswith(prefix) for prefix in prefixes)
+
+
 def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: Sequence[str]) -> List[str]:
     lines: List[str] = []
     lowered = aggregate_text.lower()
@@ -916,7 +940,7 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         existing = confirmed_groups.get(key)
         boosted_score = 120 - index
         if not existing or existing[2] < boosted_score:
-            confirmed_groups[key] = (line, list(paths), boosted_score)
+            confirmed_groups[key] = (line, [], boosted_score)
 
     conflicting: List[str] = []
     package_managers = sorted(set(re.findall(r"\b(npm|pnpm|yarn)\b", aggregate_text)))
@@ -934,10 +958,27 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         sources = summarize_sources(snippet_paths, root)
         conflicting.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
-    confirmed: List[str] = []
-    for snippet, snippet_paths, _ in sorted(confirmed_groups.values(), key=lambda item: (-item[2], len(item[0]))):
+    confirmed_raw: List[Tuple[str, List[Path], int]] = sorted(
+        confirmed_groups.values(),
+        key=lambda item: (-item[2], len(item[0])),
+    )
+    confirmed_conclusions: List[str] = []
+    confirmed_evidence: List[str] = []
+    for snippet, snippet_paths, _ in confirmed_raw:
         sources = summarize_sources(snippet_paths, root)
-        confirmed.append(f"{snippet} (sources: {sources})" if sources else snippet)
+        rendered = f"{snippet} (sources: {sources})" if sources else snippet
+        if is_role_conclusion_line(role, snippet):
+            confirmed_conclusions.append(rendered)
+        else:
+            confirmed_evidence.append(rendered)
+
+    evidence_limit_by_role = {
+        "product": 2,
+        "architecture": 2,
+        "execution": 3,
+        "memory": 4,
+    }
+    confirmed = confirmed_conclusions + confirmed_evidence[: evidence_limit_by_role.get(role, 3)]
 
     unresolved: List[str] = []
     for snippet, snippet_paths, _ in sorted(unresolved_groups.values(), key=lambda item: (-item[2], len(item[0]))):
