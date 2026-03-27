@@ -24,10 +24,10 @@ Python:
 pipx install doc-for-agent
 ```
 
-One-off Node run:
+One-off Node start (no global install):
 
 ```bash
-npx -y doc-for-agent
+npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 
 ## Init
