@@ -1714,15 +1714,15 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 ## Knowledge Status
 
-### Confirmed Signals
+### Confirmed Rules
 
 {format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
 
-### Derived Signals
+### Supporting Signals
 
 {format_bullets(inferred, "No additional derived product signals were detected from repository structure.")}
 
-### Open Questions
+### Decision Backlog
 
 {format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
 
@@ -1806,15 +1806,15 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 ## Knowledge Status
 
-### Confirmed Signals
+### Confirmed Rules
 
 {format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
 
-### Derived Signals
+### Supporting Signals
 
 {format_bullets(inferred, "No additional derived architecture signals were detected from repository structure.")}
 
-### Open Questions
+### Decision Backlog
 
 {format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
 
@@ -1952,15 +1952,15 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 ## Knowledge Status
 
-### Confirmed Signals
+### Confirmed Rules
 
 {format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
 
-### Derived Signals
+### Supporting Signals
 
 {format_bullets(inferred, "No additional derived execution signals were detected from repository structure.")}
 
-### Open Questions
+### Decision Backlog
 
 {format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
 
