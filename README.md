@@ -53,20 +53,20 @@ docagent refresh --root <repo-root> --output-mode agent
 
 ## Product CLI v1
 
-Primary commands:
+Primary flow commands:
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent doctor --target <repo-root>
 docagent refresh --root <repo-root> --output-mode agent|human|dual
+docagent doctor --target <repo-root>
+```
+
+Other primary commands:
+
+```bash
 docagent generate --root <repo-root> --mode refresh --output-mode agent|human|dual
 docagent update --target <repo-root>
 docagent versions --target <repo-root>
-```
-
-Utility command:
-
-```bash
 docagent quickstart --target <repo-root>
 ```
 

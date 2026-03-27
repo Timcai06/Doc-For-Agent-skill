@@ -53,20 +53,20 @@ docagent refresh --root <repo-root> --output-mode agent
 
 ## Product CLI v1
 
-主命令：
+主流程命令：
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent doctor --target <repo-root>
 docagent refresh --root <repo-root> --output-mode agent|human|dual
+docagent doctor --target <repo-root>
+```
+
+其他主命令：
+
+```bash
 docagent generate --root <repo-root> --mode refresh --output-mode agent|human|dual
 docagent update --target <repo-root>
 docagent versions --target <repo-root>
-```
-
-工具命令：
-
-```bash
 docagent quickstart --target <repo-root>
 ```
 
@@ -82,4 +82,3 @@ docagent all --target <repo-root>
 - [Quickstart（英文）](docs/quickstart.md) / [Quickstart（中文）](docs/quickstart.zh.md)
 - [Platform Guide（英文）](docs/platforms.md) / [Platform Guide（中文）](docs/platforms.zh.md)
 - [Maintainer Guide](docs/maintainers.md)
-
