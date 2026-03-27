@@ -887,6 +887,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             constraints.append("declare `--ai <platform>` explicitly so platform routing stays deterministic")
         if constraints:
             triage_steps: List[str] = []
+            triage_steps.append("prioritize lifecycle commands (`docagent init/refresh/doctor`) before ad-hoc script edits")
             if doctor_command or "docagent doctor" in lowered:
                 triage_steps.append("run `docagent doctor` for install/config drift checks")
             if "readme.md" in lowered:
@@ -895,6 +896,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
                 triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
             if any(token in lowered for token in ("ci", "github actions", "workflow")):
                 triage_steps.append("inspect CI logs for command/environment mismatches")
+            triage_steps.append("if failures persist, roll back to the last known-good generated docs state, then rerun `docagent refresh`")
             if triage_steps:
                 lines.append(f"Execution constraints: {'; '.join(constraints)}; on failures, {'; '.join(triage_steps)}.")
             else:
