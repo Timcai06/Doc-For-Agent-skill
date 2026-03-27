@@ -301,8 +301,8 @@
       "contains": [
         "# Project Overview",
         "## Knowledge Status",
-        "### Derived Signals",
-        "### Open Questions",
+        "### Supporting Signals",
+        "### Decision Backlog",
         "## Intended Audience",
         "## Synthesis Summary",
         "## Update Triggers",
@@ -315,7 +315,7 @@
       "contains": [
         "# Architecture",
         "## Knowledge Status",
-        "### Derived Signals",
+        "### Supporting Signals",
         "### Conflict Watchlist",
         "## Update Triggers",
         "## Maintenance Workflow",
@@ -326,8 +326,8 @@
       "contains": [
         "# Workflows",
         "## Knowledge Status",
-        "### Derived Signals",
-        "### Open Questions",
+        "### Supporting Signals",
+        "### Decision Backlog",
         "## Operational Notes",
         "## Update Triggers",
         "## Maintenance Workflow",
@@ -356,8 +356,8 @@
       "contains": [
         "# Project Overview",
         "Current repo shape:",
-        "### Derived Signals",
-        "### Open Questions",
+        "### Supporting Signals",
+        "### Decision Backlog",
         "## Current Priorities",
         "## Update Triggers",
         "## Maintenance Workflow",
