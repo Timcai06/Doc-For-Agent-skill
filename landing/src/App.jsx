@@ -97,7 +97,7 @@ function App() {
           <a href="#workflow">Path</a>
           <a href="#artifacts">Outputs</a>
           <a href="#status">Matrix</a>
-          <a className="nav-cta" href="https://github.com/Doc-For-Agent">GitHub</a>
+          <a className="nav-cta" href="https://github.com/Timcai06/Doc-For-Agent-skill">GitHub</a>
         </nav>
       </header>
 
