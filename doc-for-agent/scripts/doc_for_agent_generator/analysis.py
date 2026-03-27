@@ -886,7 +886,19 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if any("--ai " in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("declare `--ai <platform>` explicitly so platform routing stays deterministic")
         if constraints:
-            lines.append(f"Execution constraints: {'; '.join(constraints)}.")
+            triage_steps: List[str] = []
+            if doctor_command or "docagent doctor" in lowered:
+                triage_steps.append("run `docagent doctor` for install/config drift checks")
+            if "readme.md" in lowered:
+                triage_steps.append("reconcile command context with `README.md`")
+            if "quickstart" in lowered:
+                triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
+            if any(token in lowered for token in ("ci", "github actions", "workflow")):
+                triage_steps.append("inspect CI logs for command/environment mismatches")
+            if triage_steps:
+                lines.append(f"Execution constraints: {'; '.join(constraints)}; on failures, {'; '.join(triage_steps)}.")
+            else:
+                lines.append(f"Execution constraints: {'; '.join(constraints)}.")
     elif role == "architecture":
         platform_facts = collect_platform_command_facts(snippets)
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
@@ -896,7 +908,17 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         source_paths = extract_source_of_truth_paths(snippets, aggregate_text)
         if source_paths and any(token in lowered for token in ("source of truth", "canonical", "readme.md", "entry", "distribution")):
             labels = ", ".join(f"`{path}`" for path in source_paths[:3])
-            lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
+            build_anchors: List[str] = []
+            for marker in ("package.json", "pyproject.toml", "requirements.txt"):
+                if marker in lowered:
+                    build_anchors.append(f"`{marker}`")
+            if build_anchors:
+                anchors = ", ".join(build_anchors[:2])
+                lines.append(
+                    f"Source-of-truth boundary: confirm {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
+                )
+            else:
+                lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
         if platform_facts or ("docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform"))):
             if platform_facts:
                 labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
@@ -918,11 +940,17 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             lines.append("Repository adaptation scope: cover initialize, migrate, and refresh paths so existing and messy docs can converge to one system.")
         if "docagent init" in lowered and "docagent refresh" in lowered:
             if doctor_command or "docagent doctor" in lowered:
-                lines.append("Retention value: prioritize repeatable `init -> refresh -> doctor` lifecycle checks over one-shot document generation.")
+                lines.append(
+                    "Retention value: prioritize repeatable `init -> refresh -> doctor` lifecycle checks so documentation stays governable, not a one-shot generator output."
+                )
             elif migrate_command or "migrate" in lowered:
-                lines.append("Retention value: prioritize repeatable `init -> refresh` updates plus `migrate` for legacy-doc consolidation.")
+                lines.append(
+                    "Retention value: prioritize repeatable `init -> refresh` updates plus `migrate` for legacy-doc consolidation, not one-shot document dumps."
+                )
             else:
-                lines.append("Retention value: prioritize repeatable `init -> refresh` lifecycle updates over one-shot document generation.")
+                lines.append(
+                    "Retention value: prioritize repeatable `init -> refresh` lifecycle updates so outputs remain maintainable, not one-shot generation."
+                )
         if all(token in lowered for token in ("human", "agent", "dual")) and "docagent" in lowered:
             lines.append("Product usage context emphasizes `human / agent / dual` outputs within the same workflow contract.")
     return lines[:3]
