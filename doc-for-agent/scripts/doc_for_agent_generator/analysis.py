@@ -1053,6 +1053,15 @@ def synthesize_role_supporting_insights(root: Path, paths: Sequence[Path], role:
         sources = summarize_sources(snippet_paths, root)
         conflicting.append(f"{snippet} (sources: {sources})" if sources else snippet)
 
+    if role == "architecture" and conflicting:
+        source_paths = extract_source_of_truth_paths(collected_snippets, aggregate_text)
+        if source_paths:
+            labels = ", ".join(f"`{path}`" for path in source_paths[:3])
+            conflicting.insert(
+                0,
+                f"Conflict rule: when supporting docs disagree, treat {labels} as the arbitration point before changing CLI, adapter, or build-path behavior.",
+            )
+
     confirmed_raw: List[Tuple[str, List[Path], int]] = sorted(
         confirmed_groups.values(),
         key=lambda item: (-item[2], len(item[0])),

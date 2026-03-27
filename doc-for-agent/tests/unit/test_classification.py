@@ -255,6 +255,34 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertFalse(any("inferred context" in line.lower() for line in product_confirmed))
             self.assertTrue(any("Execution contract:" in line for line in execution_confirmed))
 
+    def test_architecture_conflicts_emit_source_of_truth_arbitration_rule(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-architecture-conflict-rule-") as tmpdir:
+            root = Path(tmpdir) / "architecture-conflict-rule"
+            (root / "docs/architecture").mkdir(parents=True)
+            (root / "README.md").write_text(
+                (
+                    "# Architecture Conflict Rule\n\n"
+                    "Source of truth files include `README.md` and `package.json`.\n"
+                    "Docagent is the CLI entry for Codex workflows.\n"
+                ),
+                encoding="utf-8",
+            )
+            (root / "docs/architecture/runtime.md").write_text(
+                (
+                    "# Runtime\n\n"
+                    "- Runtime framework: FastAPI.\n"
+                    "- Runtime framework: Flask.\n"
+                    "- Conflict: runtime choice differs across architecture drafts.\n"
+                ),
+                encoding="utf-8",
+            )
+
+            analysis = analyze_repo(root, "Architecture Conflict Rule")
+            architecture_conflicting = analysis.supporting_doc_insights.get("architecture", {}).get("conflicting", [])
+
+            self.assertTrue(any(line.startswith("Conflict rule:") for line in architecture_conflicting))
+            self.assertTrue(any("`README.md`" in line or "`package.json`" in line for line in architecture_conflicting))
+
     def test_docs_inventory_reports_initialize_when_no_agent_docs_exist(self) -> None:
         analysis = analyze_repo(FIXTURES_ROOT / "backend_service", "Event Relay")
 
