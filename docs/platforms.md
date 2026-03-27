@@ -39,5 +39,6 @@ docagent refresh --root <repo-root> --output-mode agent
 
 See also:
 
+- [Landing Page Note](landing-page.md)
 - [Quickstart](quickstart.md)
 - [Maintainer Guide](maintainers.md)

@@ -39,5 +39,6 @@ docagent refresh --root <repo-root> --output-mode agent
 
 另见：
 
-- [Quickstart（英文）](quickstart.md) / [Quickstart（中文）](quickstart.zh.md)
+- [Landing Page（英文）](landing-page.md) / [落地页说明（中文）](landing-page.zh.md)
+- [Quickstart（英文）](quickstart.md) / [快速开始（中文）](quickstart.zh.md)
 - [Maintainer Guide](maintainers.md)
