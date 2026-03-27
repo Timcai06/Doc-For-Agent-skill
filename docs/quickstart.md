@@ -79,5 +79,6 @@ docagent versions --target <repo-root>
 
 See also:
 
+- [Landing Page Note](landing-page.md)
 - [Platform Guide](platforms.md)
 - [Maintainer Guide](maintainers.md)
