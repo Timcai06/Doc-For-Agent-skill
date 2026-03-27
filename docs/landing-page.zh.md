@@ -23,9 +23,11 @@
 从仓库入口文档开始，建议按这个顺序：
 
 1. `README.md`
-2. `docs/landing-page.md`
-3. `docs/quickstart.md`
-4. `docs/platforms.md`
+2. `docs/landing-page.zh.md`
+3. `docs/quickstart.zh.md`
+4. `docs/platforms.zh.md`
+
+如果你更习惯英文文档，可按同样顺序使用不带 `.zh.md` 的版本。
 
 ## 本地预览
 
@@ -37,7 +39,7 @@ npm run dev
 
 ## 另见
 
-看完这里后，先去 Quickstart，再去 Platform Guide。
+看完这里后，先去“快速开始”，再去“平台指南”。
 
-- [Quickstart（英文）](quickstart.md) / [Quickstart（中文）](quickstart.zh.md)
+- [Quickstart（英文）](quickstart.md) / [快速开始（中文）](quickstart.zh.md)
 - [Platform Guide（英文）](platforms.md) / [平台指南（中文）](platforms.zh.md)
