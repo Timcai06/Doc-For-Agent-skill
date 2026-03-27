@@ -545,6 +545,19 @@ footer {
   100% { transform: translateY(0px) rotate(0deg); }
 }
 
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
+  70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 10px transparent; }
+  100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 transparent; }
+}
+
+.green-pulse {
+  background: var(--accent);
+  animation: pulse 2s infinite;
+  display: inline-block;
+  border-radius: 50%;
+}
+
 .floating {
   animation: float 8s ease-in-out infinite;
 }
@@ -558,5 +571,102 @@ footer {
 .scroll-reveal.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Technical Details */
+.badge-technical {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--primary-glow);
+  color: var(--primary);
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid var(--primary);
+  margin-bottom: 12px;
+}
+
+.cmd-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.cmd-pill:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.status-pill.production {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+/* Artifact Viewer Tabs */
+.tab {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #fff;
+  transform: translateY(3px);
+  transition: transform 0.3s;
+}
+
+.tab.active::after {
+  transform: translateY(0);
+}
+
+.tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Matrix Table Styling */
+table {
+  border-spacing: 0;
+}
+
+tr {
+  transition: background 0.2s;
+}
+
+tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* CTA Box */
+.install-box {
+  background: var(--bg);
+  padding: 24px 48px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 40px var(--primary-glow);
+  position: relative;
+}
+
+.install-box::before {
+  content: '$';
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary);
+  font-weight: 600;
 }
 
