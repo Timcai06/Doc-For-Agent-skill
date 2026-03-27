@@ -365,6 +365,129 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 
+/* Drift Visualization */
+.drift-visual {
+  display: flex;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.drift-card {
+  flex: 1;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  transition: transform 0.3s;
+}
+
+.drift-card:hover {
+  transform: translateY(-4px);
+}
+
+.drift-title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-bottom: 24px;
+  color: #fff;
+}
+
+.drift-card ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drift-card li {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.drift-card.good {
+  background: linear-gradient(135deg, rgba(39, 201, 63, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-color: var(--accent);
+}
+
+.drift-card.good .drift-title {
+  color: var(--accent);
+}
+
+/* Workflow Grid */
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.workflow-card {
+  padding: 40px 32px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.workflow-card .step-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 20px;
+  letter-spacing: 0.1em;
+}
+
+.workflow-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.workflow-card p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.workflow-card code {
+  color: var(--primary);
+  font-size: 0.85rem;
+  display: block;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+/* Artifact Viewer Tabs */
+.artifact-viewer {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+}
+
+.viewer-window {
+  min-height: 400px;
+}
+
+.viewer-header {
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 /* Code Window */
 .code-window {
   background: #080a12;
