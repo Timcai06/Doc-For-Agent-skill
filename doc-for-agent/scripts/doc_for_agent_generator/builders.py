@@ -506,6 +506,12 @@ def build_readme(analysis: RepoAnalysis) -> str:
 - Multi-agent work where terminology, workflow, and ownership boundaries need to stay aligned
 - Refreshing repo-specific context after the codebase structure changes
 
+## Dual Documentation System
+
+- `AGENTS/` is the agent-facing rule/runbook layer for execution and handoff.
+- `docs/` is the human-facing system context layer for maintainers and onboarding.
+- Prefer `--output-mode dual` so both layers stay synchronized after refresh.
+
 ## Repository Classification
 
 - Detected repo type: `{repo_type_label(analysis.repo_type)}`
@@ -552,6 +558,7 @@ def build_product(analysis: RepoAnalysis) -> str:
         "Confirm the primary audience and the exact outcome they expect from this repository.",
         "Confirm the core success criteria agents should optimize for before making broad edits.",
     ]
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
     return f"""# Product
 
@@ -560,6 +567,10 @@ def build_product(analysis: RepoAnalysis) -> str:
 - Planning work in this repository before editing code or docs
 - Aligning multiple agents on what this repo is trying to preserve
 - Checking whether a proposed change still matches the repository's purpose
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -613,6 +624,7 @@ def build_architecture(analysis: RepoAnalysis) -> str:
                 "When repo shape is ambiguous, inspect the README and build scripts before assuming ownership boundaries.",
             ]
         )
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
 
     return f"""# Architecture
 
@@ -621,6 +633,10 @@ def build_architecture(analysis: RepoAnalysis) -> str:
 - Building a quick mental model of repository boundaries before editing
 - Deciding which files are canonical versus generated
 - Handing work between agents without losing context
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -1016,6 +1032,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     if not refresh_lines:
         refresh_lines = ["Refresh `AGENTS/` after major codebase, workflow, or terminology changes."]
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Workflows
 
@@ -1024,6 +1041,10 @@ def build_workflows(analysis: RepoAnalysis) -> str:
 - Getting an agent from zero context to runnable context quickly
 - Running the minimum commands needed to inspect or validate changes
 - Refreshing agent docs after the repository shape changes
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
 
 ## Setup
 

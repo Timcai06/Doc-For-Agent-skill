@@ -41,7 +41,7 @@ LEGACY_FLAT_TO_LAYERED_TARGETS = {
 class EngineRequest:
     root: Path
     mode: str = "refresh"
-    output_mode: str = "agent"
+    output_mode: str = "dual"
     profile: str = "bootstrap"
     project_name: str = ""
     repo_type_override: Optional[str] = None
@@ -286,6 +286,8 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         f"- Frontend root: `{analysis.frontend_root}`" if analysis.frontend_root else "- Frontend root: not detected",
         f"- Backend root: `{analysis.backend_root}`" if analysis.backend_root else "- Backend root: not detected",
         f"- Package manager: `{analysis.package_manager}`",
+        f"- Output mode: `{plan.request.output_mode}`",
+        "- Recommended output mode: `dual` (AGENTS + docs).",
         f"- Suggested profile: `{suggested_profile}`",
         f"- Documentation state: `{analysis.docs_inventory.detected_state}`",
     ]
@@ -295,8 +297,13 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         lines.append(f"- Note: current run requested profile `{analysis.doc_profile}`.")
     lines.append(
         "Suggested command: "
-        f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {plan.request.output_mode}"
+        f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode dual"
     )
+    if plan.request.output_mode != "dual":
+        lines.append(
+            "Current-mode command: "
+            f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {plan.request.output_mode}"
+        )
     lines.append("Suggested source-of-truth files:")
     lines.extend([f"- {line}" for line in infer_source_of_truth_lines(analysis)[:6]])
     lines.append("Supporting-doc synthesis summary:")

@@ -23,6 +23,10 @@ from doc_for_agent_generator.engine import (  # noqa: E402
 
 
 class EngineApiTests(unittest.TestCase):
+    def test_engine_request_defaults_to_dual_output_mode(self) -> None:
+        request = EngineRequest(root=Path("/tmp/doc-for-agent-default-output"))
+        self.assertEqual(request.output_mode, "dual")
+
     def test_mode_semantics_helpers_are_stable(self) -> None:
         self.assertEqual(write_strategy_for_mode("refresh"), "refresh")
         self.assertEqual(write_strategy_for_mode("generate"), "init")

@@ -45,8 +45,12 @@ def generate_docs(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Initialize or refresh documentation outputs for AGENTS and/or docs.")
-    parser.add_argument("--root", required=True, help="Repository root where AGENTS/ should be created or refreshed.")
+    parser = argparse.ArgumentParser(description="Initialize or refresh a dual documentation system for AGENTS and/or docs.")
+    parser.add_argument(
+        "--root",
+        required=True,
+        help="Repository root where AGENTS/ and/or docs/ should be created or refreshed.",
+    )
     parser.add_argument("--project-name", help="Optional explicit project name.")
     parser.add_argument(
         "--mode",
@@ -54,7 +58,11 @@ def main() -> None:
         default="refresh",
         help="Engine action to execute: init, refresh, migrate, or generate.",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Preview AGENTS file changes without writing anything.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview AGENTS/docs file changes without writing anything.",
+    )
     parser.add_argument(
         "--repo-type",
         choices=SUPPORTED_REPO_TYPES,
@@ -74,8 +82,8 @@ def main() -> None:
     parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
-        default="agent",
-        help="Choose which documentation system to generate: agent, human, or dual.",
+        default="dual",
+        help="Choose which documentation system to generate: agent, human, or dual (recommended default).",
     )
     args = parser.parse_args()
 
