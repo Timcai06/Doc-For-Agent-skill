@@ -227,6 +227,60 @@ def compact_human_evidence(
     return confirmed_out, inferred_out, unresolved_out, conflicting_out
 
 
+def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
+    prefixes_by_role = {
+        "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
+        "architecture": ("CLI boundary:", "Source-of-truth boundary:", "Build-path rule:", "Distribution structure:"),
+        "execution": ("Execution contract:", "Verification gate:", "Failure triage:", "Execution constraints:"),
+    }
+    conflict_prefix_by_role = {
+        "architecture": "Conflict rule:",
+    }
+    selected: list[str] = []
+    seen: set[str] = set()
+    confirmed = supporting_doc_insight_lines(analysis, role, "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, role, "conflicting")
+    prefixes = prefixes_by_role.get(role, ())
+
+    for line in confirmed:
+        if prefixes and not line.startswith(prefixes):
+            continue
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            selected.append(line)
+            seen.add(key)
+
+    conflict_prefix = conflict_prefix_by_role.get(role)
+    if conflict_prefix:
+        for line in conflicting:
+            if not line.startswith(conflict_prefix):
+                continue
+            key = normalize_evidence_line(line)
+            if key and key not in seen:
+                selected.append(line)
+                seen.add(key)
+            break
+
+    if selected:
+        return selected[:4]
+
+    fallback_by_role = {
+        "product": [
+            "State repository scope and user value as explicit rules before writing broad product narrative.",
+            "Use lifecycle language (`init/refresh/doctor/migrate`) to keep docs maintainable over one-shot generation.",
+        ],
+        "architecture": [
+            "Resolve source-of-truth conflicts before changing CLI, adapter, or build-path behavior.",
+            "Treat platform adapters as distribution details; keep contract changes centralized at CLI entry.",
+        ],
+        "execution": [
+            "Run documented setup/run/verify commands in order before editing scripts or docs.",
+            "On failures, triage install/config drift first, then command context, then CI environment mismatches.",
+        ],
+    }
+    return fallback_by_role.get(role, [])
+
+
 def repo_type_label(repo_type: str) -> str:
     labels = {
         "skill-meta": "skill/meta repository",
@@ -1104,8 +1158,13 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+    top_rules = role_first_screen_rules(analysis, "product")
 
     return f"""# Core Goals
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -1367,6 +1426,7 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+    top_rules = role_first_screen_rules(analysis, "architecture")
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
@@ -1376,6 +1436,10 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
         boundaries.append("Skill manifests, README examples, and generator output should describe the same capability surface.")
 
     return f"""# Architecture Compatibility
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
 
 ## Repo-Type Signals
 
@@ -1482,12 +1546,17 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+    top_rules = role_first_screen_rules(analysis, "execution")
 
     return f"""# Implementation Plan
 
 ## Current Operating Posture
 
 - {current_operating_posture(analysis)}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before detailed command blocks.")}
 
 ## Immediate Next Steps
 
@@ -1671,6 +1740,7 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
     provenance = supporting_doc_provenance_lines(analysis, "product")
     synthesis_summary = synthesis_summary_lines(analysis, "product")
     audiences = human_audience_lines(analysis)
+    top_rules = role_first_screen_rules(analysis, "product")
 
     core = []
     if analysis.summary:
@@ -1699,6 +1769,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 ## What This Project Is
 
 {format_bullets(core, "Project overview should be confirmed with maintainers.")}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
 
 ## Intended Audience
 
@@ -1769,6 +1843,7 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
     )
     provenance = supporting_doc_provenance_lines(analysis, "architecture")
     synthesis_summary = synthesis_summary_lines(analysis, "architecture")
+    top_rules = role_first_screen_rules(analysis, "architecture")
     boundaries = [
         "Treat source-of-truth files as canonical when supporting docs disagree.",
         "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
@@ -1791,6 +1866,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Source Of Truth
 
 {format_bullets(infer_source_of_truth_lines(analysis), "No canonical source-of-truth files were detected automatically.")}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
 
 ## Detected Signals
 
@@ -1861,6 +1940,7 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     )
     provenance = supporting_doc_provenance_lines(analysis, "execution")
     synthesis_summary = synthesis_summary_lines(analysis, "execution")
+    top_rules = role_first_screen_rules(analysis, "execution")
 
     if analysis.frontend_root:
         frontend_prefix = (
@@ -1927,6 +2007,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
     bootstrap_backlog = human_bootstrap_backlog_lines("execution", bool(provenance))
 
     return f"""# Workflows
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
 
 ## Setup
 

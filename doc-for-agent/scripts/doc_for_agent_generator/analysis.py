@@ -877,6 +877,19 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if verify_commands:
             summary = ", ".join(f"`{cmd}`" for cmd in verify_commands[:3])
             lines.append(f"Verification gate: workflow changes are not complete until {summary} pass.")
+        triage_steps: List[str] = []
+        if doctor_command or "docagent doctor" in lowered:
+            triage_steps.append("run `docagent doctor` first to catch install/config drift")
+        elif verify_commands:
+            triage_steps.append(f"rerun the first failing gate (`{verify_commands[0]}`) to isolate command scope")
+        if "readme.md" in lowered:
+            triage_steps.append("reconcile command context with `README.md`")
+        if "quickstart" in lowered:
+            triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
+        if any(token in lowered for token in ("ci", "github actions", "workflow")):
+            triage_steps.append("inspect CI logs for command/environment mismatches")
+        triage_steps.append("if failures persist, roll back generated docs to last known-good state and rerun `docagent refresh`")
+        lines.append(f"Failure triage: {'; '.join(triage_steps)}.")
         constraints: List[str] = []
         if any("--target" in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("keep `--target <repo-root>` explicit when commands run outside the target repo")
@@ -886,22 +899,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
         if any("--ai " in cmd for cmd in commands if cmd.startswith("docagent ")):
             constraints.append("declare `--ai <platform>` explicitly so platform routing stays deterministic")
         if constraints:
-            triage_steps: List[str] = []
-            triage_steps.append("prioritize lifecycle commands (`docagent init/refresh/doctor`) before ad-hoc script edits")
-            if doctor_command or "docagent doctor" in lowered:
-                triage_steps.append("run `docagent doctor` for install/config drift checks")
-                triage_steps.append("if `docagent doctor` fails, fix install/config drift before rerunning verify commands")
-            if "readme.md" in lowered:
-                triage_steps.append("reconcile command context with `README.md`")
-            if "quickstart" in lowered:
-                triage_steps.append("cross-check setup assumptions in `docs/quickstart.md`")
-            if any(token in lowered for token in ("ci", "github actions", "workflow")):
-                triage_steps.append("inspect CI logs for command/environment mismatches")
-            triage_steps.append("if failures persist, roll back to the last known-good generated docs state, then rerun `docagent refresh`")
-            if triage_steps:
-                lines.append(f"Execution constraints: {'; '.join(constraints)}; on failures, {'; '.join(triage_steps)}.")
-            else:
-                lines.append(f"Execution constraints: {'; '.join(constraints)}.")
+            lines.append(f"Execution constraints: {'; '.join(constraints)}.")
     elif role == "architecture":
         platform_facts = collect_platform_command_facts(snippets)
         platforms = [name for name in ("codex", "claude", "continue", "copilot") if name in lowered]
@@ -918,13 +916,15 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
             if build_anchors:
                 anchors = ", ".join(build_anchors[:2])
                 lines.append(
-                    f"Source-of-truth boundary: confirm {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
+                    f"Source-of-truth boundary: on conflicts, arbitrate against {labels} and build-path anchors ({anchors}) before changing CLI entry, adapter wiring, or distribution behavior."
                 )
                 lines.append(
                     f"Build-path rule: if platform entry or packaging behavior breaks, inspect {anchors} before changing adapter/config mappings."
                 )
             else:
-                lines.append(f"Source-of-truth boundary: confirm {labels} before changing CLI entry, adapter wiring, or distribution behavior.")
+                lines.append(
+                    f"Source-of-truth boundary: on conflicts, arbitrate against {labels} before changing CLI entry, adapter wiring, or distribution behavior."
+                )
         if platform_facts or ("docagent" in lowered and any(token in lowered for token in ("distribution", "adapter", "platform"))):
             if platform_facts:
                 labels = "; ".join(f"`{platform}` -> `{command}`" for platform, command in platform_facts[:2])
@@ -964,7 +964,7 @@ def synthesize_role_conclusion_lines(role: str, aggregate_text: str, snippets: S
     limit_by_role = {
         "product": 3,
         "architecture": 4,
-        "execution": 3,
+        "execution": 4,
         "memory": 3,
     }
     return lines[: limit_by_role.get(role, 3)]
