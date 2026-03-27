@@ -76,6 +76,7 @@ class RepoClassificationTests(unittest.TestCase):
 
             self.assertTrue(any("Codex uses docagent init --ai codex --target <repo-root>" in line for line in architecture_confirmed))
             self.assertFalse(any(line.strip().startswith("|") for line in architecture_confirmed))
+            self.assertTrue(any("Distribution structure:" in line for line in architecture_confirmed))
 
     def test_synthesis_emits_product_positioning_and_source_of_truth_boundary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-synthesis-rules-") as tmpdir:
@@ -149,6 +150,7 @@ class RepoClassificationTests(unittest.TestCase):
             self.assertTrue(any("Product positioning:" in line for line in product_confirmed))
             self.assertTrue(any("Repository adaptation scope:" in line for line in product_confirmed))
             self.assertTrue(any("Retention value:" in line for line in product_confirmed))
+            self.assertTrue(any("init -> refresh -> doctor" in line for line in product_confirmed if line.startswith("Retention value:")))
             self.assertFalse(
                 any("(sources:" in line for line in execution_confirmed if line.startswith("Execution "))
             )
