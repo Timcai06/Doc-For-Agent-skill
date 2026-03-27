@@ -199,6 +199,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("doc-for-agent quickstart", text)
             self.assertIn("Node users: `npm install -g doc-for-agent`", text)
             self.assertIn("Node one-off start: `npx -y doc-for-agent init --ai all --target <repo-root>`", text)
+            self.assertIn("Single-platform option: replace `all` with `claude`, `codex`, `continue`, or `copilot`.", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai <claude|codex|continue|copilot|all>", text)
             self.assertIn("<repo-root>", text)

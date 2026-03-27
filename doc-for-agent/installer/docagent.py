@@ -177,6 +177,7 @@ def render_quickstart(target_root: Path) -> str:
         "- Install:",
         "- Node users: `npm install -g doc-for-agent`",
         "- Node one-off start: `npx -y doc-for-agent init --ai all --target <repo-root>`",
+        "- Single-platform option: replace `all` with `claude`, `codex`, `continue`, or `copilot`.",
         "- Python users: `pipx install doc-for-agent`",
         "- Init (one command shape):",
         f"- `docagent init --ai <claude|codex|continue|copilot|all> --target {repo_placeholder}`",
