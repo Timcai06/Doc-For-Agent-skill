@@ -31,6 +31,12 @@ docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
 docagent refresh --root <repo-root> --output-mode agent
 ```
 
+如果你需要按步骤的文档入口图，先运行：
+
+```bash
+docagent quickstart --target <repo-root>
+```
+
 ## 按 Agent 选入口
 
 | 你使用... | 先执行 |
@@ -79,6 +85,6 @@ docagent all --target <repo-root>
 
 ## 文档
 
-- [Quickstart（英文）](docs/quickstart.md) / [Quickstart（中文）](docs/quickstart.zh.md)
-- [Platform Guide（英文）](docs/platforms.md) / [Platform Guide（中文）](docs/platforms.zh.md)
+- [Quickstart（英文）](docs/quickstart.md) / [Quickstart（中文）](docs/quickstart.zh.md)（先看这里）
+- [Platform Guide（英文）](docs/platforms.md) / [Platform Guide（中文）](docs/platforms.zh.md)（选择 `--ai`）
 - [Maintainer Guide](docs/maintainers.md)
