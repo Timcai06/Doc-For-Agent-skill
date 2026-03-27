@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 // --- Icon Components (Inline SVG) ---
 const Artifacts = {
   human: {
-    title: "docs/architecture.md",
-    content: `# Technical Architecture\n\n## Overview\nThis project follows a **modular plugin** design. Each core component is isolated in \`/src/plugins\` to ensure high maintainability.\n\n## Core Flows\n- **Scanner**: Analyzes file AST and directory structures.\n- **Synthesizer**: Generates balanced human/agent context.\n- **Lifecycle Manager**: Handles \`init\`, \`doctor\`, and \`refresh\` logic.`
+    title: "docs/overview.md",
+    content: `# Project Overview\n\n## Purpose\nThis repository provides a CLI-first documentation system for coding-agent workflows.\n\n## Core Outputs\n- \`docs/\` for human maintainers and onboarding\n- \`AGENTS/\` for agent execution and handoff\n\n## Lifecycle\n- \`docagent init\`\n- \`docagent doctor\`\n- \`docagent refresh\``
   },
   agent: {
-    title: "AGENTS/source-of-truth.json",
-    content: `{\n  "project_id": "agent-skill-engine",\n  "architecture": "plugin-modular",\n  "critical_paths": ["src/plugins", "src/core"],\n  "execution_rules": [\n    "strict_typing_required",\n    "no_transient_state"\n  ],\n  "dependency_graph": {\n    "nodes": 84,\n    "depth": 5\n  }\n}`
+    title: "AGENTS/03-execution/008-implementation-plan.md",
+    content: `# Workflows\n\n## Top Rules (Read First)\n- Verify before merging.\n- Use the documented command path, not ad-hoc prompts.\n- Escalate source-of-truth conflicts before editing.\n\n## Run\n- \`docagent init --ai codex --target .\`\n- \`docagent refresh --root . --output-mode dual\``
   }
 };
 
@@ -20,7 +20,7 @@ const heroCases = [
     command: 'tim@macBook ~ % @codex Use doc-for-agent to check the current branch health.',
     output: [
       { text: 'Codex: Calling doc-for-agent skill...', color: 'var(--primary)' },
-      { text: '$ docagent doctor --root .', color: 'var(--text-secondary)' },
+      { text: '$ docagent doctor --target . --platform codex', color: 'var(--text-secondary)' },
       { text: '[1/2] Auditing knowledge drift...', color: 'var(--text-secondary)' },
       { text: '✓ No drift detected in 24 core modules.', color: 'var(--accent)' },
       { text: '[2/2] Status: Systemic Integrity Confirmed.', color: 'var(--accent)' },
@@ -31,11 +31,11 @@ const heroCases = [
     index: 1,
     label: 'docagent init',
     title: 'Initialize System',
-    command: 'tim@macBook ~ % docagent init --mode dual',
+    command: 'tim@macBook ~ % docagent init --ai codex --target .',
     output: [
       { text: '[1/3] Scanning repository depth...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected 4 microservices & 12 entry points', color: 'var(--accent)' },
-      { text: '[2/3] Building Knowledge Bridge...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected CLI-first repo with existing product docs', color: 'var(--accent)' },
+      { text: '[2/3] Building dual documentation baseline...', color: 'var(--text-secondary)' },
       { text: '+ Generated /AGENTS/ (Machine Source-of-Truth)', color: '#fff' },
       { text: '+ Generated /docs/ (Human-Centric Guides)', color: '#fff' },
       { text: '[3/3] Done. Baseline established for all agents.', color: 'var(--accent)' },
@@ -45,13 +45,13 @@ const heroCases = [
     index: 2,
     label: 'docagent refresh',
     title: 'Lifecycle Sync',
-    command: 'tim@macBook ~ % docagent refresh --ai all',
+    command: 'tim@macBook ~ % docagent refresh --root . --output-mode dual',
     output: [
       { text: '[1/2] Detecting code evolution...', color: 'var(--text-secondary)' },
-      { text: '✓ 14 files changed in /src/core', color: 'var(--accent)' },
-      { text: '[2/2] Synchronizing Dual-Docs...', color: 'var(--text-secondary)' },
-      { text: '↺ AGENTS/context.json updated', color: '#fff' },
-      { text: '↺ docs/CHANGELOG.md updated', color: '#fff' },
+      { text: '✓ Supporting docs and code signals changed', color: 'var(--accent)' },
+      { text: '[2/2] Synchronizing dual documentation...', color: 'var(--text-secondary)' },
+      { text: '↺ AGENTS/ updated for agent execution', color: '#fff' },
+      { text: '↺ docs/ updated for maintainers and onboarding', color: '#fff' },
       { text: 'Lifecycle Sync complete (8s).', color: 'var(--primary)' },
     ]
   }
@@ -167,7 +167,7 @@ function App() {
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS</div>
               <h3>/AGENTS/ Baseline</h3>
-              <p>Machine-optimized source of truth. High-density knowledge maps and strict execution rules strictly tuned for Claude Code, Codex, and Cursor.</p>
+              <p>Machine-optimized source of truth. High-density rules and execution guidance tuned for Claude Code, Codex, Continue, and Copilot workflows.</p>
               <ul className="mini-features">
                 <li>✓ Execution Constraints</li>
                 <li>✓ Structural Invariants</li>
