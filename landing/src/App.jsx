@@ -24,7 +24,7 @@ const heroCases = [
       { text: '[2/3] Generating Dual-Doc baseline...', color: 'var(--text-secondary)' },
       { text: '  + /AGENTS/ (Machine Source-of-Truth)', color: '#fff' },
       { text: '  + /docs/   (Human Narrative)', color: '#fff' },
-      { text: '[3/3] Systemic Bridge established.', color: 'var(--accent)' },
+      { text: '[3/3] Dual-doc baseline established.', color: 'var(--accent)' },
     ]
   },
   {
@@ -38,7 +38,7 @@ const heroCases = [
       { text: '[2/2] Synchronizing dual outputs...', color: 'var(--text-secondary)' },
       { text: '  ↺ /AGENTS/ context updated.', color: '#fff' },
       { text: '  ↺ /docs/ technical guides updated.', color: '#fff' },
-      { text: 'Refresh complete (1.2s). All agents aligned.', color: 'var(--primary)' },
+      { text: 'Refresh complete. Agent and human docs updated.', color: 'var(--primary)' },
     ]
   },
   {
@@ -50,7 +50,7 @@ const heroCases = [
       { text: '[1/1] Auditing knowledge integrity...', color: 'var(--text-secondary)' },
       { text: '✓ All AGENTS/ skills grounded to current code.', color: 'var(--accent)' },
       { text: '✓ Human docs synchronized with recent PRs.', color: 'var(--accent)' },
-      { text: 'Status: Systemic Integrity Confirmed.', color: 'var(--primary)' },
+      { text: 'Status: Core install and docs paths look healthy.', color: 'var(--primary)' },
     ]
   }
 ];
@@ -58,11 +58,11 @@ const heroCases = [
 const commands = [
   { 
     name: 'init', 
-    desc: 'Bootstrap the Dual-Doc system from zero-knowledge state', 
+    desc: 'Bootstrap the Dual-Doc system from low-doc or scattered repo state', 
     status: 'Production',
     logic: 'Global Repository Scan',
     complexity: 'High',
-    efficiency: '98%',
+    efficiency: 'High fit',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
   },
   { 
@@ -71,7 +71,7 @@ const commands = [
     status: 'Stable',
     logic: 'Integrity Verification',
     complexity: 'Medium',
-    efficiency: '99%',
+    efficiency: 'Fast check',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>
   },
   { 
@@ -80,7 +80,7 @@ const commands = [
     status: 'Production',
     logic: 'Drift Detection Engine',
     complexity: 'High',
-    efficiency: '94%',
+    efficiency: 'Repeatable',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
   },
   { 
@@ -88,8 +88,8 @@ const commands = [
     desc: 'Systemize scattered READMEs into structured baselines', 
     status: 'Beta',
     logic: 'Heuristic Document Extraction',
-    complexity: 'Extreme',
-    efficiency: '88%',
+    complexity: 'Higher risk',
+    efficiency: 'Use with review',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
   },
   { 
@@ -98,7 +98,7 @@ const commands = [
     status: 'Stable',
     logic: 'Context Compression',
     complexity: 'Low',
-    efficiency: '100%',
+    efficiency: 'Targeted',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
   },
 ];
@@ -241,10 +241,10 @@ function App() {
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (Context-First)</div>
               <h3>/AGENTS/ Context</h3>
-              <p>Actionable, high-density knowledge maps. Designed for AI like Claude Code and Codex to navigate repositories with machine-level precision and zero context overflow.</p>
+              <p>Actionable, high-density knowledge maps. Designed for AI like Claude Code and Codex to navigate repositories with clearer execution context and lower ambiguity.</p>
               <ul className="mini-features">
                 <li>✓ Execution Invariants</li>
-                <li>✓ Deterministic Grounding</li>
+                <li>✓ Repository-Grounded Rules</li>
                 <li>✓ Machine-readable Rules</li>
               </ul>
             </div>
