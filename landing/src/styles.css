@@ -389,7 +389,125 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 
-/* Drift Visualization */
+/* Dual Grid Section */
+.dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dual-card {
+  padding: 48px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dual-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--surface-hover);
+}
+
+.dual-card .card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--primary);
+  margin-bottom: 24px;
+  letter-spacing: 0.2em;
+}
+
+.dual-card h3 {
+  font-size: 1.75rem;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.dual-card p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.mini-features {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mini-features li {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dual-card.agent {
+  border-left: 4px solid var(--primary);
+}
+
+.dual-card.human {
+  border-left: 4px solid var(--accent);
+}
+
+/* Artifact Viewer */
+.artifact-viewer {
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.viewer-window {
+  min-height: 480px;
+}
+
+.viewer-tabs {
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+
+.viewer-tabs button {
+  flex: 1;
+  padding: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewer-tabs button.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  position: relative;
+}
+
+.viewer-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+}
+
+/* Drift Visualization Enhancements */
 .drift-visual {
   display: flex;
   gap: 24px;
@@ -399,118 +517,26 @@ h1, h2, h3, h4 {
 
 .drift-card {
   flex: 1;
-  padding: 32px;
+  padding: 40px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  transition: transform 0.3s;
-}
-
-.drift-card:hover {
-  transform: translateY(-4px);
+  transition: all 0.3s;
 }
 
 .drift-title {
-  font-weight: 700;
-  font-size: 1.125rem;
+  font-weight: 800;
+  font-size: 1.25rem;
   margin-bottom: 24px;
-  color: #fff;
-}
-
-.drift-card ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.drift-card li {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
 }
 
 .drift-card.good {
-  background: linear-gradient(135deg, rgba(39, 201, 63, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
   border-color: var(--accent);
 }
 
-.drift-card.good .drift-title {
-  color: var(--accent);
-}
-
-/* Workflow Grid */
-.workflow-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.workflow-card {
-  padding: 40px 32px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.workflow-card .step-num {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 20px;
-  letter-spacing: 0.1em;
-}
-
-.workflow-card h3 {
-  font-size: 1.25rem;
-  margin-bottom: 12px;
-  color: #fff;
-}
-
-.workflow-card p {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 24px;
-}
-
-.workflow-card code {
-  color: var(--primary);
-  font-size: 0.85rem;
-  display: block;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  border: 1px solid var(--line);
-}
-
-/* Artifact Viewer Tabs */
-.artifact-viewer {
-  max-width: 900px;
-  margin: 0 auto;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
-}
-
-.viewer-window {
-  min-height: 400px;
-}
-
-.viewer-header {
-  padding: 16px 24px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid var(--line);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
+.drift-card.good ul li { color: var(--accent); }
+.drift-card.bad ul li { color: #f87171; }
 
 /* Code Window */
 .code-window {
