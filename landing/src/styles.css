@@ -632,6 +632,46 @@ h1, h2, h3, h4 {
   background: transparent;
 }
 
+.md-content {
+  padding: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.md-line {
+  min-height: 1.5em;
+  color: #e2e8f0;
+}
+
+.md-h1 {
+  color: #fff;
+  font-weight: 800;
+  margin: 12px 0 16px;
+  font-size: 1.25rem;
+}
+
+.md-h2 {
+  color: var(--primary);
+  font-weight: 700;
+  margin: 12px 0 8px;
+  font-size: 1.1rem;
+}
+
+.md-bullet {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.md-inline-code {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
 .viewer-tabs {
   background: rgba(255, 255, 255, 0.03);
   display: flex;

@@ -110,6 +110,47 @@ const commands = [
   },
 ];
 
+function renderMarkdown(content) {
+  // Simple regex-based syntax highlighting for Markdown
+  const lines = content.split('\n');
+  return lines.map((line, i) => {
+    let styledLine = line;
+    
+    // Headers
+    if (line.startsWith('# ')) {
+      return <div key={i} className="md-line md-h1">{line}</div>;
+    }
+    if (line.startsWith('## ')) {
+      return <div key={i} className="md-line md-h2">{line}</div>;
+    }
+    
+    // Bullets
+    if (line.trim().startsWith('- ')) {
+      const parts = line.split('- ');
+      return (
+        <div key={i} className="md-line">
+          <span className="md-bullet">- </span>
+          {renderInlineStyles(parts[1])}
+        </div>
+      );
+    }
+
+    return <div key={i} className="md-line">{renderInlineStyles(line)}</div>;
+  });
+}
+
+function renderInlineStyles(text) {
+  if (!text) return '';
+  // Highlight inline code `...`
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <span key={i} className="md-inline-code">{part}</span>;
+    }
+    return part;
+  });
+}
+
 function App() {
   const [activeArtifact, setActiveArtifact] = useState('agent');
   const [activeHeroCase, setActiveHeroCase] = useState(0);
@@ -343,7 +384,9 @@ function App() {
                 <div className="code-gutter">
                   {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => <span key={n}>{n}</span>)}
                 </div>
-                <pre><code>{Artifacts[activeArtifact].content}</code></pre>
+                <div className="md-content">
+                  {renderMarkdown(Artifacts[activeArtifact].content)}
+                </div>
               </div>
             </div>
           </div>
