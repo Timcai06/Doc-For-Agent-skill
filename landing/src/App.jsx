@@ -4,11 +4,17 @@ import React, { useEffect, useState } from 'react';
 const Artifacts = {
   human: {
     title: "docs/architecture.md",
-    content: `# Architecture Overview\n\n## Narrative Context\nThis repository implements a rule-based documentation engine. It prioritizes clarity for human onboarding and strategic alignment.\n\n## Systemic Core\n- Unified Analysis: Single pass for dual outputs.\n- Drift Prevention: Automated refresh logic via CLI.\n\n## Maintenance\nHuman docs remain aligned via \`docagent refresh\` triggers.`
+    mode: "Narrative-First",
+    status: "Audit Passed",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
+    content: `# Architecture Overview\n\n## Narrative Context\nThis repository prioritizes clarity for human onboarding and strategic alignment.\n\n## Systemic Core\n- Unified Analysis: Single pass for dual outputs.\n- Drift Prevention: Automated refresh via CLI.\n\n## Maintenance\nNarratives remain synchronized with real code signals.`
   },
   agent: {
-    title: "AGENTS/03-execution/rules.md",
-    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify AST stability before merge.\n- Use grounded command paths.\n- Prevent context overflow by splitting rules.\n\n## CLI Integration\n- \`docagent doctor --target .\` (Audit)\n- \`docagent refresh --mode dual\` (Maintenance)`
+    title: "AGENTS/rules.md",
+    mode: "Execution-First",
+    status: "Grounded 100%",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
+    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify AST stability before merge.\n- Ground all commands in local /src.\n- Prevent context overflow via splits.\n\n## Grounding Context\n- Root Path: ./\n- Engine: docagent-core v1.2`
   }
 };
 
@@ -288,14 +294,55 @@ function App() {
 
         {/* ARTIFACT VISUALIZER */}
         <section className="section" id="artifacts">
-          <div className="artifact-viewer scroll-reveal">
-            <div className="viewer-tabs">
-              <button className={`tab ${activeArtifact === 'agent' ? 'active' : ''}`} onClick={() => setActiveArtifact('agent')}>AGENTS Context (Machine)</button>
-              <button className={`tab ${activeArtifact === 'human' ? 'active' : ''}`} onClick={() => setActiveArtifact('human')}>Human Guide (docs/)</button>
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">Production Outputs</span>
+            <h2>Grounded Knowledge Base</h2>
+          </div>
+          
+          <div className="artifact-viewer scroll-reveal premium-viewer">
+            <div className="viewer-tabs sidebar-tabs">
+              <button 
+                className={`tab ${activeArtifact === 'agent' ? 'active' : ''}`} 
+                onClick={() => setActiveArtifact('agent')}
+              >
+                <div className="tab-pill-icon">{Artifacts.agent.icon}</div>
+                <div className="tab-label-group">
+                  <strong>AGENTS/context</strong>
+                  <small>Execution Rules</small>
+                </div>
+              </button>
+              <button 
+                className={`tab ${activeArtifact === 'human' ? 'active' : ''}`} 
+                onClick={() => setActiveArtifact('human')}
+              >
+                <div className="tab-pill-icon" style={{ color: 'var(--accent)' }}>{Artifacts.human.icon}</div>
+                <div className="tab-label-group">
+                  <strong>docs/narrative</strong>
+                  <small>Human Guide</small>
+                </div>
+              </button>
             </div>
-            <div className="viewer-window">
-              <div className="viewer-header">Viewing: {Artifacts[activeArtifact].title}</div>
-              <div className="code-body">
+            
+            <div className="viewer-window browser">
+              <div className="viewer-header-premium">
+                <div className="browser-path">
+                  <span className="dir">repository / </span>
+                  <span className="file">{Artifacts[activeArtifact].title}</span>
+                </div>
+                <div className="browser-meta">
+                  <div className="meta-badge pulse-dot">
+                    <span className="dot-mini green" />
+                    {Artifacts[activeArtifact].status}
+                  </div>
+                  <div className="meta-badge outline">
+                    {Artifacts[activeArtifact].mode}
+                  </div>
+                </div>
+              </div>
+              <div className="code-body ide-look">
+                <div className="code-gutter">
+                  {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => <span key={n}>{n}</span>)}
+                </div>
                 <pre><code>{Artifacts[activeArtifact].content}</code></pre>
               </div>
             </div>
