@@ -4,17 +4,17 @@ import React, { useEffect, useState } from 'react';
 const Artifacts = {
   human: {
     title: "docs/architecture.md",
-    mode: "Narrative-First",
-    status: "Audit Passed",
+    mode: "Strategic-First",
+    status: "Narrative Verified",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
-    content: `# Architecture Overview\n\n## Narrative Context\nThis repository prioritizes clarity for human onboarding and strategic alignment.\n\n## Systemic Core\n- Unified Analysis: Single pass for dual outputs.\n- Drift Prevention: Automated refresh via CLI.\n\n## Maintenance\nNarratives remain synchronized with real code signals.`
+    content: `# Architecture Overview\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.\n\n## Human Handoff\nNarratives are maintained as high-level maps, ensuring every team member stays aligned with the machine rules.`
   },
   agent: {
     title: "AGENTS/rules.md",
     mode: "Execution-First",
-    status: "Rule-Oriented",
+    status: "Execution Ready",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
-    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.\n\n## Grounding Context\n- Root Path: ./\n- Mode: layer-aware execution guidance`
+    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.\n\n## Execution Context\n- Root Path: ./\n- Mode: layer-aware execution guidance`
   }
 };
 
@@ -22,15 +22,16 @@ const heroCases = [
   {
     index: 0,
     label: 'docagent init',
-    title: 'Establish Baseline',
+    title: 'Baseline Establishment',
     command: 'tim@macBook ~ % docagent init --target . --ai all',
     output: [
-      { text: '[1/3] Scanning repository for legacy knowledge...', color: 'var(--text-secondary)' },
+      { text: '[step 1/3] Scanning repository for knowledge signals...', color: 'var(--text-secondary)' },
       { text: '✓ Detected low-doc state with scattered READMEs.', color: 'var(--accent)' },
-      { text: '[2/3] Establishing Dual-Doc baseline...', color: 'var(--text-secondary)' },
-      { text: '  + /AGENTS/ (Machine Execution Context)', color: '#fff' },
-      { text: '  + /docs/   (Human Narrative Guide)', color: '#fff' },
-      { text: '[3/3] Dual-Doc baseline established for supported CLI agents.', color: 'var(--accent)' },
+      { text: '[step 2/3] Building dual-doc baseline...', color: 'var(--text-secondary)' },
+      { text: '  + /AGENTS/ (execution context)', color: '#fff' },
+      { text: '  + /docs/   (human narrative guides)', color: '#fff' },
+      { text: '[step 3/3] Baseline established for supported CLI agent workflows.', color: 'var(--accent)' },
+      { text: 'Ready for install -> init -> refresh.', color: 'var(--primary)' },
     ]
   },
   {
@@ -39,11 +40,11 @@ const heroCases = [
     title: 'Knowledge Maintenance',
     command: 'tim@macBook ~ % docagent refresh --root . --output-mode dual',
     output: [
-      { text: '[1/2] Checking for systemic drift...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected changes affecting implementation guidance.', color: 'var(--accent)' },
-      { text: '[2/2] Refreshing paired artifacts...', color: 'var(--text-secondary)' },
-      { text: '  ↺ /AGENTS/ context synchronized.', color: '#fff' },
-      { text: '  ↺ /docs/ architecture guides updated.', color: '#fff' },
+      { text: '[step 1/2] Detecting changes affecting paired guidance...', color: 'var(--text-secondary)' },
+      { text: '✓ Found code changes that require synced docs updates.', color: 'var(--accent)' },
+      { text: '[step 2/2] Synchronizing paired artifacts...', color: 'var(--text-secondary)' },
+      { text: '  ↺ /AGENTS/ execution context synchronized.', color: '#fff' },
+      { text: '  ↺ /docs/ human guides updated.', color: '#fff' },
       { text: 'Refresh complete. Dual-doc outputs synchronized.', color: 'var(--primary)' },
     ]
   },
@@ -53,9 +54,9 @@ const heroCases = [
     title: 'System Health Audit',
     command: 'tim@macBook ~ % docagent doctor --target .',
     output: [
-      { text: '[1/1] Auditing documentation integrity...', color: 'var(--text-secondary)' },
-      { text: '✓ Install paths and skill bundles found for configured targets.', color: 'var(--accent)' },
-      { text: '✓ Quickstart and refresh path are ready for this repo.', color: 'var(--accent)' },
+      { text: '[step 1/1] Auditing install and documentation integrity...', color: 'var(--text-secondary)' },
+      { text: '✓ Skill bundles and install targets found.', color: 'var(--accent)' },
+      { text: '✓ Refresh path is available for this repository.', color: 'var(--accent)' },
       { text: 'Status: install state looks healthy.', color: 'var(--primary)' },
     ]
   }
@@ -64,49 +65,87 @@ const heroCases = [
 const commands = [
   { 
     name: 'init', 
-    desc: 'Bootstrap the Dual-Doc system from low-doc or scattered repo state', 
-    status: 'Production',
-    logic: 'Global Repository Scan',
-    complexity: 'High',
-    efficiency: 'High fit',
+    desc: 'Establish systemic baseline from legacy or inconsistent repositories', 
+    status: 'Grounded',
+    logic: 'Context Extraction',
+    complexity: 'Infrastructure',
+    efficiency: 'Deep Scan',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
   },
   { 
-    name: 'doctor', 
-    desc: 'Audit repository stability and documentation health', 
-    status: 'Stable',
-    logic: 'Integrity Verification',
-    complexity: 'Medium',
-    efficiency: 'Fast check',
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>
-  },
-  { 
     name: 'refresh', 
-    desc: 'Sync documentation with real-time code evolution', 
-    status: 'Production',
-    logic: 'Drift Detection Engine',
-    complexity: 'High',
-    efficiency: 'Repeatable',
+    desc: 'Synchronize dual artifacts with active logic evolution', 
+    status: 'Ready',
+    logic: 'Drift Detection',
+    complexity: 'Semantic',
+    efficiency: 'Atomic Sync',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
   },
   { 
+    name: 'doctor', 
+    desc: 'Audit grounding integrity and systemic health across artifacts', 
+    status: 'Stable',
+    logic: 'Verification',
+    complexity: 'Deterministic',
+    efficiency: 'Instant',
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>
+  },
+  { 
     name: 'migrate', 
-    desc: 'Systemize scattered READMEs into structured baselines', 
-    status: 'Beta',
-    logic: 'Heuristic Document Extraction',
-    complexity: 'Higher risk',
-    efficiency: 'Use with review',
+    desc: 'Absorb legacy documentation into the dual-doc baseline', 
+    status: 'Grounded',
+    logic: 'Knowledge Intake',
+    complexity: 'Heuristic',
+    efficiency: 'Structural',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
   },
   { 
     name: 'generate', 
-    desc: 'Produce machine-first artifacts for specific AI agents', 
-    status: 'Stable',
-    logic: 'Context Compression',
-    complexity: 'Low',
-    efficiency: 'Targeted',
+    desc: 'Project machine execution context for targeted Agent platforms', 
+    status: 'Production',
+    logic: 'Artifact Projection',
+    complexity: 'Targeted',
+    efficiency: 'Native-Fit',
     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
   },
+];
+
+const playgroundVariants = [
+  {
+    id: 'v1',
+    label: 'Initial Grounding',
+    code: `// src/auth.ts
+export function login(user) {
+  // Simple auth logic
+  return validate(user.id);
+}`,
+    human: `# Auth logic\n\nSupports basic user ID validation.\n\nStatus: current baseline view.`,
+    agent: `# EXECUTION RULES\n\n- call validate(user.id)\n- return boolean`
+  },
+  {
+    id: 'v2',
+    label: 'Logic Evolution',
+    code: `// src/auth.ts
+export function login(user) {
+  // Upgraded to JWT + MFA
+  const token = sign(user.id);
+  return verifyMFA(token);
+}`,
+    human: `# Auth logic\n\n[DRIFT DETECTED]\nHuman docs currently show legacy ID validation.`,
+    agent: `# EXECUTION RULES\n\n[DRIFT DETECTED]\nAgent context out of sync with new MFA logic.`
+  },
+  {
+    id: 'v3',
+    label: 'Systemic Sync',
+    code: `// src/auth.ts
+export function login(user) {
+  // Upgraded to JWT + MFA
+  const token = sign(user.id);
+  return verifyMFA(token);
+}`,
+    human: `# Auth logic\n\nNow supports JWT and MFA verification flow.\n\nStatus: refreshed after logic change.`,
+    agent: `# EXECUTION RULES\n\n- sign(user.id) for token\n- verifyMFA(token) strictly`
+  }
 ];
 
 function renderMarkdown(content) {
@@ -153,6 +192,47 @@ function renderInlineStyles(text) {
 function App() {
   const [activeArtifact, setActiveArtifact] = useState('agent');
   const [activeHeroCase, setActiveHeroCase] = useState(0);
+  const [activePlayground, setActivePlayground] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [sliderValue, setSliderValue] = useState(50);
+  const [activePlatform, setActivePlatform] = useState('claude');
+
+  const handleSync = () => {
+    if (activePlayground === 1) {
+      setIsSyncing(true);
+      setTimeout(() => {
+        setActivePlayground(2);
+        setIsSyncing(false);
+      }, 1500);
+    }
+  };
+
+  const platforms = {
+    claude: {
+      name: 'Claude Code',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
+      integration: 'docagent init --target . --ai claude',
+      description: 'Installs the Claude-facing skill path and keeps repository guidance aligned through the same dual-doc engine.'
+    },
+    codex: {
+      name: 'Codex',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" x2="15" y1="9" y2="15"/><line x1="15" x2="9" y1="9" y2="15"/></svg>,
+      integration: 'docagent init --target . --ai codex',
+      description: 'Installs the Codex-facing skill bundle and keeps execution guidance aligned with the same repository analysis.'
+    },
+    continue: {
+      name: 'Continue',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>,
+      integration: 'docagent init --target . --ai continue',
+      description: 'Installs the Continue-facing integration path while keeping the same docs and AGENTS baseline.'
+    },
+    copilot: {
+      name: 'Copilot',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>,
+      integration: 'docagent init --target . --ai copilot',
+      description: 'Installs the Copilot-facing integration path without changing the core dual-doc lifecycle.'
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -189,21 +269,24 @@ function App() {
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
           <div className="hero-copy scroll-reveal">
-            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px' }}>CLI Agent Skill</div>
+            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', background: 'rgba(56,189,248,0.05)', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>SYSTEMIC DOC INFRASTRUCTURE</div>
             <h1>
-              Durable Knowledge for <br />
-              <span style={{ color: 'var(--primary)' }}>the Agentic LifeCycle.</span>
+              The Bridge for <br />
+              <span style={{ color: 'var(--primary)', textShadow: '0 0 30px var(--primary-glow)' }}>Agentic LifeCycle.</span>
             </h1>
             <p className="hero-text">
-              Don't settle for ephemeral chat history. <strong>doc-for-agent</strong> builds a persistent, refreshable bridge: <code>/docs/</code> for human narrative, <code>/AGENTS/</code> for machine precision.
+              Don't leave your Agent's context to chance. <strong>doc-for-agent</strong> transforms messy repositories into a durable, refreshable double-act: <code>/docs/</code> for human strategy, <code>/AGENTS/</code> for machine precision.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#workflow">Start Lifecycle</a>
-              <a className="button button-secondary" href="#dual-logic">Dual-Doc Architecture</a>
+              <a className="button button-primary" href="#workflow">
+                Get Started
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+              <a className="button button-secondary" href="#dual-logic">Dual-Doc Philosophy</a>
             </div>
             
             <div className="ecosystem-row">
-              <span>Bridging:</span>
+              <span style={{ opacity: 0.6 }}>Powering Workflows in:</span>
               <div className="ecosystem-badges">
                 <span className="eco-badge">Claude Code</span>
                 <span className="eco-badge">Codex</span>
@@ -253,9 +336,9 @@ function App() {
         {/* DUAL DOC LOGIC SECTION */}
         <section className="section" id="dual-logic">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Paired-Documentation Model</span>
-            <h2>Two Targets. One LifeCycle.</h2>
-            <p className="feature-desc">Humans need <strong>Architectural Narrative</strong> to maintain long-term alignment. Agents need <strong>Execution Rules</strong> to maintain stability. We synchronize both as code evolves.</p>
+            <span className="eyebrow">DUAL-MODE ARCHITECTURE</span>
+            <h2>Two Targets. One Truth.</h2>
+            <p className="feature-desc">Stop fighting manual drift. The engine analyzes your codebase to produce synchronized artifacts for both human maintainers and coding agents.</p>
           </div>
 
           <div className="sync-diagram scroll-reveal">
@@ -284,11 +367,69 @@ function App() {
              </div>
           </div>
 
+          {/* GROUNDING PLAYGROUND SUBSECTION */}
+          <div className="playground-container scroll-reveal" style={{ marginTop: '80px' }}>
+            <div className="playground-head">
+              <h3>Grounding Playground</h3>
+              <p>Simulate a logic evolution and see the systemic sync in action.</p>
+            </div>
+            
+            <div className="playground-editor-shell">
+              <div className="pg-controls">
+                {playgroundVariants.map((v, i) => (
+                  <button 
+                    key={v.id} 
+                    className={`pg-btn ${activePlayground === i ? 'active' : ''}`}
+                    disabled={i === 2 && activePlayground !== 2 && !isSyncing}
+                    onClick={() => setActivePlayground(i)}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="pg-main-grid">
+                <div className="pg-pane code-pane">
+                  <div className="pane-header">Source Code</div>
+                  <div className="code-body ide-look">
+                    <div className="code-gutter">
+                      {[1,2,3,4,5].map(n => <span key={n}>{n}</span>)}
+                    </div>
+                    <pre><code>{playgroundVariants[activePlayground].code}</code></pre>
+                  </div>
+                  {activePlayground === 1 && (
+                    <button className={`sync-trigger ${isSyncing ? 'syncing' : ''}`} onClick={handleSync}>
+                      {isSyncing ? 'Systemic Syncing...' : 'docagent refresh'}
+                    </button>
+                  )}
+                </div>
+                
+                <div className="pg-pane doc-pane">
+                  <div className="pane-header">Dual-Doc Outputs</div>
+                  <div className="dual-doc-tabs">
+                    <div className="sync-doc-box human">
+                      <div className="doc-label">/docs/ human narrative</div>
+                      <div className="md-content mini">
+                        {renderMarkdown(playgroundVariants[activePlayground].human)}
+                      </div>
+                    </div>
+                    <div className="sync-doc-box agent">
+                      <div className="doc-label">/AGENTS/ execution rules</div>
+                      <div className="md-content mini">
+                        {renderMarkdown(playgroundVariants[activePlayground].agent)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="dual-grid scroll-reveal" style={{ marginTop: '64px' }}>
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (Execution-First)</div>
               <h3>/AGENTS/ Context</h3>
-              <p>Actionable, high-density execution rules. Designed for Claude Code and Codex to navigate repositories with machine precision, zero context overflow, and deterministic grounding.</p>
+              <p>Actionable, high-density execution rules. Designed for Claude Code, Codex, Continue, and Copilot workflows with lower ambiguity and repeatable refresh paths.</p>
               <ul className="mini-features">
                 <li>✓ Deterministic Invariants</li>
                 <li>✓ CLI Workflow Handoffs</li>
@@ -329,6 +470,46 @@ function App() {
                 <span>{s.desc}</span>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* CASE STUDY SECTION */}
+        <section className="section" id="case-study">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">Real World Transformation</span>
+            <h2>Order from Fragmentation.</h2>
+          </div>
+          
+          <div className="case-study-visual scroll-reveal">
+            <div className="comparison-slider">
+              <div className="img-container before">
+                <img src="/assets/before_messy.png" alt="Messy Repo" />
+                <div className="img-label">CHAOTIC BEFORE</div>
+              </div>
+              <div className="img-container after" style={{ clipPath: `inset(0 0 0 ${sliderValue}%)` }}>
+                <img src="/assets/after_clean.png" alt="Clean Repo" />
+                <div className="img-label after">SYSTEMIC AFTER</div>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value={sliderValue} 
+                onChange={(e) => setSliderValue(e.target.value)} 
+                className="slider-handle"
+              />
+              <div className="slider-line" style={{ left: `${sliderValue}%` }} />
+            </div>
+            
+            <div className="case-meta">
+              <div className="case-stat">
+                <strong>Low-doc repository example</strong>
+                <p>Illustrates the shift from scattered inputs to a more structured dual-doc baseline.</p>
+              </div>
+              <div className="case-quote">
+                "The point is not prettier markdown. The point is a baseline that humans and agents can both reuse."
+              </div>
+            </div>
           </div>
         </section>
 
@@ -391,31 +572,34 @@ function App() {
           </div>
         </section>
 
-          {/* WHY DOCAGENT SECTION */}
+          {/* THE PROMPTING PARADOX SECTION */}
         <section className="section" id="why-docagent">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Sustainable Choice</span>
+            <span className="eyebrow">THE PROMPTING PARADOX</span>
             <h2>Why not just prompt the agent?</h2>
-            <p className="feature-desc">Prompting works for small fixes, but fails for long-term repository health. Ephemeral chat histories drift, context decays across sessions, and teams end up re-explaining the same repository rules.</p>
+            <p className="feature-desc">Prompting works for individual tasks, but fails for long-term project survival. Without a maintained baseline, teams and agents both hit context decay over time.</p>
           </div>
 
           <div className="drift-visual scroll-reveal">
             <div className="drift-card bad">
               <div className="drift-title">Ephemeral Prompting</div>
-              <ul className="mini-features" style={{ color: '#f87171' }}>
-                <li>❌ Knowledge expires mid-session</li>
-                <li>❌ Inconsistent "Manual Drift"</li>
-                <li>❌ Context Decay across sessions</li>
-                <li>❌ High manual alignment overhead</li>
+              <ul className="mini-features" style={{ color: 'var(--danger)' }}>
+                <li>✕ Knowledge expires mid-session</li>
+                <li>✕ Manual drift during logic shifts</li>
+                <li>✕ Context decay across sessions</li>
+                <li>✕ High-friction onboarding for new agents</li>
               </ul>
+            </div>
+            <div className="drift-arrow-hub">
+              <div className="vs-badge">VS</div>
             </div>
             <div className="drift-card good">
               <div className="drift-title">Systemic Dual-Doc</div>
               <ul className="mini-features">
-                <li>✅ Persistent /AGENTS baseline</li>
-                <li>✅ More stable truth across sessions</li>
-                <li>✅ Scalable for messy legacy repos</li>
-                <li>✅ Automated CLI refresh cycle</li>
+                <li>✓ Persistent /AGENTS/ baseline</li>
+                <li>✓ More stable truth across sessions</li>
+                <li>✓ Low-doc legacy repo support</li>
+                <li>✓ Automated refresh cycle</li>
               </ul>
             </div>
           </div>
@@ -424,54 +608,82 @@ function App() {
         {/* LIFECYCLE PATH SECTION */}
         <section className="section" id="workflow">
           <div className="section-head scroll-reveal">
-            <span className="eyebrow">The Systemic Lifecycle</span>
+            <span className="eyebrow">THE SYSTEMIC RECOVERY</span>
             <h2>Install. Init. Refresh.</h2>
             <p className="feature-desc">Go from a zero-knowledge repository to a deep-context agent workflow in three systemic steps.</p>
           </div>
           
-          <div className="lifecycle-path scroll-reveal">
-            <div className="lifecycle-step">
-              <div className="step-marker">
-                <div className="marker-dot" />
-                <div className="marker-line" />
+          <div className="lifecycle-circle-container scroll-reveal">
+            <div className="lifecycle-path-v2">
+              <div className="l-step step-1">
+                <div className="l-icon">01</div>
+                <div className="l-info">
+                  <strong>npm install</strong>
+                  <p>Global CLI engine</p>
+                </div>
               </div>
-              <div className="step-content">
-                <div className="step-badge">01</div>
-                <h3>Global Install</h3>
-                <p>Equip your CLI environment with the systemic analysis engine.</p>
-                <div className="command-box">
-                  <code>npm install -g doc-for-agent</code>
+              <div className="l-connector" />
+              <div className="l-step step-2">
+                <div className="l-icon">02</div>
+                <div className="l-info">
+                  <strong>docagent init</strong>
+                  <p>Establish Baseline</p>
+                </div>
+              </div>
+              <div className="l-connector" />
+              <div className="l-step step-3 recurring">
+                <div className="l-icon highlight">03</div>
+                <div className="l-info">
+                  <strong>docagent refresh</strong>
+                  <p>Neutralize Drift</p>
+                  <span className="loop-indicator">RECURRING</span>
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <div className="lifecycle-step active">
-              <div className="step-marker">
-                <div className="marker-dot" />
-                <div className="marker-line" />
-              </div>
-              <div className="step-content">
-                <div className="step-badge">02</div>
-                <h3>System Bridge (Init)</h3>
-                <p>Scan legacy code and messy docs. Establish a baseline for supported CLI coding agents.</p>
-                <div className="command-box">
-                  <code>docagent init --target . --ai all</code>
-                </div>
-              </div>
+        {/* ECOSYSTEM BRIDGE SECTION */}
+        <section className="section" id="ecosystem">
+          <div className="section-head scroll-reveal">
+            <span className="eyebrow">The Systemic Bridge</span>
+            <h2>Targeted Agent Context.</h2>
+          </div>
+          
+          <div className="ecosystem-bridge scroll-reveal">
+            <div className="platform-tabs">
+              {Object.keys(platforms).map(key => (
+                <button 
+                  key={key} 
+                  className={`plat-tab ${activePlatform === key ? 'active' : ''}`}
+                  onClick={() => setActivePlatform(key)}
+                >
+                  {platforms[key].name}
+                </button>
+              ))}
             </div>
-
-            <div className="lifecycle-step recurring">
-              <div className="step-marker">
-                <div className="marker-dot" />
-                <div className="marker-line dash" />
-              </div>
-              <div className="step-content">
-                <div className="step-badge">03</div>
-                <h3>Active Refresh</h3>
-                <p>The core of sustainability. Sync knowledge as code evolves with lower manual overhead.</p>
+            
+            <div className="platform-content glass-card premium-ide">
+              <div className="plat-info">
+                <div className="plat-icon-box">{platforms[activePlatform].icon}</div>
+                <h3>{platforms[activePlatform].name}</h3>
+                <p>{platforms[activePlatform].description}</p>
                 <div className="command-box highlight">
-                  <code>docagent refresh --root . --output-mode dual</code>
-                  <span className="recurring-tag">RECURRING</span>
+                  <code>{platforms[activePlatform].integration}</code>
+                </div>
+              </div>
+              <div className="plat-visual">
+                <div className="plat-code-preview ide-look">
+                  <div className="code-gutter">
+                    {[1,2,3,4,5].map(n => <span key={n}>{n}</span>)}
+                  </div>
+                  <div className="md-content mini">
+                    <div className="md-line md-h2"># Platform Integration</div>
+                    <div className="md-line">✓ Target: {platforms[activePlatform].name}</div>
+                    <div className="md-line">✓ Mode: Repository-aware docs setup</div>
+                    <div className="md-line">✓ Status: Supported install path</div>
+                    <div className="md-line">✓ Result: Shared dual-doc baseline</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -483,7 +695,7 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">Engine Integrity</span>
             <h2>Modular Capability Matrix</h2>
-            <p className="feature-desc">High-density operational modules designed for repeatable repository alignment.</p>
+            <p className="feature-desc">High-density operational modules designed for deterministic repository alignment.</p>
           </div>
           
           <div className="matrix-grid scroll-reveal">
