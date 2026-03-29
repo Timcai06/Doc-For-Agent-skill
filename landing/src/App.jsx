@@ -12,9 +12,9 @@ const Artifacts = {
   agent: {
     title: "AGENTS/rules.md",
     mode: "Execution-First",
-    status: "Grounded 100%",
+    status: "Rule-Oriented",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
-    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify AST stability before merge.\n- Ground all commands in local /src.\n- Prevent context overflow via splits.\n\n## Grounding Context\n- Root Path: ./\n- Engine: docagent-core v1.2`
+    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.\n\n## Grounding Context\n- Root Path: ./\n- Mode: layer-aware execution guidance`
   }
 };
 
@@ -30,34 +30,33 @@ const heroCases = [
       { text: '[2/3] Establishing Dual-Doc baseline...', color: 'var(--text-secondary)' },
       { text: '  + /AGENTS/ (Machine Execution Context)', color: '#fff' },
       { text: '  + /docs/   (Human Narrative Guide)', color: '#fff' },
-      { text: '[3/3] LifeCycle enabled. Initialized for Claude/Codex/Copilot.', color: 'var(--accent)' },
+      { text: '[3/3] Dual-Doc baseline established for supported CLI agents.', color: 'var(--accent)' },
     ]
   },
   {
     index: 1,
     label: 'docagent refresh',
     title: 'Knowledge Maintenance',
-    command: 'tim@macBook ~ % docagent refresh',
+    command: 'tim@macBook ~ % docagent refresh --root . --output-mode dual',
     output: [
       { text: '[1/2] Checking for systemic drift...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected 5 code changes affecting execution logic.', color: 'var(--accent)' },
+      { text: '✓ Detected changes affecting implementation guidance.', color: 'var(--accent)' },
       { text: '[2/2] Refreshing paired artifacts...', color: 'var(--text-secondary)' },
       { text: '  ↺ /AGENTS/ context synchronized.', color: '#fff' },
       { text: '  ↺ /docs/ architecture guides updated.', color: '#fff' },
-      { text: 'Refresh complete. "Manual Drift" neutralized.', color: 'var(--primary)' },
+      { text: 'Refresh complete. Dual-doc outputs synchronized.', color: 'var(--primary)' },
     ]
   },
   {
     index: 2,
     label: 'docagent doctor',
     title: 'System Health Audit',
-    command: 'tim@macBook ~ % docagent doctor',
+    command: 'tim@macBook ~ % docagent doctor --target .',
     output: [
       { text: '[1/1] Auditing documentation integrity...', color: 'var(--text-secondary)' },
-      { text: '✓ /AGENTS/ rules are 100% grounded in /src.', color: 'var(--accent)' },
-      { text: '✓ /docs/ narratives match current AST structure.', color: 'var(--accent)' },
-      { text: '✓ Dual-doc synchronization confirmed.', color: 'var(--accent)' },
-      { text: 'Integrity Audit Passed (0.8s).', color: 'var(--primary)' },
+      { text: '✓ Install paths and skill bundles found for configured targets.', color: 'var(--accent)' },
+      { text: '✓ Quickstart and refresh path are ready for this repo.', color: 'var(--accent)' },
+      { text: 'Status: install state looks healthy.', color: 'var(--primary)' },
     ]
   }
 ];
@@ -293,7 +292,7 @@ function App() {
               <ul className="mini-features">
                 <li>✓ Deterministic Invariants</li>
                 <li>✓ CLI Workflow Handoffs</li>
-                <li>✓ Zero Context Overflow</li>
+                <li>✓ Lower Ambiguity Under Refresh</li>
               </ul>
             </div>
             <div className="dual-card human">
@@ -397,7 +396,7 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">The Sustainable Choice</span>
             <h2>Why not just prompt the agent?</h2>
-            <p className="feature-desc">Prompting works for small fixes, but fails for long-term repository health. Ephemeral chat histories drift, context limits overflow, and agents inevitably hallucinate outdated execution rules.</p>
+            <p className="feature-desc">Prompting works for small fixes, but fails for long-term repository health. Ephemeral chat histories drift, context decays across sessions, and teams end up re-explaining the same repository rules.</p>
           </div>
 
           <div className="drift-visual scroll-reveal">
@@ -406,7 +405,7 @@ function App() {
               <ul className="mini-features" style={{ color: '#f87171' }}>
                 <li>❌ Knowledge expires mid-session</li>
                 <li>❌ Inconsistent "Manual Drift"</li>
-                <li>❌ Context Decay as session grows</li>
+                <li>❌ Context Decay across sessions</li>
                 <li>❌ High manual alignment overhead</li>
               </ul>
             </div>
@@ -414,7 +413,7 @@ function App() {
               <div className="drift-title">Systemic Dual-Doc</div>
               <ul className="mini-features">
                 <li>✅ Persistent /AGENTS baseline</li>
-                <li>✅ Unified truth for every session</li>
+                <li>✅ More stable truth across sessions</li>
                 <li>✅ Scalable for messy legacy repos</li>
                 <li>✅ Automated CLI refresh cycle</li>
               </ul>
@@ -454,9 +453,9 @@ function App() {
               <div className="step-content">
                 <div className="step-badge">02</div>
                 <h3>System Bridge (Init)</h3>
-                <p>Scan your legacy code & mess documents. Establish the baseline for every AI agent.</p>
+                <p>Scan legacy code and messy docs. Establish a baseline for supported CLI coding agents.</p>
                 <div className="command-box">
-                  <code>docagent init --ai all</code>
+                  <code>docagent init --target . --ai all</code>
                 </div>
               </div>
             </div>
@@ -471,7 +470,7 @@ function App() {
                 <h3>Active Refresh</h3>
                 <p>The core of sustainability. Sync knowledge as code evolves with lower manual overhead.</p>
                 <div className="command-box highlight">
-                  <code>docagent refresh</code>
+                  <code>docagent refresh --root . --output-mode dual</code>
                   <span className="recurring-tag">RECURRING</span>
                 </div>
               </div>
@@ -484,7 +483,7 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">Engine Integrity</span>
             <h2>Modular Capability Matrix</h2>
-            <p className="feature-desc">High-density operational modules designed for deterministic repository alignment.</p>
+            <p className="feature-desc">High-density operational modules designed for repeatable repository alignment.</p>
           </div>
           
           <div className="matrix-grid scroll-reveal">
