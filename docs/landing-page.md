@@ -19,6 +19,7 @@ The landing page is aimed at CLI coding-agent users and explains the short produ
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
 The docs output model is `agent`, `human`, or `dual` according to user intent.
 Mode map: `agent` for `AGENTS/`, `human` for `docs/`, and `dual` for both.
+Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
 The product message is dual-system, not AGENTS-only.
 
 ## Entry Path

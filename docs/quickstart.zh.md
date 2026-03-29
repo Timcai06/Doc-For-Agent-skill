@@ -12,6 +12,7 @@
 
 `refresh` 支持 `agent`、`human`、`dual` 三种文档输出。
 模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出。
+`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
 ## 安装

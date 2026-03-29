@@ -18,6 +18,7 @@ Entry path step: this page follows `README.md` -> `docs/landing-page.md` -> `doc
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 After init, use `refresh --output-mode agent|human|dual` based on the docs audience.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
+Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
 Platform selection is separate from doc audience: this is not AGENTS-only.
 
 ## Multi-Agent Setup

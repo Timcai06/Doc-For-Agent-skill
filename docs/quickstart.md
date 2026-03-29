@@ -12,6 +12,7 @@ Use one mental model:
 
 `refresh` supports `agent`, `human`, and `dual` documentation outputs.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
+Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 
 ## Install
