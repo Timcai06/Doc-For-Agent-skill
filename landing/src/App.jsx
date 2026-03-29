@@ -269,7 +269,7 @@ function App() {
         {/* HERO SECTION */}
         <section className="hero section" id="hero">
           <div className="hero-copy scroll-reveal">
-            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', background: 'rgba(56,189,248,0.05)', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>SYSTEMIC DOC INFRASTRUCTURE</div>
+            <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', background: 'rgba(56,189,248,0.05)', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>DOCUMENTATION LIFECYCLE CLI</div>
             <h1>
               The Bridge for <br />
               <span style={{ color: 'var(--primary)', textShadow: '0 0 30px var(--primary-glow)' }}>Agentic LifeCycle.</span>
@@ -363,7 +363,7 @@ function App() {
                  <div className="res-card human"><strong>/docs/</strong> Narrative Baseline</div>
                </div>
                <strong>Unified Knowledge Hub</strong>
-               <p>Grounded in repository analysis and legacy-document heuristics.</p>
+               <p>Derived from repository analysis and legacy-document heuristics.</p>
              </div>
           </div>
 
@@ -453,12 +453,12 @@ function App() {
         <section className="section" id="scenarios">
           <div className="section-head scroll-reveal">
             <span className="eyebrow">Enterprise Resilience</span>
-            <h2>Grounded in messy realities.</h2>
+            <h2>Built for messy realities.</h2>
             <p className="feature-desc">doc-for-agent doesn't require a clean repo to start. It creates order from fragmentation.</p>
           </div>
           <div className="scenario-row scroll-reveal">
             {[
-              { type: 'Low-Doc Legacy', desc: 'Bootstrap a professional documentation system from zero-knowledge source and scattered configs.' },
+              { type: 'Low-Doc Legacy', desc: 'Bootstrap a professional documentation system from source code and scattered configs.' },
               { type: 'Messy-Doc Repos', desc: 'Inhale outdated, conflicting READMEs and systemize them into a durable /AGENTS/ baseline.' },
               { type: 'Team Scalability', desc: 'Maintain peak alignment for every agent session with a repeatable, automated refresh cycle.' }
             ].map(s => (
@@ -517,7 +517,7 @@ function App() {
         <section className="section" id="artifacts">
           <div className="section-head scroll-reveal">
             <span className="eyebrow">Production Outputs</span>
-            <h2>Grounded Knowledge Base</h2>
+            <h2>Consistent Knowledge Base</h2>
           </div>
           
           <div className="artifact-viewer scroll-reveal premium-viewer">
@@ -695,7 +695,7 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">Engine Integrity</span>
             <h2>Modular Capability Matrix</h2>
-            <p className="feature-desc">High-density operational modules designed for deterministic repository alignment.</p>
+            <p className="feature-desc">High-density operational modules designed for consistent repository documentation.</p>
           </div>
           
           <div className="matrix-grid scroll-reveal">
