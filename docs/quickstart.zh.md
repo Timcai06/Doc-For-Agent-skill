@@ -82,7 +82,7 @@ docagent versions --target <repo-root>
 ```
 
 另见：
-
+入口链路提醒：`README.md` -> `docs/landing-page.zh.md` -> `docs/quickstart.zh.md` -> `docs/platforms.zh.md`。
 - [Landing Page（英文）](landing-page.md) / [落地页说明（中文）](landing-page.zh.md)
 - [Platform Guide（英文）](platforms.md) / [平台指南（中文）](platforms.zh.md)
 - [Maintainer Guide](maintainers.md)

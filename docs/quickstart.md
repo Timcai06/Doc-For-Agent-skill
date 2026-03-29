@@ -82,7 +82,7 @@ docagent versions --target <repo-root>
 ```
 
 See also:
-
+Entry path reminder: `README.md` -> `docs/landing-page.md` -> `docs/quickstart.md` -> `docs/platforms.md`.
 - [Landing Page Note](landing-page.md)
 - [Platform Guide](platforms.md)
 - [Maintainer Guide](maintainers.md)

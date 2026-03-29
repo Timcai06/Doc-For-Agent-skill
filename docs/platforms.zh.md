@@ -3,6 +3,7 @@
 [English](platforms.md) | 简体中文
 
 使用 `docagent init --ai ...` 选择你的平台入口。
+入口链路位置：本页位于 `README.md` -> `docs/landing-page.zh.md` -> `docs/quickstart.zh.md` 之后。
 
 ## 平台矩阵
 

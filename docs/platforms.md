@@ -3,6 +3,7 @@
 Language: English | [简体中文](platforms.zh.md)
 
 Use `docagent init --ai ...` to choose your platform entrypoint.
+Entry path step: this page follows `README.md` -> `docs/landing-page.md` -> `docs/quickstart.md`.
 
 ## Platform Matrix
 
