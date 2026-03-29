@@ -349,6 +349,20 @@ def human_output_boundary_lines(role: str) -> list[str]:
     return shared
 
 
+def human_dual_view_rationale_lines(role: str) -> list[str]:
+    lines = [
+        "`docs/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.",
+        "When the two views diverge, treat it as refresh drift rather than independent documentation authority.",
+    ]
+    if role == "product":
+        lines.append("Product intent lives in `docs/overview.md`, while execution-facing preservation rules live in paired AGENTS product docs.")
+    elif role == "architecture":
+        lines.append("Architecture rationale lives in `docs/architecture.md`, while operational boundaries for agents live in paired AGENTS architecture docs.")
+    elif role == "execution":
+        lines.append("Maintainer runbook context lives in `docs/workflows.md`, while step ordering for agent actions lives in paired AGENTS execution docs.")
+    return lines
+
+
 def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
     prefixes_by_role = {
         "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
@@ -1955,6 +1969,10 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 {format_bullets(human_output_boundary_lines("product"), "Add output boundary rules between docs/ and AGENTS/.")}
 
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("product"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+
 ## Intended Audience
 
 {format_bullets(audiences, "Add the primary maintainer audiences for this project.")}
@@ -2079,6 +2097,10 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 ## Output Boundary (Human vs Agent)
 
 {format_bullets(human_output_boundary_lines("architecture"), "Add output boundary rules between docs/ and AGENTS/.")}
+
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("architecture"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Detected Signals
 
@@ -2248,6 +2270,10 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 ## Output Boundary (Human vs Agent)
 
 {format_bullets(human_output_boundary_lines("execution"), "Add output boundary rules between docs/ and AGENTS/.")}
+
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("execution"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Setup
 
