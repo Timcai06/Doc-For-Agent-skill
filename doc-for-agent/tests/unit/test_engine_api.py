@@ -224,9 +224,13 @@ class EngineApiTests(unittest.TestCase):
             self.assertIn("## Output Boundary (Human vs Agent)", overview)
             self.assertIn("## Output Boundary (Human vs Agent)", architecture)
             self.assertIn("## Output Boundary (Human vs Agent)", workflows)
+            self.assertIn("## Dual Pairing Contract (Rules)", overview)
+            self.assertIn("## Dual Pairing Contract (Rules)", architecture)
+            self.assertIn("## Dual Pairing Contract (Rules)", workflows)
             self.assertIn("## Dual View Rationale", overview)
             self.assertIn("## Dual View Rationale", architecture)
             self.assertIn("## Dual View Rationale", workflows)
+            self.assertIn("Template rule: human template variant `paired-core`", overview)
             self.assertNotIn("(sources:", overview)
             self.assertNotIn("(sources:", architecture)
             self.assertNotIn("(sources:", workflows)
@@ -252,6 +256,9 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
             self.assertTrue((sandbox_root / "docs.zh" / "architecture.md").exists())
             self.assertFalse((sandbox_root / "docs" / "overview.md").exists())
+            overview = (sandbox_root / "docs.zh" / "overview.md").read_text(encoding="utf-8")
+            self.assertIn("`docs.zh/` and `AGENTS/` are two views generated from the same repository analysis", overview)
+            self.assertIn("Locale-output rule: human locale `zh` maps to `docs.zh/`.", overview)
 
     def test_invalid_human_template_variant_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-template-invalid-") as tmpdir:

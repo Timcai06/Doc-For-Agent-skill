@@ -296,9 +296,9 @@ def trim_human_evidence_density(
     )
 
 
-def human_doc_contract_lines(role: str) -> list[str]:
+def human_doc_contract_lines(role: str, human_output_root: str) -> list[str]:
     base = [
-        "This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode.",
+        f"This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode and `{human_output_root}/` as the human-view root.",
         "Update this page in the same PR as behavior changes; avoid narrative-only refreshes without command or contract changes.",
     ]
     if role == "product":
@@ -312,9 +312,9 @@ def human_doc_contract_lines(role: str) -> list[str]:
     return base
 
 
-def human_dual_sync_checklist_lines(role: str) -> list[str]:
+def human_dual_sync_checklist_lines(role: str, human_output_root: str) -> list[str]:
     base = [
-        "After edits, refresh in dual mode and verify both `AGENTS/` and `docs/` were updated in the same change set.",
+        f"After edits, refresh in dual mode and verify both `AGENTS/` and `{human_output_root}/` were updated in the same change set.",
         "If one side changed without the other, treat it as documentation drift and resolve before merge.",
     ]
     if role == "execution":
@@ -354,31 +354,75 @@ def strip_supporting_sources_suffix(lines: Sequence[str]) -> list[str]:
     return [line for line in compacted if line]
 
 
-def human_output_boundary_lines(role: str) -> list[str]:
+def human_output_boundary_lines(role: str, human_output_root: str) -> list[str]:
     shared = [
-        "Use `docs/` for maintainer-facing policy and decisions; use `AGENTS/` for execution order, command wiring, and handoff runbooks.",
+        f"Use `{human_output_root}/` for maintainer-facing policy and decisions; use `AGENTS/` for execution order, command wiring, and handoff runbooks.",
         "If a change affects both reader types, update both systems in one dual refresh cycle instead of patching only one side.",
     ]
     if role == "product":
-        shared.append("Keep user/value framing in `docs/overview.md`; keep edit-time operating rules in `AGENTS/product.md` (or layered product docs).")
+        shared.append(
+            f"Keep user/value framing in `{human_output_root}/overview.md`; keep edit-time operating rules in `AGENTS/product.md` (or layered product docs)."
+        )
     elif role == "architecture":
-        shared.append("Keep architecture rationale in `docs/architecture.md`; keep CLI/build/source-of-truth guardrails in `AGENTS/architecture.md` (or layered architecture docs).")
+        shared.append(
+            f"Keep architecture rationale in `{human_output_root}/architecture.md`; keep CLI/build/source-of-truth guardrails in `AGENTS/architecture.md` (or layered architecture docs)."
+        )
     elif role == "execution":
-        shared.append("Keep maintainer runbook context in `docs/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs).")
+        shared.append(
+            f"Keep maintainer runbook context in `{human_output_root}/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs)."
+        )
     return shared
 
 
-def human_dual_view_rationale_lines(role: str) -> list[str]:
+def human_dual_view_rationale_lines(role: str, human_output_root: str) -> list[str]:
     lines = [
-        "`docs/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.",
+        f"`{human_output_root}/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.",
         "When the two views diverge, treat it as refresh drift rather than independent documentation authority.",
     ]
     if role == "product":
-        lines.append("Product intent lives in `docs/overview.md`, while execution-facing preservation rules live in paired AGENTS product docs.")
+        lines.append(
+            f"Product intent lives in `{human_output_root}/overview.md`, while execution-facing preservation rules live in paired AGENTS product docs."
+        )
     elif role == "architecture":
-        lines.append("Architecture rationale lives in `docs/architecture.md`, while operational boundaries for agents live in paired AGENTS architecture docs.")
+        lines.append(
+            f"Architecture rationale lives in `{human_output_root}/architecture.md`, while operational boundaries for agents live in paired AGENTS architecture docs."
+        )
     elif role == "execution":
-        lines.append("Maintainer runbook context lives in `docs/workflows.md`, while step ordering for agent actions lives in paired AGENTS execution docs.")
+        lines.append(
+            f"Maintainer runbook context lives in `{human_output_root}/workflows.md`, while step ordering for agent actions lives in paired AGENTS execution docs."
+        )
+    return lines
+
+
+def human_doc_relative_path(role: str) -> str:
+    mapping = {
+        "product": "overview.md",
+        "architecture": "architecture.md",
+        "execution": "workflows.md",
+        "memory": "glossary.md",
+    }
+    return mapping.get(role, "overview.md")
+
+
+def human_dual_pairing_contract_lines(
+    analysis: RepoAnalysis,
+    role: str,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> list[str]:
+    resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
+    profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
+    lines = [
+        "Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.",
+        f"Locale-output rule: human locale `{human_locale}` maps to `{human_output_root}/`.",
+        f"Template rule: human template variant `{resolved_variant}` is part of the pairing contract and must remain consistent across paired docs.",
+    ]
+    human_rel = human_doc_relative_path(role)
+    for relative, purpose in HUMAN_PAIRED_PATH_RULES[profile].get(role, []):
+        lines.append(
+            f"Path pair rule: `{human_output_root}/{human_rel}` pairs with `AGENTS/{relative}` for {purpose}."
+        )
     return lines
 
 
@@ -1912,7 +1956,7 @@ def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
     return generate_bootstrap_docs(analysis)
 
 
-def build_human_overview(analysis: RepoAnalysis) -> str:
+def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_locale: str, human_template_variant: str) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
@@ -1974,11 +2018,15 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 ## Document Contract
 
-{format_bullets(human_doc_contract_lines("product"), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(human_doc_contract_lines("product", human_output_root), "Add maintainer-facing contract rules for this page.")}
 
 ## Dual Sync Checklist
 
-{format_bullets(human_dual_sync_checklist_lines("product"), "Add dual-system synchronization checks for this page.")}
+{format_bullets(human_dual_sync_checklist_lines("product", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
 
 ## Paired Agent Docs (Dual Mode)
 
@@ -1986,11 +2034,11 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 
 ## Output Boundary (Human vs Agent)
 
-{format_bullets(human_output_boundary_lines("product"), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(human_output_boundary_lines("product", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Dual View Rationale
 
-{format_bullets(human_dual_view_rationale_lines("product"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(human_dual_view_rationale_lines("product", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Intended Audience
 
@@ -2048,7 +2096,12 @@ def build_human_overview(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_human_architecture(analysis: RepoAnalysis) -> str:
+def build_human_architecture(
+    analysis: RepoAnalysis,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> str:
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
@@ -2103,11 +2156,15 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 ## Document Contract
 
-{format_bullets(human_doc_contract_lines("architecture"), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(human_doc_contract_lines("architecture", human_output_root), "Add maintainer-facing contract rules for this page.")}
 
 ## Dual Sync Checklist
 
-{format_bullets(human_dual_sync_checklist_lines("architecture"), "Add dual-system synchronization checks for this page.")}
+{format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
 
 ## Paired Agent Docs (Dual Mode)
 
@@ -2115,11 +2172,11 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 
 ## Output Boundary (Human vs Agent)
 
-{format_bullets(human_output_boundary_lines("architecture"), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(human_output_boundary_lines("architecture", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Dual View Rationale
 
-{format_bullets(human_dual_view_rationale_lines("architecture"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(human_dual_view_rationale_lines("architecture", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Detected Signals
 
@@ -2173,7 +2230,12 @@ def build_human_architecture(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_human_workflows(analysis: RepoAnalysis) -> str:
+def build_human_workflows(
+    analysis: RepoAnalysis,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> str:
     setup_lines = []
     run_lines = []
     verify_lines = []
@@ -2276,11 +2338,15 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 ## Document Contract
 
-{format_bullets(human_doc_contract_lines("execution"), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(human_doc_contract_lines("execution", human_output_root), "Add maintainer-facing contract rules for this page.")}
 
 ## Dual Sync Checklist
 
-{format_bullets(human_dual_sync_checklist_lines("execution"), "Add dual-system synchronization checks for this page.")}
+{format_bullets(human_dual_sync_checklist_lines("execution", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "execution", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
 
 ## Paired Agent Docs (Dual Mode)
 
@@ -2288,11 +2354,11 @@ def build_human_workflows(analysis: RepoAnalysis) -> str:
 
 ## Output Boundary (Human vs Agent)
 
-{format_bullets(human_output_boundary_lines("execution"), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(human_output_boundary_lines("execution", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Dual View Rationale
 
-{format_bullets(human_dual_view_rationale_lines("execution"), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(human_dual_view_rationale_lines("execution", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Setup
 
@@ -2436,11 +2502,21 @@ def generate_human_docs(
     human_locale: str = "en",
     human_template_variant: str | None = None,
 ) -> Dict[str, str]:
-    _ = resolve_human_template_variant(human_locale, human_template_variant)
+    resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
     output_root = resolve_human_output_root(human_locale)
     return {
-        f"{output_root}/overview.md": build_human_overview(analysis),
-        f"{output_root}/architecture.md": build_human_architecture(analysis),
-        f"{output_root}/workflows.md": build_human_workflows(analysis),
+        f"{output_root}/overview.md": build_human_overview(analysis, output_root, human_locale, resolved_variant),
+        f"{output_root}/architecture.md": build_human_architecture(
+            analysis,
+            output_root,
+            human_locale,
+            resolved_variant,
+        ),
+        f"{output_root}/workflows.md": build_human_workflows(
+            analysis,
+            output_root,
+            human_locale,
+            resolved_variant,
+        ),
         f"{output_root}/glossary.md": build_human_glossary(analysis),
     }
