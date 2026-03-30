@@ -17,6 +17,7 @@ The landing page is aimed at CLI coding-agent users and explains the short produ
 3. refresh
 
 Two-step entry model: global install exposes the skill to your coding agent, and repo-local init enables workflow in each repository.
+Treat `refresh` as the half-step after setup: it is what writes or updates the docs system when the repository is ready.
 For temporary Node onboarding, `npx -y doc-for-agent init ...` can combine both steps.
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
 The docs output model is `agent`, `human`, `dual`, or `quad` according to user intent.

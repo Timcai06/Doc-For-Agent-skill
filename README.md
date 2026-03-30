@@ -16,6 +16,11 @@ The product path is short:
 1. install
 2. `init`
 3. `refresh`
+Think of this as two and a half steps: global install makes the skill visible to the agent, repo-local `init` enables a repository workflow, and `refresh` writes or updates docs when you need them.
+Simple path (`uipro-cli` style):
+- `npm install -g doc-for-agent@next`
+- `docagent init --ai codex`
+- `docagent init --ai claudecode`
 
 ## 30-Second Start
 

@@ -9,6 +9,7 @@
 1. 安装
 2. init
 3. refresh
+把它理解成“两步半”最合适：全局安装负责 agent 可见性，repo-local init 负责仓库工作流，随后在需要写入或更新文档时再执行 refresh。
 
 `refresh` 支持 `agent`、`human`、`dual`、`quad` 四种文档输出。
 模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出，`quad` -> `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。

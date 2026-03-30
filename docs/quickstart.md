@@ -9,6 +9,7 @@ Use one mental model:
 1. install
 2. init
 3. refresh
+Think of it as two and a half steps: global install for agent visibility, repo-local init for repository workflow, then refresh when you want to write or update docs.
 
 `refresh` supports `agent`, `human`, `dual`, and `quad` documentation outputs.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.

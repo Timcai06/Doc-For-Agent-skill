@@ -5,6 +5,7 @@ Language: English | [简体中文](platforms.zh.md)
 Use `docagent init --ai ...` to choose your platform entrypoint.
 Entry path step: this page follows `README.md` -> `docs/landing-page.md` -> `docs/quickstart.md`.
 Two-step model: global install makes the skill visible; repo-local init enables this repository workflow.
+`refresh` is the half-step after init: run it when you want to write or update agent docs, human docs, or both.
 For temporary Node use, `npx -y doc-for-agent init ...` combines both steps.
 
 ## Platform Matrix

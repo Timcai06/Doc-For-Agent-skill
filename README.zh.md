@@ -16,6 +16,11 @@
 1. 安装
 2. `init`
 3. `refresh`
+把它理解成“两步半”更准确：全局安装让 agent 能看到 skill，repo-local `init` 启用仓库工作流，`refresh` 在需要时负责写入或更新文档。
+简路径（`uipro-cli` 风格）：
+- `npm install -g doc-for-agent@next`
+- `docagent init --ai codex`
+- `docagent init --ai claudecode`
 
 ## 30 秒开始
 
