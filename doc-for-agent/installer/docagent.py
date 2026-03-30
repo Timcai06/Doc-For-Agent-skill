@@ -285,11 +285,9 @@ def print_init_summary(
     print("Recommended next commands:")
     if local_target_root:
         print(f"- `{metadata.installer_command} refresh --root {local_target_root} --output-mode agent`")
-    else:
-        print(f"- `{metadata.installer_command} init --ai {DEFAULT_GLOBAL_PLATFORM} --target <repo-root>` (when onboarding a repository)")
     print(f"- `{metadata.installer_command} doctor --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
     print(f"- `{metadata.installer_command} versions --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
-    print("- Restart the relevant assistant so the new local skill bundle is loaded.")
+    print("- Restart the relevant assistant so the new skill bundle is loaded.")
 
 
 def print_update_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:

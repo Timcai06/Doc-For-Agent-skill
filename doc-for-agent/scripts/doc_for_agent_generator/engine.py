@@ -373,6 +373,7 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
             f"human/en -> `{resolve_human_output_root('en')}/`, "
             f"human/zh -> `{resolve_human_output_root('zh')}/`"
         ),
+        "- Paired template/path contract: `paired-core` must keep audience-locale roots synchronized through one refresh action.",
         f"- Human locale: `{plan.request.human_locale}` (output root: `{plan.docs_dir}`)",
         f"- Human template variant: `{resolve_human_template_variant(plan.request.human_locale, plan.request.human_template_variant)}`",
         "- Recommended output mode: `dual` (AGENTS + docs).",

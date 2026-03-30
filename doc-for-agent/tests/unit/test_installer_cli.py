@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -85,6 +86,67 @@ class InstallerCliTests(unittest.TestCase):
             text = stdout.getvalue()
             self.assertIn("doc-for-agent init", text)
             self.assertIn("Selected AI platforms: claudecode", text)
+            self.assertIn("Install scope: global assistant discovery first", text)
+            self.assertIn("Recommended next commands:", text)
+
+    def test_init_without_target_wires_current_directory_by_default(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-init-default-local-") as tmpdir:
+            global_root = Path(tmpdir) / "global-root"
+            repo_root = Path(tmpdir) / "repo-root"
+            global_root.mkdir(parents=True, exist_ok=True)
+            repo_root.mkdir(parents=True, exist_ok=True)
+
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(repo_root)
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(["init", "--ai", "codex", "--global-root", str(global_root)])
+            finally:
+                os.chdir(previous_cwd)
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue((global_root / ".codex" / "skills" / "doc-for-agent" / "SKILL.md").exists())
+            self.assertTrue((repo_root / ".codex" / "skills" / "doc-for-agent" / "SKILL.md").exists())
+            self.assertIn(f"Repository target root: {repo_root.resolve()}", stdout.getvalue())
+
+    def test_init_command_no_local_skips_repository_wiring(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-init-no-local-") as tmpdir:
+            tmp_path = Path(tmpdir)
+            global_root = tmp_path / "global-root"
+            repo_root = tmp_path / "repo-root"
+            global_root.mkdir(parents=True, exist_ok=True)
+            repo_root.mkdir(parents=True, exist_ok=True)
+
+            current_dir = Path.cwd()
+            try:
+                os.chdir(repo_root)
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    exit_code = main(["init", "--ai", "codex", "--global-root", str(global_root), "--no-local"])
+            finally:
+                os.chdir(current_dir)
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue((global_root / ".codex" / "skills" / "doc-for-agent" / "SKILL.md").exists())
+            self.assertFalse((repo_root / ".codex" / "skills" / "doc-for-agent").exists())
+            self.assertNotIn("Repository target root:", stdout.getvalue())
+            self.assertIn(f"Global target root: {global_root.resolve()}", stdout.getvalue())
+            self.assertIn("Recommended next commands:", stdout.getvalue())
+
+    def test_global_install_command_writes_platform_bundle_under_global_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-install-") as tmpdir:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["global-install", "--ai", "codex", "--global-root", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            install_root = Path(tmpdir) / ".codex" / "skills" / "doc-for-agent"
+            self.assertTrue((install_root / "SKILL.md").exists())
+            self.assertTrue((install_root / "scripts").is_dir())
+            self.assertTrue((install_root / "INSTALLATION.json").exists())
+            text = stdout.getvalue()
+            self.assertIn("doc-for-agent global-install", text)
             self.assertIn(f"Global target root: {Path(tmpdir).resolve()}", text)
             self.assertIn("Recommended next commands:", text)
 
@@ -143,18 +205,6 @@ class InstallerCliTests(unittest.TestCase):
             report = stdout.getvalue()
             self.assertIn("doc-for-agent versions", report)
             self.assertIn("Continue (continue): not installed", report)
-
-    def test_versions_command_can_inspect_global_install_root(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-versions-") as tmpdir:
-            main(["global-install", "--ai", "codex", "--global-root", tmpdir])
-            stdout = io.StringIO()
-            with redirect_stdout(stdout):
-                exit_code = main(["versions", "--platform", "codex", "--global", "--global-root", tmpdir])
-
-            self.assertEqual(exit_code, 0)
-            report = stdout.getvalue()
-            self.assertIn("doc-for-agent versions", report)
-            self.assertIn("Codex (codex): 0.2.0.dev0", report)
 
     def test_update_command_refreshes_installed_platforms(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:

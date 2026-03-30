@@ -59,6 +59,41 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue(any("--output-mode dual" in line for line in explanation if line.startswith("Suggested command:")))
             self.assertTrue(any("Human locale: `en`" in line for line in explanation))
             self.assertTrue(any("Human template variant: `paired-core`" in line for line in explanation))
+            self.assertTrue(any("Audience-locale mapping:" in line for line in explanation))
+            self.assertTrue(any("Paired template/path contract:" in line for line in explanation))
+
+    def test_quad_plan_writes_four_view_roots(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-quad-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            plan = build_generation_plan(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="quad",
+                    profile="layered",
+                )
+            )
+
+            self.assertTrue(any(path.endswith("/AGENTS/00-entry/AGENTS.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/AGENTS.zh/00-entry/AGENTS.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/docs/overview.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/docs.zh/overview.md") for path in plan.files))
+            result = execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="quad",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+            self.assertIn("four-view docs", result.summary)
+            self.assertTrue((sandbox_root / "AGENTS" / "00-entry" / "AGENTS.md").exists())
+            self.assertTrue((sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").exists())
+            self.assertTrue((sandbox_root / "docs" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
 
     def test_migrate_mode_uses_refresh_write_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-migrate-") as tmpdir:
@@ -227,6 +262,9 @@ class EngineApiTests(unittest.TestCase):
             self.assertIn("## Dual Pairing Contract (Rules)", overview)
             self.assertIn("## Dual Pairing Contract (Rules)", architecture)
             self.assertIn("## Dual Pairing Contract (Rules)", workflows)
+            self.assertIn("## Paired Refresh Rules", overview)
+            self.assertIn("## Paired Refresh Rules", architecture)
+            self.assertIn("## Paired Refresh Rules", workflows)
             self.assertIn("## Dual View Rationale", overview)
             self.assertIn("## Dual View Rationale", architecture)
             self.assertIn("## Dual View Rationale", workflows)

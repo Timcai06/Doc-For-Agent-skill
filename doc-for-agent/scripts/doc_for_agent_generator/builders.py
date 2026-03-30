@@ -335,6 +335,27 @@ def human_dual_sync_checklist_lines(role: str, human_output_root: str) -> list[s
     return base
 
 
+def human_paired_refresh_rule_lines(role: str, human_output_root: str) -> list[str]:
+    lines = [
+        "Refresh contract: run one refresh/generate action that updates paired views together; do not patch one locale/audience in isolation.",
+        "Path contract: verify changed files include both `AGENTS*/` and `docs*/` counterparts when behavior changes affect shared source-of-truth.",
+        "Quad-mode contract: when using `--output-mode quad`, validate all four roots (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`) in the same review cycle.",
+    ]
+    if role == "product":
+        lines.append(
+            f"Product pairing rule: if `{human_output_root}/overview.md` changes due to scope/value decisions, refresh paired product paths under both AGENTS roots."
+        )
+    elif role == "architecture":
+        lines.append(
+            f"Architecture pairing rule: if `{human_output_root}/architecture.md` changes due to boundary/source-of-truth updates, refresh paired architecture paths under both AGENTS roots."
+        )
+    elif role == "execution":
+        lines.append(
+            f"Execution pairing rule: if `{human_output_root}/workflows.md` changes due to command/order updates, refresh paired execution paths under both AGENTS roots."
+        )
+    return lines
+
+
 def paired_agent_doc_lines(analysis: RepoAnalysis, role: str) -> list[str]:
     profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
     mapping = HUMAN_PAIRED_PATH_RULES[profile]
@@ -2033,6 +2054,10 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
 
 {format_bullets(human_dual_sync_checklist_lines("product", human_output_root), "Add dual-system synchronization checks for this page.")}
 
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("product", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+
 ## Dual Pairing Contract (Rules)
 
 {format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
@@ -2170,6 +2195,10 @@ def build_human_architecture(
 ## Dual Sync Checklist
 
 {format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("architecture", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
 
 ## Dual Pairing Contract (Rules)
 
@@ -2352,6 +2381,10 @@ def build_human_workflows(
 ## Dual Sync Checklist
 
 {format_bullets(human_dual_sync_checklist_lines("execution", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("execution", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
 
 ## Dual Pairing Contract (Rules)
 
