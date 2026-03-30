@@ -1,0 +1,29 @@
+{
+  "name": "doc-for-agent",
+  "version": "0.2.0-dev0",
+  "description": "Unified CLI for generating and refreshing agent docs, human docs, or both from a repository.",
+  "license": "UNLICENSED",
+  "private": false,
+  "bin": {
+    "docagent": "./installer/node/docagent.js",
+    "doc-for-agent": "./installer/node/docagent.js"
+  },
+  "files": [
+    "SKILL.md",
+    "agents",
+    "installer",
+    "references",
+    "scripts",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "docs",
+    "agents",
+    "cli",
+    "codex",
+    "documentation"
+  ]
+}

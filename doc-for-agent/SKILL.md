@@ -1,14 +1,20 @@
 ---
 name: doc-for-agent
-description: Generate and maintain an AGENTS documentation directory for a coding agent at the start of a new project or when an existing repository needs a clear agent-facing docs structure. Use this when the user wants a reusable AGENTS folder with product, architecture, frontend, backend, workflows, and glossary docs scanned and prefilled from the current codebase, or refreshed against existing code and docs.
+description: Generate and maintain a dual documentation system for a repository. Use this when the user wants agent-facing docs in `AGENTS/`, human-facing docs in `docs/`, or both together in one refreshable flow grounded in the current codebase and repository docs.
 ---
 # doc-for-agent
 
-Use this skill when the user wants to initialize or refresh an `AGENTS/` directory for a repository so future coding agents can work against a stable, project-specific documentation structure.
+Use this skill when the user wants to initialize or refresh repository documentation so future coding agents and human maintainers can work against a stable, project-specific documentation baseline.
 
 ## What This Skill Produces
 
-This skill generates a pragmatic `AGENTS/` directory with these files:
+This skill can generate:
+
+- `AGENTS/` for agent-facing execution docs
+- `docs/` for human-facing reference docs
+- or both together as a paired dual-doc system
+
+Typical agent-facing files include:
 
 - `AGENTS/product.md`
 - `AGENTS/architecture.md`
@@ -18,20 +24,30 @@ This skill generates a pragmatic `AGENTS/` directory with these files:
 - `AGENTS/glossary.md`
 - `AGENTS/README.md`
 
+Typical human-facing files include:
+
+- `docs/overview.md`
+- `docs/architecture.md`
+- `docs/workflows.md`
+- `docs/glossary.md`
+
 The generated docs are prefilled from the real repository structure. They are not generic placeholders only.
-They should help future agents act with lower ambiguity, not just read a prettier summary.
+The goal is not prettier markdown. The goal is a refreshable documentation baseline with lower ambiguity for both humans and agents.
 
 ## When To Use
 
 Trigger this skill when the user asks to:
 
 - create an `AGENTS` directory
+- create a `docs/` directory from the current codebase
 - bootstrap coding-agent docs for a new project
+- bootstrap human-facing project docs for a repo with weak or messy docs
 - generate reusable project docs for future agent work
-- standardize agent-facing docs across repos
-- refresh or rewrite an existing `AGENTS/` directory from the latest codebase
+- generate paired human + agent docs
+- standardize dual docs across repos
+- refresh or rewrite an existing documentation baseline from the latest codebase
 
-Do not use this skill for normal feature work unless the user explicitly wants agent documentation.
+Do not use this skill for normal feature work unless the user explicitly wants repository documentation.
 
 ## Workflow
 
@@ -51,24 +67,36 @@ Use that to infer:
 - likely frontend stack
 - likely backend stack
 
-### Step 2: Generate or refresh the AGENTS directory
+### Step 2: Generate or refresh the documentation baseline
 
-Run:
+For agent docs only, run:
 
 ```bash
-python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --output-mode agent
+```
+
+For human docs only, run:
+
+```bash
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --output-mode human
+```
+
+For both together, prefer:
+
+```bash
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --output-mode dual
 ```
 
 If the user gives a project name, also pass:
 
 ```bash
-python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --project-name "<name>" --mode refresh
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --project-name "<name>" --mode refresh --output-mode dual
 ```
 
 If the repository is long-lived, phase-driven, or the user explicitly wants an entry/execution/memory layout, prefer:
 
 ```bash
-python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --profile layered
+python3 /Users/tim/DocForAgent_skill/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --profile layered --output-mode dual
 ```
 
 ### Step 3: Let the script prefill from the actual codebase
@@ -84,6 +112,7 @@ The script will scan and prefill from:
 - result contract fields
 - canonical terminology hints
 - existing `AGENTS/` section content when running in `refresh` mode
+- existing `docs/` content when running in human or dual mode
 
 ### Step 4: Review and tighten the generated docs
 
@@ -96,9 +125,10 @@ After generation, review the docs and tighten the parts the script cannot infer 
 - any manual sections you want to preserve long term; `refresh` now keeps useful existing section bodies where possible
 - any sections still marked as facts vs. inferences vs. open questions
 - any hand-maintained blocks wrapped with `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->`
+
 ### Step 5: Keep it lean
 
-These docs are for coding agents, not human marketing docs.
+These docs are for project execution and maintenance, not marketing.
 
 Prefer:
 
@@ -110,12 +140,14 @@ Prefer:
 - naming conventions
 - file ownership hints
 - task-oriented handoff guidance
+- paired human/agent views when the user wants a durable baseline
 
 Avoid:
 
 - long narrative prose
 - duplicated README content
 - aspirational future-state plans unless the user explicitly wants them
+- treating the skill as AGENTS-only when the user clearly wants human or dual docs
 
 ## Reference
 
