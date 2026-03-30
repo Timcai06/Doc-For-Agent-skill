@@ -66,7 +66,7 @@ class RepoClassificationTests(unittest.TestCase):
                     "| Agent | Command |\n"
                     "| --- | --- |\n"
                     "| Codex | docagent init --ai codex --target <repo-root> |\n"
-                    "| Claude Code | docagent init --ai claude --target <repo-root> |\n"
+                    "| Claude Code | docagent init --ai claudecode --target <repo-root> |\n"
                 ),
                 encoding="utf-8",
             )

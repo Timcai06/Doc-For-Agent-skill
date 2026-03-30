@@ -42,6 +42,7 @@ from init_agents_docs import SUPPORTED_DOC_PROFILES, SUPPORTED_REPO_TYPES  # noq
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
 SUPPORTED_BUNDLE_STRATEGIES = ("copy", "symlink")
 SUPPORTED_AI_PARAMS = ("codex", "claudecode", "continue", "copilot")
+PUBLIC_AI_METAVAR = "{codex,claudecode,continue,copilot,all}"
 AI_PARAM_TO_PLATFORM = {
     "codex": "codex",
     "claudecode": "claudecode",
@@ -91,7 +92,16 @@ def resolve_ai_platforms(ai_param: str) -> List[str]:
 
 
 def supported_ai_choices() -> List[str]:
-    return list(dict.fromkeys([*SUPPORTED_AI_PARAMS, "claude"]))
+    return list(SUPPORTED_AI_PARAMS)
+
+
+def parse_ai_choice(value: str) -> str:
+    normalized = AI_PARAM_TO_PLATFORM.get(value, value)
+    if normalized == "all" or normalized in SUPPORTED_AI_PARAMS:
+        return normalized
+    raise argparse.ArgumentTypeError(
+        f"Unsupported platform `{value}`. Choose one of: {PUBLIC_AI_METAVAR}."
+    )
 
 
 def resolve_generator_script() -> Path:
@@ -224,7 +234,7 @@ def render_quickstart(target_root: Path) -> str:
         "- Install:",
         "- Node users: `npm install -g doc-for-agent@next`",
         "- Node one-off start: `npx -y doc-for-agent init --ai codex`",
-        "- Alternate platform option: use `--ai claudecode` (legacy alias: `claude`).",
+        "- Alternate platform option: use `--ai claudecode`.",
         "- Python users: `pipx install doc-for-agent`",
         "- Init (one command shape):",
         f"- `docagent init --ai <codex|claudecode|continue|copilot|all>`",
@@ -329,7 +339,8 @@ def print_global_install_summary(
 
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
-    primary_commands = "init, global-install, refresh, doctor, generate, update, versions"
+    primary_commands = "init, refresh, doctor, generate, update, versions"
+    compatibility_commands = "global-install, install, all"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
         prog=metadata.installer_command,
@@ -340,12 +351,12 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Product CLI v1:\n"
             f"  primary commands: {primary_commands}\n"
-            "  legacy compatibility: install, all\n"
+            f"  compatibility commands: {compatibility_commands}\n"
             f"  generate/refresh output modes: {output_modes}\n"
             "30-second start:\n"
-            f"  docagent global-install --ai {DEFAULT_GLOBAL_PLATFORM}\n"
+            "  npm install -g doc-for-agent@next\n"
             f"  docagent init --ai {DEFAULT_GLOBAL_PLATFORM}\n"
-            "  docagent init --ai claudecode --target <repo-root>\n"
+            "  docagent init --ai claudecode\n"
             "  docagent refresh --root <repo-root> --output-mode quad"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -363,8 +374,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     init_parser.add_argument(
         "--ai",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         default=DEFAULT_GLOBAL_PLATFORM,
+        metavar=PUBLIC_AI_METAVAR,
         help="Select platform parameter: codex, claudecode, continue, copilot, or all.",
     )
     init_parser.add_argument(
@@ -393,8 +405,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     global_install_parser.add_argument(
         "--ai",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         default=DEFAULT_GLOBAL_PLATFORM,
+        metavar=PUBLIC_AI_METAVAR,
         help="Select target AI platform (`all` installs every supported platform globally).",
     )
     global_install_parser.add_argument(
@@ -422,8 +435,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor_parser.add_argument(
         "--platform",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         default="all",
+        metavar=PUBLIC_AI_METAVAR,
         help="Limit doctor output to one platform.",
     )
 
@@ -469,8 +483,9 @@ def build_parser() -> argparse.ArgumentParser:
     update_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
     update_parser.add_argument(
         "--platform",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         default="all",
+        metavar=PUBLIC_AI_METAVAR,
         help="Update one installed platform or all installed platforms.",
     )
 
@@ -488,8 +503,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     versions_parser.add_argument(
         "--platform",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         default="all",
+        metavar=PUBLIC_AI_METAVAR,
         help="Limit version output to one platform.",
     )
 
@@ -502,8 +518,9 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser = subparsers.add_parser("install", help="Legacy compatibility: install one or more platform adapters.")
     install_parser.add_argument(
         "--platform",
-        choices=supported_ai_choices() + ["all"],
+        type=parse_ai_choice,
         required=True,
+        metavar=PUBLIC_AI_METAVAR,
         help="Platform adapter to install.",
     )
     install_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")

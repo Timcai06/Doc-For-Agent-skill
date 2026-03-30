@@ -195,7 +195,7 @@ function App() {
   const [activePlayground, setActivePlayground] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [sliderValue, setSliderValue] = useState(50);
-  const [activePlatform, setActivePlatform] = useState('claude');
+  const [activePlatform, setActivePlatform] = useState('claudecode');
 
   const handleSync = () => {
     if (activePlayground === 1) {
@@ -208,28 +208,28 @@ function App() {
   };
 
   const platforms = {
-    claude: {
+    claudecode: {
       name: 'Claude Code',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
-      integration: 'docagent init --target . --ai claude',
+      integration: 'docagent init --ai claudecode',
       description: 'Installs the Claude-facing skill path and keeps repository guidance aligned through the same dual-doc engine.'
     },
     codex: {
       name: 'Codex',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" x2="15" y1="9" y2="15"/><line x1="15" x2="9" y1="9" y2="15"/></svg>,
-      integration: 'docagent init --target . --ai codex',
+      integration: 'docagent init --ai codex',
       description: 'Installs the Codex-facing skill bundle and keeps execution guidance aligned with the same repository analysis.'
     },
     continue: {
       name: 'Continue',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>,
-      integration: 'docagent init --target . --ai continue',
+      integration: 'docagent init --ai continue',
       description: 'Installs the Continue-facing integration path while keeping the same docs and AGENTS baseline.'
     },
     copilot: {
       name: 'Copilot',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20"/><path d="m5 9 7 7 7-7"/></svg>,
-      integration: 'docagent init --target . --ai copilot',
+      integration: 'docagent init --ai copilot',
       description: 'Installs the Copilot-facing integration path without changing the core dual-doc lifecycle.'
     }
   };

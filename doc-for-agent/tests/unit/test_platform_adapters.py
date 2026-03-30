@@ -23,10 +23,11 @@ from render_platform_adapter import (
 
 
 class PlatformAdapterTests(unittest.TestCase):
-    def test_supported_platforms_include_codex_and_claude(self) -> None:
+    def test_supported_platforms_include_codex_and_claudecode(self) -> None:
         platforms = available_platforms()
         self.assertIn("codex", platforms)
-        self.assertIn("claude", platforms)
+        self.assertIn("claudecode", platforms)
+        self.assertNotIn("claude", platforms)
         self.assertIn("continue", platforms)
         self.assertIn("copilot", platforms)
 
@@ -41,7 +42,7 @@ class PlatformAdapterTests(unittest.TestCase):
     def test_install_platform_writes_self_contained_adapter_tree(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-adapter-") as tmpdir:
             target_root = Path(tmpdir)
-            install_root = install_platform(target_root, load_platform_config("claude"))
+            install_root = install_platform(target_root, load_platform_config("claudecode"))
             receipt_path = install_root / load_product_metadata().install_receipt_filename
 
             self.assertTrue((install_root / "SKILL.md").exists())
@@ -57,7 +58,7 @@ class PlatformAdapterTests(unittest.TestCase):
             self.assertIn("python3 .claude/skills/doc-for-agent/scripts/init_agents_docs.py", skill_text)
 
             receipt_text = receipt_path.read_text(encoding="utf-8")
-            self.assertIn('"platform": "claude"', receipt_text)
+            self.assertIn('"platform": "claudecode"', receipt_text)
             self.assertIn('"version": "0.2.0.dev0"', receipt_text)
 
     def test_rendered_continue_adapter_uses_continue_paths(self) -> None:

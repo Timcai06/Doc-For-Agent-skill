@@ -111,7 +111,7 @@ DocForAgent_skill/
     │   │   └── workflow-content.md
     │   └── platforms/
     │       ├── codex.json
-    │       ├── claude.json
+    │       ├── claudecode.json
     │       ├── continue.json
     │       ├── copilot.json
     │       └── ...
@@ -201,7 +201,7 @@ Recommended commands:
 
 ```bash
 docagent install --ai codex
-docagent install --ai claude
+docagent init --ai claudecode
 docagent install --ai continue
 docagent install --ai copilot
 docagent install --ai all

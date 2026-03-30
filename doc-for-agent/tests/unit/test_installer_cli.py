@@ -31,12 +31,12 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn("usage: docagent", text)
         self.assertNotIn("usage: docagent.py", text)
         self.assertIn("Product CLI v1", text)
-        self.assertIn("primary commands: init, global-install, refresh, doctor, generate, update, versions", text)
-        self.assertIn("legacy compatibility: install, all", text)
+        self.assertIn("primary commands: init, refresh, doctor, generate, update, versions", text)
+        self.assertIn("compatibility commands: global-install, install, all", text)
         self.assertIn("30-second start:", text)
-        self.assertIn("docagent global-install --ai codex", text)
+        self.assertIn("npm install -g doc-for-agent@next", text)
         self.assertIn("docagent init --ai codex", text)
-        self.assertIn("docagent init --ai claudecode --target <repo-root>", text)
+        self.assertIn("docagent init --ai claudecode", text)
 
     def test_collect_doctor_statuses_reports_install_targets(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-doctor-") as tmpdir:
@@ -284,7 +284,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("doc-for-agent quickstart", text)
             self.assertIn("Node users: `npm install -g doc-for-agent@next`", text)
             self.assertIn("Node one-off start: `npx -y doc-for-agent init --ai codex`", text)
-            self.assertIn("Alternate platform option: use `--ai claudecode` (legacy alias: `claude`).", text)
+            self.assertIn("Alternate platform option: use `--ai claudecode`.", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
             self.assertIn("docagent init --ai <codex|claudecode|continue|copilot|all>", text)
             self.assertIn("<repo-root>", text)
