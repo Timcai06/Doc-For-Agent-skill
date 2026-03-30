@@ -16,6 +16,8 @@ The landing page is aimed at CLI coding-agent users and explains the short produ
 2. init
 3. refresh
 
+Two-step entry model: global install exposes the skill to your coding agent, and repo-local init enables workflow in each repository.
+For temporary Node onboarding, `npx -y doc-for-agent init ...` can combine both steps.
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
 The docs output model is `agent`, `human`, or `dual` according to user intent.
 Mode map: `agent` for `AGENTS/`, `human` for `docs/`, and `dual` for both.
@@ -44,6 +46,7 @@ npm run dev
 ## See Also
 
 After this note, go to `Quickstart`, then `Platform Guide`.
+This keeps the dual-doc message and command path aligned end to end.
 
 - [Quickstart](quickstart.md)
 - [Platform Guide](platforms.md)

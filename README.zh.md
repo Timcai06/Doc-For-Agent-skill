@@ -30,6 +30,9 @@ pipx install doc-for-agent
 ```
 
 在仓库中开始：
+步骤 1（全局安装）：让 coding agent 能看到这个 skill。
+步骤 2（repo-local init）：在目标仓库启用工作流。
+一次性 `npx -y doc-for-agent init ...` 可在临时场景下合并这两步。
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
@@ -95,6 +98,8 @@ docagent all --target <repo-root>
 1. [Landing Page（英文）](docs/landing-page.md) / [落地页说明（中文）](docs/landing-page.zh.md)
 2. [Quickstart（英文）](docs/quickstart.md) / [快速开始（中文）](docs/quickstart.zh.md)
 3. [Platform Guide（英文）](docs/platforms.md) / [平台指南（中文）](docs/platforms.zh.md)
+
+这条链路用于 dual 文档系统上手：先看产品定位，再跑首轮命令，再选平台入口。
 
 维护文档：
 

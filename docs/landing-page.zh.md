@@ -16,6 +16,8 @@
 2. init
 3. refresh
 
+两步入口模型：全局安装让 skill 对 coding agent 可见，repo-local init 为每个仓库启用工作流。
+临时 Node 上手场景下，`npx -y doc-for-agent init ...` 可合并两步。
 同时把 `doc-for-agent` 定位为“项目文档系统工具”，而不是一次性 markdown 生成器。
 文档输出模型可按用户意图选择：`agent`、`human` 或 `dual`。
 模式映射：`agent` 面向 `AGENTS/`，`human` 面向 `docs/`，`dual` 同时覆盖两者。
@@ -44,6 +46,7 @@ npm run dev
 ## 另见
 
 看完这里后，先去“快速开始”，再去“平台指南”。
+这样可以把 dual 文档系统叙事与命令路径从头到尾保持一致。
 
 - [Quickstart（英文）](quickstart.md) / [快速开始（中文）](quickstart.zh.md)
 - [Platform Guide（英文）](platforms.md) / [平台指南（中文）](platforms.zh.md)

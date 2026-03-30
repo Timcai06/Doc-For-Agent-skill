@@ -17,6 +17,8 @@
 
 ## 安装
 
+步骤 1（全局安装）：让 coding agent 能看到这个 skill。
+
 Node：
 
 ```bash
@@ -34,10 +36,13 @@ Node 一次性开始（无需全局安装）：
 ```bash
 npx -y doc-for-agent init --ai all --target <repo-root>
 ```
+该一次性命令会在临时场景下合并“全局安装 + repo-local init”。
 
 如果你只需要单个平台，把 `all` 替换成 `claude`、`codex`、`continue` 或 `copilot`。
 
 ## Init
+
+步骤 2（repo-local init）：在目标仓库启用工作流。
 
 统一命令形态：
 

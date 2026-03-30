@@ -17,6 +17,8 @@ This flow is not AGENTS-only; use `human` or `dual` when needed.
 
 ## Install
 
+Step 1 (global install): make the skill visible to your coding agent.
+
 Node:
 
 ```bash
@@ -34,10 +36,13 @@ One-off Node start (no global install):
 ```bash
 npx -y doc-for-agent init --ai all --target <repo-root>
 ```
+This one-off command combines global install and repo-local init for temporary use.
 
 If you only need one platform, replace `all` with `claude`, `codex`, `continue`, or `copilot`.
 
 ## Init
+
+Step 2 (repo-local init): enable the workflow in the target repository.
 
 Use one command shape:
 

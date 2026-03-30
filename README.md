@@ -30,6 +30,9 @@ pipx install doc-for-agent
 ```
 
 Start in a repository:
+Step 1 (global install): make the skill visible to your coding agent.
+Step 2 (repo-local init): enable the workflow in the target repository.
+One-off `npx -y doc-for-agent init ...` combines both steps for temporary use.
 
 ```bash
 docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
@@ -95,6 +98,8 @@ Entry docs path:
 1. [Landing Page Note (EN)](docs/landing-page.md) / [落地页说明 (ZH)](docs/landing-page.zh.md)
 2. [Quickstart (EN)](docs/quickstart.md) / [快速开始 (ZH)](docs/quickstart.zh.md)
 3. [Platform Guide (EN)](docs/platforms.md) / [平台指南 (ZH)](docs/platforms.zh.md)
+
+Use this chain for dual-system onboarding: product framing -> first run -> platform choice.
 
 Maintainer docs:
 

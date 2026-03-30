@@ -4,6 +4,8 @@
 
 使用 `docagent init --ai ...` 选择你的平台入口。
 入口链路位置：本页位于 `README.md` -> `docs/landing-page.zh.md` -> `docs/quickstart.zh.md` 之后。
+两步模型：全局安装让 skill 对 agent 可见，repo-local init 启用当前仓库工作流。
+临时 Node 场景下，`npx -y doc-for-agent init ...` 可合并两步。
 
 ## 平台矩阵
 
