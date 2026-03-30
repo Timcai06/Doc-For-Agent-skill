@@ -30,9 +30,10 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn("usage: docagent", text)
         self.assertNotIn("usage: docagent.py", text)
         self.assertIn("Product CLI v1", text)
-        self.assertIn("primary commands: init, refresh, doctor, generate, update, versions", text)
+        self.assertIn("primary commands: init, global-install, refresh, doctor, generate, update, versions", text)
         self.assertIn("legacy compatibility: install, all", text)
         self.assertIn("30-second start:", text)
+        self.assertIn("docagent global-install --ai codex", text)
         self.assertIn("docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>", text)
 
     def test_collect_doctor_statuses_reports_install_targets(self) -> None:

@@ -134,11 +134,25 @@ def copy_bundled_assets(install_root: Path) -> None:
             shutil.copytree(source, install_root / directory_name, dirs_exist_ok=True)
 
 
+def symlink_bundled_assets(install_root: Path) -> None:
+    for directory_name in bundled_asset_directories():
+        source = skill_root() / directory_name
+        target = install_root / directory_name
+        if not source.exists():
+            continue
+        if target.exists() or target.is_symlink():
+            if target.is_symlink() or target.is_file():
+                target.unlink()
+            else:
+                shutil.rmtree(target)
+        target.symlink_to(source, target_is_directory=True)
+
+
 def install_receipt_path(install_root: Path) -> Path:
     return install_root / load_product_metadata().install_receipt_filename
 
 
-def write_install_receipt(install_root: Path, config: PlatformConfig) -> Path:
+def write_install_receipt(install_root: Path, config: PlatformConfig, bundle_strategy: str) -> Path:
     metadata = load_product_metadata()
     receipt = {
         "product_name": metadata.product_name,
@@ -152,6 +166,7 @@ def write_install_receipt(install_root: Path, config: PlatformConfig) -> Path:
         "install_root": str(install_root),
         "adapter_file": config.folder_structure["filename"],
         "bundled_assets": bundled_asset_directories(),
+        "bundle_strategy": bundle_strategy,
         "installer_command": metadata.installer_command,
     }
     receipt_path = install_receipt_path(install_root)
@@ -159,13 +174,19 @@ def write_install_receipt(install_root: Path, config: PlatformConfig) -> Path:
     return receipt_path
 
 
-def install_platform(target_root: Path, config: PlatformConfig) -> Path:
+def install_platform(target_root: Path, config: PlatformConfig, bundle_strategy: str = "copy") -> Path:
+    if bundle_strategy not in {"copy", "symlink"}:
+        raise ValueError(f"Unsupported bundle strategy `{bundle_strategy}`. Supported: copy, symlink")
+
     install_root = platform_install_root(target_root, config)
     install_root.mkdir(parents=True, exist_ok=True)
 
     write_file(install_root / config.folder_structure["filename"], render_adapter(config))
-    copy_bundled_assets(install_root)
-    write_install_receipt(install_root, config)
+    if bundle_strategy == "symlink":
+        symlink_bundled_assets(install_root)
+    else:
+        copy_bundled_assets(install_root)
+    write_install_receipt(install_root, config, bundle_strategy)
     return install_root
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import shutil
 import sys
@@ -39,6 +40,9 @@ from init_agents_docs import SUPPORTED_DOC_PROFILES, SUPPORTED_REPO_TYPES  # noq
 
 
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
+SUPPORTED_BUNDLE_STRATEGIES = ("copy", "symlink")
+DEFAULT_GLOBAL_PLATFORM = "codex"
+GLOBAL_ROOT_ENV = "DOCAGENT_GLOBAL_ROOT"
 
 
 @dataclass(frozen=True)
@@ -57,8 +61,6 @@ def resolve_target_root(target: str) -> Path:
     return Path(target).expanduser().resolve()
 
 
-<<<<<<< HEAD
-=======
 def resolve_global_target_root(global_root: Optional[str] = None) -> Path:
     if global_root:
         return resolve_target_root(global_root)
@@ -72,9 +74,6 @@ def resolve_command_root(target: Optional[str], global_mode: bool, global_root: 
     if global_mode:
         return resolve_global_target_root(global_root)
     return resolve_target_root(target or ".")
-
-
->>>>>>> f475d25 (what: add global doctor/versions root resolution for global-install verification | why: make global install a formally verifiable capability and keep repo-local init separated from global discoverability checks | tests: python3 -m unittest doc-for-agent/tests/unit/test_installer_cli.py && python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py' && python3 doc-for-agent/tests/verify_generator_snapshots.py | risk: users may misread --global semantics without explicit examples in user docs)
 def resolve_generator_script() -> Path:
     return RUNTIME_ROOT / "scripts" / "init_agents_docs.py"
 
@@ -148,10 +147,20 @@ def render_doctor_report(target_root: Path, statuses: Iterable[PlatformDoctorSta
     return "\n".join(lines)
 
 
-def install_selected_platforms(target_root: Path, platforms: Sequence[str]) -> List[Path]:
+def install_selected_platforms(
+    target_root: Path,
+    platforms: Sequence[str],
+    bundle_strategy: str = "copy",
+) -> List[Path]:
     installed_paths: List[Path] = []
     for platform in platforms:
-        installed_paths.append(install_platform(target_root, load_platform_config(platform)))
+        installed_paths.append(
+            install_platform(
+                target_root,
+                load_platform_config(platform),
+                bundle_strategy=bundle_strategy,
+            )
+        )
     return installed_paths
 
 
@@ -238,6 +247,7 @@ def print_init_summary(target_root: Path, platforms: Sequence[str], installed_pa
     print(f"- Version: {metadata.version}")
     print(f"- Target root: {target_root}")
     print(f"- Selected AI platforms: {', '.join(platforms)}")
+    print("- Install scope: repository-local workflow wiring (not global assistant discovery).")
     print("Installed platform adapters:")
     for path in installed_paths:
         print(f"- {path}")
@@ -245,6 +255,7 @@ def print_init_summary(target_root: Path, platforms: Sequence[str], installed_pa
     print(f"- `{metadata.installer_command} refresh --root {target_root} --output-mode agent`")
     print(f"- `{metadata.installer_command} doctor --target {target_root}`")
     print(f"- `{metadata.installer_command} versions --target {target_root}`")
+    print(f"- Optional global discoverability: `{metadata.installer_command} global-install --ai {DEFAULT_GLOBAL_PLATFORM}`")
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 
@@ -262,9 +273,32 @@ def print_update_summary(target_root: Path, platforms: Sequence[str], installed_
     print("- Restart the relevant assistant if it was already running.")
 
 
+def print_global_install_summary(
+    global_target_root: Path,
+    platforms: Sequence[str],
+    installed_paths: Sequence[Path],
+    bundle_strategy: str,
+) -> None:
+    metadata = load_product_metadata()
+    print(f"{metadata.product_name} global-install")
+    print(f"- Version: {metadata.version}")
+    print(f"- Global target root: {global_target_root}")
+    print(f"- Platforms: {', '.join(platforms)}")
+    print(f"- Bundle strategy: {bundle_strategy}")
+    print("- Install scope: global assistant discovery only (repository workflow wiring is separate).")
+    print("Installed global adapters:")
+    for path in installed_paths:
+        print(f"- {path}")
+    print("Next steps:")
+    print("- Restart the relevant assistant so global skill discovery refreshes.")
+    print(
+        f"- For a specific repository workflow, run `{metadata.installer_command} init --ai {platforms[0]} --target <repo-root>`."
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
-    primary_commands = "init, refresh, doctor, generate, update, versions"
+    primary_commands = "init, global-install, refresh, doctor, generate, update, versions"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
         prog=metadata.installer_command,
@@ -278,6 +312,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  legacy compatibility: install, all\n"
             f"  generate/refresh output modes: {output_modes}\n"
             "30-second start:\n"
+            f"  docagent global-install --ai {DEFAULT_GLOBAL_PLATFORM}\n"
             "  docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>\n"
             "  docagent refresh --root <repo-root> --output-mode agent"
         ),
@@ -298,9 +333,30 @@ def build_parser() -> argparse.ArgumentParser:
         "--ai",
         choices=available_platforms() + ["all"],
         default="all",
-        help="Select target AI platform (`all` installs every supported platform).",
+        help="Select target AI platform (`all` installs every supported platform in the repository target).",
     )
     init_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+
+    global_install_parser = subparsers.add_parser(
+        "global-install",
+        help="Install adapter bundle(s) to global assistant discovery directories (separate from repo-local init).",
+    )
+    global_install_parser.add_argument(
+        "--ai",
+        choices=available_platforms() + ["all"],
+        default=DEFAULT_GLOBAL_PLATFORM,
+        help="Select target AI platform (`all` installs every supported platform globally).",
+    )
+    global_install_parser.add_argument(
+        "--global-root",
+        help=f"Optional global root override (default: ${GLOBAL_ROOT_ENV} or current user home).",
+    )
+    global_install_parser.add_argument(
+        "--bundle-strategy",
+        choices=SUPPORTED_BUNDLE_STRATEGIES,
+        default="copy",
+        help="Skill bundle placement strategy for global install: copy (default) or symlink.",
+    )
 
     doctor_parser = subparsers.add_parser("doctor", help="Primary v1: inspect install state for target platform(s).")
     doctor_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
@@ -423,6 +479,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         platforms = available_platforms() if args.ai == "all" else [args.ai]
         installed_paths = install_selected_platforms(target_root, platforms)
         print_init_summary(target_root, platforms, installed_paths)
+        return 0
+
+    if args.command == "global-install":
+        global_target_root = resolve_global_target_root(args.global_root)
+        platforms = available_platforms() if args.ai == "all" else [args.ai]
+        installed_paths = install_selected_platforms(
+            global_target_root,
+            platforms,
+            bundle_strategy=args.bundle_strategy,
+        )
+        print_global_install_summary(global_target_root, platforms, installed_paths, args.bundle_strategy)
         return 0
 
     if args.command in {"install", "all"}:
