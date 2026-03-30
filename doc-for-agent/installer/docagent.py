@@ -57,6 +57,24 @@ def resolve_target_root(target: str) -> Path:
     return Path(target).expanduser().resolve()
 
 
+<<<<<<< HEAD
+=======
+def resolve_global_target_root(global_root: Optional[str] = None) -> Path:
+    if global_root:
+        return resolve_target_root(global_root)
+    env_root = os.environ.get(GLOBAL_ROOT_ENV)
+    if env_root:
+        return resolve_target_root(env_root)
+    return Path.home().resolve()
+
+
+def resolve_command_root(target: Optional[str], global_mode: bool, global_root: Optional[str]) -> Path:
+    if global_mode:
+        return resolve_global_target_root(global_root)
+    return resolve_target_root(target or ".")
+
+
+>>>>>>> f475d25 (what: add global doctor/versions root resolution for global-install verification | why: make global install a formally verifiable capability and keep repo-local init separated from global discoverability checks | tests: python3 -m unittest doc-for-agent/tests/unit/test_installer_cli.py && python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py' && python3 doc-for-agent/tests/verify_generator_snapshots.py | risk: users may misread --global semantics without explicit examples in user docs)
 def resolve_generator_script() -> Path:
     return RUNTIME_ROOT / "scripts" / "init_agents_docs.py"
 
@@ -287,6 +305,16 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_parser = subparsers.add_parser("doctor", help="Primary v1: inspect install state for target platform(s).")
     doctor_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
     doctor_parser.add_argument(
+        "--global",
+        dest="global_mode",
+        action="store_true",
+        help="Inspect global assistant discovery install roots instead of repository-local target.",
+    )
+    doctor_parser.add_argument(
+        "--global-root",
+        help=f"Optional global root override for --global (default: ${GLOBAL_ROOT_ENV} or current user home).",
+    )
+    doctor_parser.add_argument(
         "--platform",
         choices=available_platforms() + ["all"],
         default="all",
@@ -343,6 +371,16 @@ def build_parser() -> argparse.ArgumentParser:
     versions_parser = subparsers.add_parser("versions", help="Primary v1: show source and installed platform versions.")
     versions_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
     versions_parser.add_argument(
+        "--global",
+        dest="global_mode",
+        action="store_true",
+        help="Inspect global assistant discovery install roots instead of repository-local target.",
+    )
+    versions_parser.add_argument(
+        "--global-root",
+        help=f"Optional global root override for --global (default: ${GLOBAL_ROOT_ENV} or current user home).",
+    )
+    versions_parser.add_argument(
         "--platform",
         choices=available_platforms() + ["all"],
         default="all",
@@ -375,7 +413,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "doctor":
-        target_root = resolve_target_root(args.target)
+        target_root = resolve_command_root(args.target, args.global_mode, args.global_root)
         platforms = available_platforms() if args.platform == "all" else [args.platform]
         print(render_doctor_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
@@ -396,7 +434,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     if args.command == "versions":
-        target_root = resolve_target_root(args.target)
+        target_root = resolve_command_root(args.target, args.global_mode, args.global_root)
         platforms = available_platforms() if args.platform == "all" else [args.platform]
         print(render_versions_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0

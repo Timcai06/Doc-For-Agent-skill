@@ -94,6 +94,19 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("doc-for-agent doctor", report)
             self.assertIn("Claude Code (claude)", report)
 
+    def test_doctor_command_can_inspect_global_install_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-doctor-") as tmpdir:
+            main(["global-install", "--ai", "codex", "--global-root", tmpdir])
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["doctor", "--platform", "codex", "--global", "--global-root", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            report = stdout.getvalue()
+            self.assertIn("doc-for-agent doctor", report)
+            self.assertIn("Codex (codex): installed", report)
+            self.assertIn(str((Path(tmpdir) / ".codex" / "skills" / "doc-for-agent").resolve()), report)
+
     def test_all_command_installs_every_supported_platform(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
             stdout = io.StringIO()
@@ -125,6 +138,18 @@ class InstallerCliTests(unittest.TestCase):
             report = stdout.getvalue()
             self.assertIn("doc-for-agent versions", report)
             self.assertIn("Continue (continue): not installed", report)
+
+    def test_versions_command_can_inspect_global_install_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-versions-") as tmpdir:
+            main(["global-install", "--ai", "codex", "--global-root", tmpdir])
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["versions", "--platform", "codex", "--global", "--global-root", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            report = stdout.getvalue()
+            self.assertIn("doc-for-agent versions", report)
+            self.assertIn("Codex (codex): 0.2.0.dev0", report)
 
     def test_update_command_refreshes_installed_platforms(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
