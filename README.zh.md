@@ -6,9 +6,9 @@
 
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
 
-它支持双文档系统输出：`agent`、`human` 或 `dual`。
-模式映射：`agent` 写入 `AGENTS/`，`human` 写入 `docs/`，`dual` 同时写入两者。
-`dual` 模式会在一次 refresh 流程中同时维护 `docs/`（human docs）与 `AGENTS/`（agent docs）。
+它支持 `agent`、`human`、`dual`、`quad` 四种输出。
+模式映射：`agent` 写入 `AGENTS/`，`human` 写入 `docs/`，`dual` 同时写入两者，`quad` 写入 `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
+`dual` 模式会在一次 refresh 流程中同时维护 `docs/`（human docs）与 `AGENTS/`（agent docs）。`quad` 模式建立双语四视图目录契约。
 它不是 AGENTS-only 工具：应按文档受众选择输出模式。
 
 产品路径很短：
@@ -23,21 +23,20 @@
 
 ```bash
 # Node 用户
-npm install -g doc-for-agent
+npm install -g doc-for-agent@next
 
 # Python 用户
 pipx install doc-for-agent
 ```
 
-在仓库中开始：
-步骤 1（全局安装）：让 coding agent 能看到这个 skill。
-步骤 2（repo-local init）：在目标仓库启用工作流。
-一次性 `npx -y doc-for-agent init ...` 可在临时场景下合并这两步。
+然后初始化 agent skill：
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent refresh --root <repo-root> --output-mode agent
+docagent init --ai codex
+docagent init --ai claudecode
 ```
+
+如需在同一个命令里同时接线当前仓库，添加 `--target <repo-root>`。一次性 `npx -y doc-for-agent init ...` 仍可用于临时场景。
 
 如果你需要按步骤的文档入口图，先运行：
 
@@ -49,29 +48,29 @@ docagent quickstart --target <repo-root>
 
 | 你使用... | 先执行 |
 | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` |
-| Codex | `docagent init --ai codex --target <repo-root>` |
+| Claude Code | `docagent init --ai claudecode` |
+| Codex | `docagent init --ai codex` |
 | CodeBuddy | `docagent init --ai codex --target <repo-root>` |
 | Continue | `docagent init --ai continue --target <repo-root>` |
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
-| 多个 Agent | `docagent init --ai all --target <repo-root>` |
+| 多个 Agent | `docagent init --ai all` |
 
 ## 安装矩阵
 
 | 用户类型 | 安装方式 | 起步命令 |
 | --- | --- | --- |
-| Node-first（全局） | `npm install -g doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Node-first（全局） | `npm install -g doc-for-agent@next` | `docagent init --ai all` |
 | Node-first（一次性） | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target <repo-root>` |
-| Python-first（推荐） | `pipx install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
-| Python-first（venv/system） | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Python-first（推荐） | `pipx install doc-for-agent` | `docagent init --ai all` |
+| Python-first（venv/system） | `python3 -m pip install doc-for-agent` | `docagent init --ai all` |
 
 ## Product CLI v1
 
 主流程命令：
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent refresh --root <repo-root> --output-mode agent|human|dual
+docagent init --ai <codex|claudecode|all>
+docagent refresh --root <repo-root> --output-mode agent|human|dual|quad
 docagent doctor --target <repo-root>
 ```
 

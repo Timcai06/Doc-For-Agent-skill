@@ -10,9 +10,9 @@
 2. init
 3. refresh
 
-`refresh` 支持 `agent`、`human`、`dual` 三种文档输出。
-模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出。
-`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。
+`refresh` 支持 `agent`、`human`、`dual`、`quad` 四种文档输出。
+模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出，`quad` -> `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
+`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图目录契约。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
 ## 安装
@@ -22,7 +22,7 @@
 Node：
 
 ```bash
-npm install -g doc-for-agent
+npm install -g doc-for-agent@next
 ```
 
 Python：
@@ -38,23 +38,30 @@ npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 该一次性命令会在临时场景下合并“全局安装 + repo-local init”。
 
-如果你只需要单个平台，把 `all` 替换成 `claude`、`codex`、`continue` 或 `copilot`。
+如果你只需要单个平台，把 `all` 替换成 `claudecode`、`codex`、`continue` 或 `copilot`。
 
 ## Init
 
 步骤 2（repo-local init）：在目标仓库启用工作流。
 
-统一命令形态：
+如果你只需要让 agent 看见这个 skill，使用短命令：
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
+docagent init --ai codex
+docagent init --ai claudecode
+```
+
+如果你还要同时接线当前仓库，使用 repo-local 形态：
+
+```bash
+docagent init --ai <codex|claudecode|continue|copilot|all> --target <repo-root>
 ```
 
 常见选择：
 
 ```bash
 docagent init --ai all --target <repo-root>
-docagent init --ai claude --target <repo-root>
+docagent init --ai claudecode --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
 
@@ -78,6 +85,7 @@ docagent refresh --root <repo-root> --output-mode human
 
 ```bash
 docagent refresh --root <repo-root> --output-mode dual
+docagent refresh --root <repo-root> --output-mode quad
 ```
 
 ## 验证

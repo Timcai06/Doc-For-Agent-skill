@@ -39,8 +39,16 @@ from render_platform_adapter import (  # noqa: E402
 from init_agents_docs import SUPPORTED_DOC_PROFILES, SUPPORTED_REPO_TYPES  # noqa: E402
 
 
-SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
+SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
 SUPPORTED_BUNDLE_STRATEGIES = ("copy", "symlink")
+SUPPORTED_AI_PARAMS = ("codex", "claudecode", "continue", "copilot")
+AI_PARAM_TO_PLATFORM = {
+    "codex": "codex",
+    "claudecode": "claudecode",
+    "claude": "claudecode",
+    "continue": "continue",
+    "copilot": "copilot",
+}
 DEFAULT_GLOBAL_PLATFORM = "codex"
 GLOBAL_ROOT_ENV = "DOCAGENT_GLOBAL_ROOT"
 
@@ -74,6 +82,18 @@ def resolve_command_root(target: Optional[str], global_mode: bool, global_root: 
     if global_mode:
         return resolve_global_target_root(global_root)
     return resolve_target_root(target or ".")
+
+
+def resolve_ai_platforms(ai_param: str) -> List[str]:
+    if ai_param == "all":
+        return [AI_PARAM_TO_PLATFORM[key] for key in SUPPORTED_AI_PARAMS]
+    return [AI_PARAM_TO_PLATFORM[ai_param]]
+
+
+def supported_ai_choices() -> List[str]:
+    return list(dict.fromkeys([*SUPPORTED_AI_PARAMS, "claude"]))
+
+
 def resolve_generator_script() -> Path:
     return RUNTIME_ROOT / "scripts" / "init_agents_docs.py"
 
@@ -101,7 +121,7 @@ def load_install_receipt(install_root: Path) -> dict[str, object]:
 
 
 def collect_doctor_statuses(target_root: Path, platforms: Optional[Sequence[str]] = None) -> List[PlatformDoctorStatus]:
-    selected_platforms = list(platforms or available_platforms())
+    selected_platforms = list(platforms or [AI_PARAM_TO_PLATFORM[key] for key in SUPPORTED_AI_PARAMS])
     statuses: List[PlatformDoctorStatus] = []
     for platform in selected_platforms:
         config = load_platform_config(platform)
@@ -202,26 +222,26 @@ def render_quickstart(target_root: Path) -> str:
         f"{metadata.product_name} quickstart",
         "- Product flow: install -> init -> refresh",
         "- Install:",
-        "- Node users: `npm install -g doc-for-agent`",
-        "- Node one-off start: `npx -y doc-for-agent init --ai all --target <repo-root>`",
-        "- Single-platform option: replace `all` with `claude`, `codex`, `continue`, or `copilot`.",
+        "- Node users: `npm install -g doc-for-agent@next`",
+        "- Node one-off start: `npx -y doc-for-agent init --ai codex`",
+        "- Alternate platform option: use `--ai claudecode` (legacy alias: `claude`).",
         "- Python users: `pipx install doc-for-agent`",
         "- Init (one command shape):",
-        f"- `docagent init --ai <claude|codex|continue|copilot|all> --target {repo_placeholder}`",
+        f"- `docagent init --ai <codex|claudecode|continue|copilot|all>`",
         "- Common picks:",
-        f"- `docagent init --ai all --target {repo_placeholder}`",
-        f"- `docagent init --ai claude --target {repo_placeholder}`",
-        f"- `docagent init --ai codex --target {repo_placeholder}`",
+        f"- `docagent init --ai codex`",
+        f"- `docagent init --ai claudecode`",
         "- CodeBuddy users usually start with `--ai codex`.",
+        f"- Optional repository wiring: add `--target {repo_placeholder}`",
         "- Refresh:",
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
-        "- Optional modes: `--output-mode human` or `--output-mode dual`",
-        "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both",
+        "- Optional modes: `--output-mode human`, `--output-mode dual`, or `--output-mode quad`",
+        "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`",
         "- Not AGENTS-only: choose output mode based on your docs audience",
         "- Verify:",
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",
-        "- Supported `--ai` values: claude, codex, continue, copilot, all",
+        "- Supported `--ai` values: codex, claudecode, continue, copilot, all",
         "- Entry docs path: docs/landing-page.md (EN) / docs/landing-page.zh.md (ZH) -> docs/quickstart.md (EN) / docs/quickstart.zh.md (ZH) -> docs/platforms.md (EN) / docs/platforms.zh.md (ZH)",
     ]
     return "\n".join(lines)
@@ -241,21 +261,34 @@ def print_install_summary(target_root: Path, platforms: Sequence[str], installed
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 
-def print_init_summary(target_root: Path, platforms: Sequence[str], installed_paths: Sequence[Path]) -> None:
+def print_init_summary(
+    global_target_root: Path,
+    global_platforms: Sequence[str],
+    global_installed_paths: Sequence[Path],
+    local_target_root: Optional[Path],
+    local_installed_paths: Sequence[Path],
+) -> None:
     metadata = load_product_metadata()
     print(f"{metadata.product_name} init")
     print(f"- Version: {metadata.version}")
-    print(f"- Target root: {target_root}")
-    print(f"- Selected AI platforms: {', '.join(platforms)}")
-    print("- Install scope: repository-local workflow wiring (not global assistant discovery).")
-    print("Installed platform adapters:")
-    for path in installed_paths:
+    print(f"- Selected AI platforms: {', '.join(global_platforms)}")
+    print("- Install scope: global assistant discovery first; repository-local workflow wiring is optional via --target.")
+    print(f"- Global target root: {global_target_root}")
+    print("Installed global adapters:")
+    for path in global_installed_paths:
         print(f"- {path}")
+    if local_target_root:
+        print(f"- Repository target root: {local_target_root}")
+        print("Installed repository-local adapters:")
+        for path in local_installed_paths:
+            print(f"- {path}")
     print("Recommended next commands:")
-    print(f"- `{metadata.installer_command} refresh --root {target_root} --output-mode agent`")
-    print(f"- `{metadata.installer_command} doctor --target {target_root}`")
-    print(f"- `{metadata.installer_command} versions --target {target_root}`")
-    print(f"- Optional global discoverability: `{metadata.installer_command} global-install --ai {DEFAULT_GLOBAL_PLATFORM}`")
+    if local_target_root:
+        print(f"- `{metadata.installer_command} refresh --root {local_target_root} --output-mode agent`")
+    else:
+        print(f"- `{metadata.installer_command} init --ai {DEFAULT_GLOBAL_PLATFORM} --target <repo-root>` (when onboarding a repository)")
+    print(f"- `{metadata.installer_command} doctor --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
+    print(f"- `{metadata.installer_command} versions --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
     print("- Restart the relevant assistant so the new local skill bundle is loaded.")
 
 
@@ -313,8 +346,9 @@ def build_parser() -> argparse.ArgumentParser:
             f"  generate/refresh output modes: {output_modes}\n"
             "30-second start:\n"
             f"  docagent global-install --ai {DEFAULT_GLOBAL_PLATFORM}\n"
-            "  docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>\n"
-            "  docagent refresh --root <repo-root> --output-mode agent"
+            f"  docagent init --ai {DEFAULT_GLOBAL_PLATFORM}\n"
+            "  docagent init --ai claudecode --target <repo-root>\n"
+            "  docagent refresh --root <repo-root> --output-mode quad"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -331,11 +365,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     init_parser.add_argument(
         "--ai",
-        choices=available_platforms() + ["all"],
-        default="all",
-        help="Select target AI platform (`all` installs every supported platform in the repository target).",
+        choices=supported_ai_choices() + ["all"],
+        default=DEFAULT_GLOBAL_PLATFORM,
+        help="Select platform parameter: codex, claudecode, continue, copilot, or all.",
     )
-    init_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
+    init_parser.add_argument(
+        "--global-root",
+        help=f"Optional global root override (default: ${GLOBAL_ROOT_ENV} or current user home).",
+    )
+    init_parser.add_argument(
+        "--bundle-strategy",
+        choices=SUPPORTED_BUNDLE_STRATEGIES,
+        default="copy",
+        help="Skill bundle placement strategy for global install path: copy (default) or symlink.",
+    )
+    init_parser.add_argument("--target", help="Optional repository root where assistant folders should also be wired.")
 
     global_install_parser = subparsers.add_parser(
         "global-install",
@@ -343,7 +387,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     global_install_parser.add_argument(
         "--ai",
-        choices=available_platforms() + ["all"],
+        choices=supported_ai_choices() + ["all"],
         default=DEFAULT_GLOBAL_PLATFORM,
         help="Select target AI platform (`all` installs every supported platform globally).",
     )
@@ -372,7 +416,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor_parser.add_argument(
         "--platform",
-        choices=available_platforms() + ["all"],
+        choices=supported_ai_choices() + ["all"],
         default="all",
         help="Limit doctor output to one platform.",
     )
@@ -390,7 +434,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
         default="agent",
-        help="Output docs mode: agent, human, or dual.",
+        help="Output docs mode: agent, human, dual, or quad.",
     )
     refresh_parser.add_argument("--explain", action="store_true")
 
@@ -408,7 +452,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
         default="agent",
-        help="Output docs mode: agent, human, or dual.",
+        help="Output docs mode: agent, human, dual, or quad.",
     )
     generate_parser.add_argument("--explain", action="store_true")
 
@@ -419,7 +463,7 @@ def build_parser() -> argparse.ArgumentParser:
     update_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
     update_parser.add_argument(
         "--platform",
-        choices=available_platforms() + ["all"],
+        choices=supported_ai_choices() + ["all"],
         default="all",
         help="Update one installed platform or all installed platforms.",
     )
@@ -438,7 +482,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     versions_parser.add_argument(
         "--platform",
-        choices=available_platforms() + ["all"],
+        choices=supported_ai_choices() + ["all"],
         default="all",
         help="Limit version output to one platform.",
     )
@@ -452,7 +496,7 @@ def build_parser() -> argparse.ArgumentParser:
     install_parser = subparsers.add_parser("install", help="Legacy compatibility: install one or more platform adapters.")
     install_parser.add_argument(
         "--platform",
-        choices=available_platforms() + ["all"],
+        choices=supported_ai_choices() + ["all"],
         required=True,
         help="Platform adapter to install.",
     )
@@ -470,20 +514,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.command == "doctor":
         target_root = resolve_command_root(args.target, args.global_mode, args.global_root)
-        platforms = available_platforms() if args.platform == "all" else [args.platform]
+        platforms = resolve_ai_platforms(args.platform) if args.platform == "all" else resolve_ai_platforms(args.platform)
         print(render_doctor_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
 
     if args.command == "init":
-        target_root = resolve_target_root(args.target)
-        platforms = available_platforms() if args.ai == "all" else [args.ai]
-        installed_paths = install_selected_platforms(target_root, platforms)
-        print_init_summary(target_root, platforms, installed_paths)
+        platforms = resolve_ai_platforms(args.ai)
+        global_target_root = resolve_global_target_root(args.global_root)
+        global_paths = install_selected_platforms(
+            global_target_root,
+            platforms,
+            bundle_strategy=args.bundle_strategy,
+        )
+        local_target_root: Optional[Path] = None
+        local_paths: List[Path] = []
+        if args.target:
+            local_target_root = resolve_target_root(args.target)
+            local_paths = install_selected_platforms(local_target_root, platforms)
+        print_init_summary(global_target_root, platforms, global_paths, local_target_root, local_paths)
         return 0
 
     if args.command == "global-install":
         global_target_root = resolve_global_target_root(args.global_root)
-        platforms = available_platforms() if args.ai == "all" else [args.ai]
+        platforms = resolve_ai_platforms(args.ai)
         installed_paths = install_selected_platforms(
             global_target_root,
             platforms,
@@ -494,7 +547,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.command in {"install", "all"}:
         target_root = resolve_target_root(args.target)
-        platforms = available_platforms() if args.command == "all" or args.platform == "all" else [args.platform]
+        if args.command == "all" or args.platform == "all":
+            platforms = resolve_ai_platforms("all")
+        else:
+            platforms = resolve_ai_platforms(args.platform)
         installed_paths = install_selected_platforms(target_root, platforms)
         print("Compatibility mode: `install`/`all` still work, but `init --ai ...` is now the recommended entrypoint.")
         print_install_summary(target_root, platforms, installed_paths)
@@ -502,7 +558,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     if args.command == "versions":
         target_root = resolve_command_root(args.target, args.global_mode, args.global_root)
-        platforms = available_platforms() if args.platform == "all" else [args.platform]
+        platforms = resolve_ai_platforms(args.platform) if args.platform == "all" else resolve_ai_platforms(args.platform)
         print(render_versions_report(target_root, collect_doctor_statuses(target_root, platforms)))
         return 0
 

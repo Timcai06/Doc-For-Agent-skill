@@ -10,15 +10,15 @@
   },
   "frontmatter": {
     "name": "doc-for-agent",
-    "description": "Generate and maintain AGENTS documentation for coding agents."
+    "description": "Generate and maintain a dual documentation system for agents and maintainers."
   },
   "default_title": "doc-for-agent",
-  "default_description": "Project documentation bootstrapper for coding agents. Generates lean or layered AGENTS directories from the real repository structure.",
+  "default_description": "Project documentation bootstrapper for CLI coding-agent workflows. Supports `agent`, `human`, `dual`, and four-view `quad` outputs from the real repository structure.",
   "quick_reference": false,
   "script_relpath": ".codex/skills/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [
     "Use `docagent init --ai codex` as the recommended product entry for this platform.",
     "Restart Codex so the new skill is discovered in a fresh session.",
-    "Install into a repository root when you want project-local assistant behavior."
+    "Add `--target <repo-root>` when you want repository-local workflow wiring in the same command."
   ]
 }

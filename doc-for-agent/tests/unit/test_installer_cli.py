@@ -34,14 +34,15 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn("legacy compatibility: install, all", text)
         self.assertIn("30-second start:", text)
         self.assertIn("docagent global-install --ai codex", text)
-        self.assertIn("docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>", text)
+        self.assertIn("docagent init --ai codex", text)
+        self.assertIn("docagent init --ai claudecode --target <repo-root>", text)
 
     def test_collect_doctor_statuses_reports_install_targets(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-doctor-") as tmpdir:
             target_root = Path(tmpdir)
-            statuses = collect_doctor_statuses(target_root, ["codex", "claude"])
+            statuses = collect_doctor_statuses(target_root, ["codex", "claudecode"])
 
-            self.assertEqual([status.platform for status in statuses], ["codex", "claude"])
+            self.assertEqual([status.platform for status in statuses], ["codex", "claudecode"])
             self.assertFalse(statuses[0].installed)
             self.assertEqual(statuses[0].install_root, target_root / ".codex" / "skills" / "doc-for-agent")
             self.assertIsNone(statuses[0].installed_version)
@@ -74,26 +75,29 @@ class InstallerCliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-init-") as tmpdir:
             stdout = io.StringIO()
             with redirect_stdout(stdout):
-                exit_code = main(["init", "--ai", "claude", "--target", tmpdir])
+                exit_code = main(
+                    ["init", "--ai", "claudecode", "--target", tmpdir, "--global-root", tmpdir]
+                )
 
             self.assertEqual(exit_code, 0)
             install_root = Path(tmpdir) / ".claude" / "skills" / "doc-for-agent"
             self.assertTrue((install_root / "SKILL.md").exists())
             text = stdout.getvalue()
             self.assertIn("doc-for-agent init", text)
-            self.assertIn("Selected AI platforms: claude", text)
+            self.assertIn("Selected AI platforms: claudecode", text)
+            self.assertIn(f"Global target root: {Path(tmpdir).resolve()}", text)
             self.assertIn("Recommended next commands:", text)
 
     def test_doctor_command_prints_summary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
             stdout = io.StringIO()
             with redirect_stdout(stdout):
-                exit_code = main(["doctor", "--platform", "claude", "--target", tmpdir])
+                exit_code = main(["doctor", "--platform", "claudecode", "--target", tmpdir])
 
             self.assertEqual(exit_code, 0)
             report = stdout.getvalue()
             self.assertIn("doc-for-agent doctor", report)
-            self.assertIn("Claude Code (claude)", report)
+            self.assertIn("Claude Code (claudecode)", report)
 
     def test_doctor_command_can_inspect_global_install_root(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-doctor-") as tmpdir:
@@ -119,7 +123,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertTrue((Path(tmpdir) / ".claude" / "skills" / "doc-for-agent" / "SKILL.md").exists())
             self.assertTrue((Path(tmpdir) / ".continue" / "skills" / "doc-for-agent" / "SKILL.md").exists())
             self.assertTrue((Path(tmpdir) / ".github" / "prompts" / "doc-for-agent" / "PROMPT.md").exists())
-            self.assertIn("Platforms: claude, codex, continue, copilot", stdout.getvalue())
+            self.assertIn("Platforms: codex, claudecode, continue, copilot", stdout.getvalue())
 
     def test_versions_report_reads_installed_receipt(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
@@ -228,18 +232,18 @@ class InstallerCliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             text = stdout.getvalue()
             self.assertIn("doc-for-agent quickstart", text)
-            self.assertIn("Node users: `npm install -g doc-for-agent`", text)
-            self.assertIn("Node one-off start: `npx -y doc-for-agent init --ai all --target <repo-root>`", text)
-            self.assertIn("Single-platform option: replace `all` with `claude`, `codex`, `continue`, or `copilot`.", text)
+            self.assertIn("Node users: `npm install -g doc-for-agent@next`", text)
+            self.assertIn("Node one-off start: `npx -y doc-for-agent init --ai codex`", text)
+            self.assertIn("Alternate platform option: use `--ai claudecode` (legacy alias: `claude`).", text)
             self.assertIn("Python users: `pipx install doc-for-agent`", text)
-            self.assertIn("docagent init --ai <claude|codex|continue|copilot|all>", text)
+            self.assertIn("docagent init --ai <codex|claudecode|continue|copilot|all>", text)
             self.assertIn("<repo-root>", text)
-            self.assertIn("docagent init --ai all --target <repo-root>", text)
-            self.assertIn("docagent init --ai claude --target <repo-root>", text)
+            self.assertNotIn("docagent init --ai all --target <repo-root>", text)
+            self.assertIn("docagent init --ai claudecode", text)
             self.assertIn("CodeBuddy users usually start with `--ai codex`.", text)
-            self.assertIn("Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both", text)
+            self.assertIn("Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`", text)
             self.assertIn("Not AGENTS-only: choose output mode based on your docs audience", text)
-            self.assertIn("Supported `--ai` values: claude, codex, continue, copilot, all", text)
+            self.assertIn("Supported `--ai` values: codex, claudecode, continue, copilot, all", text)
             self.assertIn("docs/landing-page.md (EN) / docs/landing-page.zh.md (ZH)", text)
             self.assertIn("docs/quickstart.md (EN) / docs/quickstart.zh.md (ZH)", text)
             self.assertIn("docs/platforms.md (EN) / docs/platforms.zh.md (ZH)", text)

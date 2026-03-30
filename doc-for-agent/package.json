@@ -5,8 +5,8 @@
   "license": "UNLICENSED",
   "private": false,
   "bin": {
-    "docagent": "./installer/node/docagent.js",
-    "doc-for-agent": "./installer/node/docagent.js"
+    "docagent": "installer/node/docagent.js",
+    "doc-for-agent": "installer/node/docagent.js"
   },
   "files": [
     "SKILL.md",

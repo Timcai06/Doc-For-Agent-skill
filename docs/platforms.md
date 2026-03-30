@@ -11,15 +11,15 @@ For temporary Node use, `npx -y doc-for-agent init ...` combines both steps.
 
 | Platform | First command |
 | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` |
-| Codex | `docagent init --ai codex --target <repo-root>` |
+| Claude Code | `docagent init --ai claudecode` |
+| Codex | `docagent init --ai codex` |
 | CodeBuddy | `docagent init --ai codex --target <repo-root>` |
 | Continue | `docagent init --ai continue --target <repo-root>` |
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
-After init, use `refresh --output-mode agent|human|dual` based on the docs audience.
-Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
+After init, use `refresh --output-mode agent|human|dual|quad` based on the docs audience.
+Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
 Platform selection is separate from doc audience: this is not AGENTS-only.
 
@@ -43,7 +43,7 @@ Default:
 docagent refresh --root <repo-root> --output-mode agent
 ```
 
-Optional modes: `--output-mode human` or `--output-mode dual`.
+Optional modes: `--output-mode human`, `--output-mode dual`, or `--output-mode quad`.
 
 See also:
 

@@ -10,9 +10,9 @@ Use one mental model:
 2. init
 3. refresh
 
-`refresh` supports `agent`, `human`, and `dual` documentation outputs.
-Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
+`refresh` supports `agent`, `human`, `dual`, and `quad` documentation outputs.
+Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
+Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 
 ## Install
@@ -22,7 +22,7 @@ Step 1 (global install): make the skill visible to your coding agent.
 Node:
 
 ```bash
-npm install -g doc-for-agent
+npm install -g doc-for-agent@next
 ```
 
 Python:
@@ -38,23 +38,30 @@ npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 This one-off command combines global install and repo-local init for temporary use.
 
-If you only need one platform, replace `all` with `claude`, `codex`, `continue`, or `copilot`.
+If you only need one platform, replace `all` with `claudecode`, `codex`, `continue`, or `copilot`.
 
 ## Init
 
 Step 2 (repo-local init): enable the workflow in the target repository.
 
-Use one command shape:
+Use the short form when you only need agent discoverability:
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
+docagent init --ai codex
+docagent init --ai claudecode
+```
+
+Use the repo-local form when you also want to wire the current repository:
+
+```bash
+docagent init --ai <codex|claudecode|continue|copilot|all> --target <repo-root>
 ```
 
 Common picks:
 
 ```bash
 docagent init --ai all --target <repo-root>
-docagent init --ai claude --target <repo-root>
+docagent init --ai claudecode --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
 
@@ -78,6 +85,7 @@ Both:
 
 ```bash
 docagent refresh --root <repo-root> --output-mode dual
+docagent refresh --root <repo-root> --output-mode quad
 ```
 
 ## Verify

@@ -6,9 +6,9 @@ English | [简体中文](README.zh.md)
 
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
 
-It supports a dual documentation system: `agent`, `human`, or `dual` outputs.
-Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, and `dual` writes both.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
+It supports `agent`, `human`, `dual`, and `quad` outputs.
+Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, `dual` writes both, and `quad` writes `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
+Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
 This is not an AGENTS-only tool: choose output mode by audience.
 
 The product path is short:
@@ -23,21 +23,20 @@ Install once:
 
 ```bash
 # Node users
-npm install -g doc-for-agent
+npm install -g doc-for-agent@next
 
 # Python users
 pipx install doc-for-agent
 ```
 
-Start in a repository:
-Step 1 (global install): make the skill visible to your coding agent.
-Step 2 (repo-local init): enable the workflow in the target repository.
-One-off `npx -y doc-for-agent init ...` combines both steps for temporary use.
+Then initialize the agent skill:
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent refresh --root <repo-root> --output-mode agent
+docagent init --ai codex
+docagent init --ai claudecode
 ```
+
+Use `--target <repo-root>` when you want the same command to wire a specific repository workflow. One-off `npx -y doc-for-agent init ...` still combines install and init for temporary use.
 
 Need a guided doc entry map? Run:
 
@@ -49,29 +48,29 @@ docagent quickstart --target <repo-root>
 
 | If you use... | Run this first |
 | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` |
-| Codex | `docagent init --ai codex --target <repo-root>` |
+| Claude Code | `docagent init --ai claudecode` |
+| Codex | `docagent init --ai codex` |
 | CodeBuddy | `docagent init --ai codex --target <repo-root>` |
 | Continue | `docagent init --ai continue --target <repo-root>` |
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
-| Multiple agents | `docagent init --ai all --target <repo-root>` |
+| Multiple agents | `docagent init --ai all` |
 
 ## Install Matrix
 
 | User profile | Install path | Start command |
 | --- | --- | --- |
-| Node-first (global) | `npm install -g doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Node-first (global) | `npm install -g doc-for-agent@next` | `docagent init --ai all` |
 | Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target <repo-root>` |
-| Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
-| Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all --target <repo-root>` |
+| Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all` |
+| Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all` |
 
 ## Product CLI v1
 
 Primary flow commands:
 
 ```bash
-docagent init --ai <claude|codex|continue|copilot|all> --target <repo-root>
-docagent refresh --root <repo-root> --output-mode agent|human|dual
+docagent init --ai <codex|claudecode|all>
+docagent refresh --root <repo-root> --output-mode agent|human|dual|quad
 docagent doctor --target <repo-root>
 ```
 

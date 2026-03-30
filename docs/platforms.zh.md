@@ -11,15 +11,15 @@
 
 | 平台 | 首条命令 |
 | --- | --- |
-| Claude Code | `docagent init --ai claude --target <repo-root>` |
-| Codex | `docagent init --ai codex --target <repo-root>` |
+| Claude Code | `docagent init --ai claudecode` |
+| Codex | `docagent init --ai codex` |
 | CodeBuddy | `docagent init --ai codex --target <repo-root>` |
 | Continue | `docagent init --ai continue --target <repo-root>` |
 | GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` 会自动处理各平台适配文件，你只需要选择 `--ai`。
-初始化后，根据文档受众选择 `refresh --output-mode agent|human|dual`。
-模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出。
+初始化后，根据文档受众选择 `refresh --output-mode agent|human|dual|quad`。
+模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出，`quad` -> `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
 `dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。
 平台选择与文档受众是两件事：这不是 AGENTS-only 工具。
 
@@ -43,7 +43,7 @@ docagent init --ai all --target <repo-root>
 docagent refresh --root <repo-root> --output-mode agent
 ```
 
-可选模式：`--output-mode human` 或 `--output-mode dual`。
+可选模式：`--output-mode human`、`--output-mode dual` 或 `--output-mode quad`。
 
 另见：
 

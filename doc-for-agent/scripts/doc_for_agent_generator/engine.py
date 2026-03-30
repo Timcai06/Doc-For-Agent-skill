@@ -7,7 +7,10 @@ from typing import Dict, Iterable, Optional
 
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
 from .builders import (
+    AGENT_LOCALE_OUTPUT_ROOTS,
+    HUMAN_LOCALE_OUTPUT_ROOTS,
     SUPPORTED_DOC_PROFILES,
+    SUPPORTED_AGENT_LOCALES,
     SUPPORTED_HUMAN_LOCALES,
     SUPPORTED_HUMAN_TEMPLATE_VARIANTS,
     SUPPORTED_OUTPUT_MODES,
@@ -15,6 +18,7 @@ from .builders import (
     generate_human_docs,
     infer_source_of_truth_lines,
     repo_type_label,
+    resolve_agent_output_root,
     resolve_human_output_root,
     resolve_human_template_variant,
 )
@@ -91,6 +95,9 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
         raise ValueError(f"Unsupported mode `{request.mode}`. Supported: {', '.join(SUPPORTED_ENGINE_ACTIONS)}")
     if request.output_mode not in SUPPORTED_OUTPUT_MODES:
         raise ValueError(f"Unsupported output mode `{request.output_mode}`. Supported: {', '.join(SUPPORTED_OUTPUT_MODES)}")
+    unsupported_agent_locales = [locale for locale in AGENT_LOCALE_OUTPUT_ROOTS if locale not in SUPPORTED_AGENT_LOCALES]
+    if unsupported_agent_locales:
+        raise ValueError(f"Agent locale mapping contains unsupported locales: {', '.join(unsupported_agent_locales)}")
     if request.human_locale not in SUPPORTED_HUMAN_LOCALES:
         raise ValueError(
             f"Unsupported human locale `{request.human_locale}`. Supported: {', '.join(SUPPORTED_HUMAN_LOCALES)}"
@@ -177,12 +184,19 @@ def collect_output_plan(
 ) -> tuple[Dict[str, str], list[Path]]:
     planned: Dict[str, str] = {}
     archive_candidates: list[Path] = []
+    agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis))
 
     if output_mode in {"agent", "dual"}:
-        agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis))
         agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
         for name, content in agent_files.items():
             planned[str(agents_dir / name)] = content
+        archive_candidates = list(analysis.docs_inventory.archive_candidates)
+
+    if output_mode == "quad":
+        for agent_locale in SUPPORTED_AGENT_LOCALES:
+            agent_root = root / resolve_agent_output_root(agent_locale)
+            for name, content in agent_files.items():
+                planned[str(agent_root / name)] = content
         archive_candidates = list(analysis.docs_inventory.archive_candidates)
 
     if output_mode in {"human", "dual"}:
@@ -193,6 +207,15 @@ def collect_output_plan(
         )
         for name, content in human_files.items():
             planned[str(root / name)] = content
+    elif output_mode == "quad":
+        for locale in SUPPORTED_HUMAN_LOCALES:
+            human_files = generate_human_docs(
+                analysis,
+                human_locale=locale,
+                human_template_variant=human_template_variant,
+            )
+            for name, content in human_files.items():
+                planned[str(root / name)] = content
 
     return planned, archive_candidates
 
@@ -214,6 +237,9 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
     )
     agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
     docs_dir = normalized_request.root / resolve_human_output_root(normalized_request.human_locale)
+    if normalized_request.output_mode == "quad":
+        agents_dir = normalized_request.root / resolve_agent_output_root("en")
+        docs_dir = normalized_request.root / resolve_human_output_root("en")
     return GenerationPlan(
         request=normalized_request,
         analysis=analysis,
@@ -243,6 +269,11 @@ def ensure_output_directories(plan: GenerationPlan) -> None:
         plan.agents_dir.mkdir(parents=True, exist_ok=True)
     if plan.request.output_mode in {"human", "dual"}:
         plan.docs_dir.mkdir(parents=True, exist_ok=True)
+    if plan.request.output_mode == "quad":
+        for locale in SUPPORTED_AGENT_LOCALES:
+            (plan.request.root / resolve_agent_output_root(locale)).mkdir(parents=True, exist_ok=True)
+        for locale in SUPPORTED_HUMAN_LOCALES:
+            (plan.request.root / resolve_human_output_root(locale)).mkdir(parents=True, exist_ok=True)
 
 
 def apply_generation_plan(plan: GenerationPlan) -> None:
@@ -284,6 +315,14 @@ def plan_title(plan: GenerationPlan, dry_run: bool = False) -> str:
             return f"Dry run: would {mode} AGENTS docs in: {plan.agents_dir}"
         if plan.request.output_mode == "human":
             return f"Dry run: would {mode} human docs in: {plan.docs_dir}"
+        if plan.request.output_mode == "quad":
+            return (
+                f"Dry run: would {mode} four-view docs in: "
+                f"{plan.request.root / resolve_agent_output_root('en')}, "
+                f"{plan.request.root / resolve_agent_output_root('zh')}, "
+                f"{plan.request.root / resolve_human_output_root('en')}, "
+                f"{plan.request.root / resolve_human_output_root('zh')}"
+            )
         return f"Dry run: would {mode} AGENTS + human docs in: {plan.agents_dir} and {plan.docs_dir}"
 
     past_tense = {
@@ -296,6 +335,14 @@ def plan_title(plan: GenerationPlan, dry_run: bool = False) -> str:
         return f"{past_tense} AGENTS docs in: {plan.agents_dir}"
     if plan.request.output_mode == "human":
         return f"{past_tense} human docs in: {plan.docs_dir}"
+    if plan.request.output_mode == "quad":
+        return (
+            f"{past_tense} four-view docs in: "
+            f"{plan.request.root / resolve_agent_output_root('en')}, "
+            f"{plan.request.root / resolve_agent_output_root('zh')}, "
+            f"{plan.request.root / resolve_human_output_root('en')}, "
+            f"{plan.request.root / resolve_human_output_root('zh')}"
+        )
     return f"{past_tense} AGENTS + human docs in: {plan.agents_dir} and {plan.docs_dir}"
 
 
@@ -320,6 +367,12 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         f"- Backend root: `{analysis.backend_root}`" if analysis.backend_root else "- Backend root: not detected",
         f"- Package manager: `{analysis.package_manager}`",
         f"- Output mode: `{plan.request.output_mode}`",
+        (
+            f"- Audience-locale mapping: agent/en -> `{resolve_agent_output_root('en')}/`, "
+            f"agent/zh -> `{resolve_agent_output_root('zh')}/`, "
+            f"human/en -> `{resolve_human_output_root('en')}/`, "
+            f"human/zh -> `{resolve_human_output_root('zh')}/`"
+        ),
         f"- Human locale: `{plan.request.human_locale}` (output root: `{plan.docs_dir}`)",
         f"- Human template variant: `{resolve_human_template_variant(plan.request.human_locale, plan.request.human_template_variant)}`",
         "- Recommended output mode: `dual` (AGENTS + docs).",
@@ -339,6 +392,8 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
             "Current-mode command: "
             f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {plan.request.output_mode}"
         )
+    if plan.request.output_mode == "quad":
+        lines.append("- Four-view mode writes AGENTS/, AGENTS.zh/, docs/, and docs.zh/ in one run (structure-only; no translation).")
     lines.append("Suggested source-of-truth files:")
     lines.extend([f"- {line}" for line in infer_source_of_truth_lines(analysis)[:6]])
     lines.append("Supporting-doc synthesis summary:")

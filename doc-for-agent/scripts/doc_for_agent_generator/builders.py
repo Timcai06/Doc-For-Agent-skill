@@ -9,7 +9,12 @@ from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
-SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual")
+SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
+SUPPORTED_AGENT_LOCALES = ("en", "zh")
+AGENT_LOCALE_OUTPUT_ROOTS = {
+    "en": "AGENTS",
+    "zh": "AGENTS.zh",
+}
 SUPPORTED_HUMAN_LOCALES = ("en", "zh")
 SUPPORTED_HUMAN_TEMPLATE_VARIANTS = ("paired-core",)
 HUMAN_LOCALE_OUTPUT_ROOTS = {
@@ -57,6 +62,10 @@ def format_bullets(items: Sequence[str], empty_line: str) -> str:
 
 def resolve_human_output_root(human_locale: str) -> str:
     return HUMAN_LOCALE_OUTPUT_ROOTS.get(human_locale, HUMAN_LOCALE_OUTPUT_ROOTS["en"])
+
+
+def resolve_agent_output_root(agent_locale: str) -> str:
+    return AGENT_LOCALE_OUTPUT_ROOTS.get(agent_locale, AGENT_LOCALE_OUTPUT_ROOTS["en"])
 
 
 def resolve_human_template_variant(human_locale: str, human_template_variant: str | None = None) -> str:

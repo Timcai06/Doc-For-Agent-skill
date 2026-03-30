@@ -23,3 +23,6 @@ landing/dist/
 
 # Antigravity/Gemini may emit a root-level landing report artifact during landing work.
 /landing-page-report.md
+
+# Local installer receipt generated while testing the package in-place.
+/doc-for-agent/INSTALLATION.json

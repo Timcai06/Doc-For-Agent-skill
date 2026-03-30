@@ -1,10 +1,10 @@
 {
-  "platform": "codex",
-  "display_name": "Codex",
+  "platform": "claudecode",
+  "display_name": "Claude Code",
   "install_type": "skill",
   "adapter_kind": "skill",
   "folder_structure": {
-    "root": ".codex",
+    "root": ".claude",
     "skill_path": "skills/doc-for-agent",
     "filename": "SKILL.md"
   },
@@ -15,10 +15,10 @@
   "default_title": "doc-for-agent",
   "default_description": "Project documentation bootstrapper for CLI coding-agent workflows. Supports `agent`, `human`, `dual`, and four-view `quad` outputs from the real repository structure.",
   "quick_reference": false,
-  "script_relpath": ".codex/skills/doc-for-agent/scripts/init_agents_docs.py",
+  "script_relpath": ".claude/skills/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [
-    "Use `docagent init --ai codex` as the recommended product entry for this platform.",
-    "Restart Codex so the new skill is discovered in a fresh session.",
+    "Use `docagent init --ai claudecode` as the recommended product entry for this platform.",
+    "Restart Claude Code so the skill is reloaded in the next session.",
     "Add `--target <repo-root>` when you want repository-local workflow wiring in the same command."
   ]
 }

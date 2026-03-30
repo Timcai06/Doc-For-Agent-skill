@@ -19,9 +19,9 @@
 两步入口模型：全局安装让 skill 对 coding agent 可见，repo-local init 为每个仓库启用工作流。
 临时 Node 上手场景下，`npx -y doc-for-agent init ...` 可合并两步。
 同时把 `doc-for-agent` 定位为“项目文档系统工具”，而不是一次性 markdown 生成器。
-文档输出模型可按用户意图选择：`agent`、`human` 或 `dual`。
-模式映射：`agent` 面向 `AGENTS/`，`human` 面向 `docs/`，`dual` 同时覆盖两者。
-`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。
+文档输出模型可按用户意图选择：`agent`、`human`、`dual`、`quad`。
+模式映射：`agent` 面向 `AGENTS/`，`human` 面向 `docs/`，`dual` 同时覆盖两者，`quad` 覆盖 `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
+`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图布局。
 产品对外叙事是双文档系统，而不是 AGENTS-only。
 
 ## 入口路径

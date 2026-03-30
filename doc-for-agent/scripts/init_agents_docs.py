@@ -85,7 +85,7 @@ def main() -> None:
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
         default="dual",
-        help="Choose which documentation system to generate: agent, human, or dual (recommended default).",
+        help="Choose output set: agent, human, dual, or quad (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`).",
     )
     parser.add_argument(
         "--human-locale",
