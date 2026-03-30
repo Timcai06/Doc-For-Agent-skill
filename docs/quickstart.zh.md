@@ -16,8 +16,8 @@
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
 ## 安装
-
 步骤 1（全局安装）：让 coding agent 能看到这个 skill。
+简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
 
 Node：
 
