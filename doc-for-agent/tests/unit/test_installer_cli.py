@@ -148,7 +148,7 @@ class InstallerCliTests(unittest.TestCase):
             text = stdout.getvalue()
             self.assertIn("doc-for-agent global-install", text)
             self.assertIn(f"Global target root: {Path(tmpdir).resolve()}", text)
-            self.assertIn("Recommended next commands:", text)
+            self.assertIn("Next steps:", text)
 
     def test_doctor_command_prints_summary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:

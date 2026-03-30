@@ -377,7 +377,15 @@ def build_parser() -> argparse.ArgumentParser:
         default="copy",
         help="Skill bundle placement strategy for global install path: copy (default) or symlink.",
     )
-    init_parser.add_argument("--target", help="Optional repository root where assistant folders should also be wired.")
+    init_parser.add_argument(
+        "--target",
+        help="Optional repository root override. If omitted, repository-local wiring uses the current directory.",
+    )
+    init_parser.add_argument(
+        "--no-local",
+        action="store_true",
+        help="Skip repository-local wiring and perform global assistant discovery install only.",
+    )
 
     global_install_parser = subparsers.add_parser(
         "global-install",
@@ -526,8 +534,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         local_target_root: Optional[Path] = None
         local_paths: List[Path] = []
-        if args.target:
-            local_target_root = resolve_target_root(args.target)
+        if not args.no_local:
+            local_target_root = resolve_target_root(args.target or ".")
             local_paths = install_selected_platforms(local_target_root, platforms)
         print_init_summary(global_target_root, platforms, global_paths, local_target_root, local_paths)
         return 0
