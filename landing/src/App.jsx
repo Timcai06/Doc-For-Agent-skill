@@ -5,30 +5,30 @@ const Artifacts = {
   agent: {
     title: "AGENTS/rules.md",
     mode: "Execution-First",
-    status: "Execution Ready",
+    status: "Structural Baseline",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
-    content: `# Agent Execution Rules\n\nUse this skill when performing agentic tasks so the machine can work from a stable, refreshed documentation layer.\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.`
+    content: `# Agent Execution Rules (Baseline)\n\nUse this structural baseline to maintain agent grounding. Content is synchronized with logic evolution via \`docagent refresh\`.\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.`
   },
   agentZh: {
     title: "AGENTS.zh/rules.md",
     mode: "执行优先",
-    status: "基础结构就绪",
+    status: "结构化基线 (已就绪)",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
-    content: `# 智能体执行规则 (基线)\n\n在执行 Agent 任务时提供结构化说明。注：此产物为结构化契约，内容质量取决于初始生成后的刷新循环。\n\n## 核心不变式\n- 交付前验证文档化的命令路径。\n- 在结构变更后通过 refresh 保持同步。\n- 遇到真相来源冲突时，选择上报而非猜测。`
+    content: `# 智能体执行规则 (结构契约)\n\n在执行 Agent 任务时提供结构化说明。注：此产物为结构化契约，内容质量取决于初始生成后的刷新循环。\n\n## 核心不变式\n- 交付前验证文档化的命令路径。\n- 在结构变更后通过 refresh 保持同步。\n- 遇到真相来源冲突时，选择上报而非猜测。`
   },
   human: {
     title: "docs/architecture.md",
     mode: "Strategic-First",
-    status: "Narrative Verified",
+    status: "Narrative Baseline",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
-    content: `# Architecture Overview\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.`
+    content: `# Architecture Overview (Baseline)\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.`
   },
   humanZh: {
     title: "docs.zh/architecture.md",
     mode: "策略优先",
-    status: "基础结构就绪",
+    status: "结构化基线 (已就绪)",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
-    content: `# 架构概览 (基线)\n\n## 结构意图\n本仓库设计为模块化文档引擎。注：此产物为初始结构投影，建议人工校验核心叙词。\n\n## 系统核心\n- **双效同步**: 统一单次分析产生配对产物。\n- **可持续循环**: CLI 驱动的刷新机制，减少偏移。`
+    content: `# 架构概览 (结构契约)\n\n## 结构意图\n本仓库设计为模块化文档引擎。注：此产物为初始结构投影，建议人工校验核心叙词。\n\n## 系统核心\n- **双效同步**: 统一单次分析产生配对产物。\n- **可持续循环**: CLI 驱动的刷新机制，减少偏移。`
   }
 };
 
@@ -36,22 +36,22 @@ const heroCases = [
   {
     index: 0,
     label: 'Global Install',
-    title: 'Registering Agent Skill',
+    title: 'Registering CLI Engine',
     command: 'tim@macBook ~ % npm install -g doc-for-agent@next',
     output: [
       { text: '[step 1/1] Fetching docagent engine...', color: 'var(--text-secondary)' },
       { text: '✓ doc-for-agent installed globally.', color: 'var(--accent)' },
-      { text: '✓ Engine ready for repository initialization.', color: 'var(--accent)' },
+      { text: '✓ Ready for repository-level activation.', color: 'var(--accent)' },
     ]
   },
   {
     index: 1,
     label: 'docagent init',
-    title: 'Baseline Establishment',
+    title: 'Activating Structural Baseline',
     command: 'tim@macBook ~ % docagent init --ai codex',
     output: [
       { text: '[step 1/3] Scanning repository signals...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected low-doc state.', color: 'var(--accent)' },
+      { text: '✓ Detected low-doc codebase state.', color: 'var(--accent)' },
       { text: '[step 2/3] Projecting Four-View Baseline...', color: 'var(--text-secondary)' },
       { text: '  + /AGENTS/ (EN)', color: '#fff' },
       { text: '  + /AGENTS.zh/ (ZH)', color: '#fff' },
@@ -63,15 +63,15 @@ const heroCases = [
   {
     index: 2,
     label: 'docagent refresh',
-    title: 'Knowledge Maintenance',
+    title: 'Continuous Synchronization',
     command: 'tim@macBook ~ % docagent refresh',
     output: [
       { text: '[step 1/2] Detecting logic evolution...', color: 'var(--text-secondary)' },
-      { text: '✓ Found code changes needing sync.', color: 'var(--accent)' },
-      { text: '[step 2/2] Synchronizing paired artifacts...', color: 'var(--text-secondary)' },
-      { text: '  ↺ /AGENTS/ synchronized.', color: '#fff' },
-      { text: '  ↺ /docs/ updated.', color: '#fff' },
-      { text: 'Maintenance cycle complete.', color: 'var(--primary)' },
+      { text: '✓ Identifying code drifts from baseline.', color: 'var(--accent)' },
+      { text: '[step 2/2] Synchronizing dual-doc pair...', color: 'var(--text-secondary)' },
+      { text: '  ↺ /AGENTS/ rules updated.', color: '#fff' },
+      { text: '  ↺ /docs/ narrative refreshed.', color: '#fff' },
+      { text: 'Documentation lifecycle sync complete.', color: 'var(--primary)' },
     ]
   }
 ];
@@ -269,12 +269,12 @@ function App() {
         <a className="brand" href="#hero">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--primary)' }}><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
           <strong>doc-for-agent</strong>
-          <small>v1.2.0 "Systemic"</small>
+          <small>v1.4.0 "@next"</small>
         </a>
         <nav className="nav-links">
-          <a href="#dual-logic">Dual-Doc System</a>
-          <a href="#why-docagent">Why Stability?</a>
-          <a href="#workflow">The Path</a>
+          <a href="#dual-logic">Documentation System</a>
+          <a href="#workflow">Lifecycle Path</a>
+          <a href="#why-docagent">Why Grounding?</a>
           <a className="nav-cta" href="https://github.com/Timcai06/Doc-For-Agent-skill">GitHub</a>
         </nav>
       </header>
@@ -285,11 +285,11 @@ function App() {
           <div className="hero-copy scroll-reveal">
             <div className="badge-technical" style={{ borderRadius: '100px', padding: '6px 16px', marginBottom: '16px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', background: 'rgba(56,189,248,0.05)', fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em' }}>DOCUMENTATION LIFECYCLE CLI</div>
             <h1>
-              The Bridge for <br />
-              <span style={{ color: 'var(--primary)', textShadow: '0 0 30px var(--primary-glow)' }}>Agentic LifeCycle.</span>
+              The Source of Truth for <br />
+              <span style={{ color: 'var(--primary)', textShadow: '0 0 30px var(--primary-glow)' }}>Agentic Workflows.</span>
             </h1>
             <p className="hero-text">
-              Don't leave your Agent's context to chance. <strong>doc-for-agent</strong> transforms messy repositories into a durable, refreshable double-act: <code>/docs/</code> for human strategy, <code>/AGENTS/</code> for machine precision.
+              Don't leave your Agent's memory to chance. <strong>doc-for-agent</strong> establishes a sustainable documentation system: <code>/docs/</code> for humans, <code>/AGENTS/</code> for machines. All synchronized via CLI.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">
@@ -617,24 +617,24 @@ function App() {
           <div className="section-head scroll-reveal">
             <span className="eyebrow">THE SYSTEMIC RECOVERY</span>
             <h2>Install. Init. Refresh.</h2>
-            <p className="feature-desc">Go from a zero-knowledge repository to a deep-context agent workflow in three systemic steps.</p>
+            <p className="feature-desc">Go from a zero-knowledge repository to a deep-context agent workflow in three repeatable steps.</p>
           </div>
           
           <div className="lifecycle-circle-container scroll-reveal">
             <div className="lifecycle-path-v2">
               <div className="l-step step-1">
-                <div className="l-icon">01</div>
+                <div className="l-icon highlight">01</div>
                 <div className="l-info">
-                  <strong>npm install</strong>
-                  <p>Global CLI engine</p>
+                  <strong>npm install -g</strong>
+                  <p>doc-for-agent@next</p>
                 </div>
               </div>
               <div className="l-connector" />
               <div className="l-step step-2">
-                <div className="l-icon">02</div>
+                <div className="l-icon highlight">02</div>
                 <div className="l-info">
                   <strong>docagent init</strong>
-                  <p>Establish Baseline</p>
+                  <p>Structural Baseline</p>
                 </div>
               </div>
               <div className="l-connector" />
@@ -642,8 +642,8 @@ function App() {
                 <div className="l-icon highlight">03</div>
                 <div className="l-info">
                   <strong>docagent refresh</strong>
-                  <p>Neutralize Drift</p>
-                  <span className="loop-indicator">RECURRING</span>
+                  <p>Continuous Alignment</p>
+                  <span className="loop-indicator">SYSTEMIC CYCLE</span>
                 </div>
               </div>
             </div>
