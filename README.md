@@ -9,6 +9,7 @@ It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar
 It supports `agent`, `human`, `dual`, and `quad` outputs.
 Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, `dual` writes both, and `quad` writes `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
+That four-view contract is a structure capability, not a claim that every bilingual view is already complete.
 This is not an AGENTS-only tool: choose output mode by audience.
 
 The product path is short:

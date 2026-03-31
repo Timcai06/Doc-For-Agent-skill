@@ -14,6 +14,7 @@
 `refresh` 支持 `agent`、`human`、`dual`、`quad` 四种文档输出。
 模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出，`quad` -> `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
 `dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图目录契约。
+这项四视图能力强调的是结构目标，不等于每一页双语内容都已经完全打磨完成。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
 ## 安装

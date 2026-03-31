@@ -24,6 +24,7 @@ It also frames `doc-for-agent` as a project documentation system tool rather tha
 The docs output model is `agent`, `human`, `dual`, or `quad` according to user intent.
 Mode map: `agent` for `AGENTS/`, `human` for `docs/`, `dual` for both, and `quad` for `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view layout.
+That four-view layout is the structure direction, not a claim that every bilingual page is already complete.
 The product message is dual-system, not AGENTS-only.
 
 ## Entry Path

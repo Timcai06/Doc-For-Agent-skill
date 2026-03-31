@@ -24,6 +24,7 @@ Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagen
 After init, use `refresh --output-mode agent|human|dual|quad` based on the docs audience.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
+The four-view layout is a structure capability, not a claim that every bilingual view is already complete.
 Platform selection is separate from doc audience: this is not AGENTS-only.
 
 ## Multi-Agent Setup
