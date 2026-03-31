@@ -14,6 +14,7 @@ Think of it as two and a half steps: global install for agent visibility, repo-l
 `refresh` supports `agent`, `human`, `dual`, and `quad` documentation outputs.
 Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
+That four-view contract describes the structure target, not a claim that every bilingual page is already fully polished.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 
 ## Install
