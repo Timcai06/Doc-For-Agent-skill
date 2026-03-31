@@ -4,6 +4,8 @@ Language: English | [简体中文](landing-page.zh.md)
 
 This repository now includes a React landing page prototype for the public-facing product surface.
 
+Public URL slot: replace this note with the real public landing URL when it is published. Until then, this document stays the stable repo entry for landing-related messaging.
+
 ## Location
 
 - `landing/`

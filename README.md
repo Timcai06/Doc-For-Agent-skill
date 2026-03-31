@@ -4,7 +4,8 @@ English | [简体中文](README.zh.md)
 
 [![doc-for-agent landing preview](landing/public/assets/after_clean.png)](docs/landing-page.md)
 
-Open the landing page overview: [docs/landing-page.md](docs/landing-page.md)
+Public landing URL: add here when it is published.
+Current landing entry doc: [docs/landing-page.md](docs/landing-page.md)
 
 `doc-for-agent` is a unified CLI for CLI coding-agent users.
 
@@ -48,7 +49,7 @@ docagent init --ai codex
 docagent init --ai claudecode
 ```
 
-Use `--target <repo-root>` when you want the same command to wire a specific repository workflow. One-off `npx -y doc-for-agent init ...` still combines install and init for temporary use.
+Use `--target <repo-root>` when you want the same command to wire a specific repository workflow.
 
 Need a guided doc entry map? Run:
 

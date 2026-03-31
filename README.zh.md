@@ -4,7 +4,8 @@
 
 [![doc-for-agent 落地页预览](landing/public/assets/after_clean.png)](docs/landing-page.zh.md)
 
-访问落地页说明：[docs/landing-page.zh.md](docs/landing-page.zh.md)
+公网 landing URL：发布后补在这里。
+当前落地入口文档：[docs/landing-page.zh.md](docs/landing-page.zh.md)
 
 `doc-for-agent` 是一个面向 CLI coding-agent 用户的统一 CLI。
 
@@ -48,7 +49,7 @@ docagent init --ai codex
 docagent init --ai claudecode
 ```
 
-如需在同一个命令里同时接线当前仓库，添加 `--target <repo-root>`。一次性 `npx -y doc-for-agent init ...` 仍可用于临时场景。
+如需在同一个命令里同时接线当前仓库，添加 `--target <repo-root>`。
 
 如果你需要按步骤的文档入口图，先运行：
 
