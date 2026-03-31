@@ -2,62 +2,76 @@ import React, { useEffect, useState } from 'react';
 
 // --- Icon Components (Inline SVG) ---
 const Artifacts = {
-  human: {
-    title: "docs/architecture.md",
-    mode: "Strategic-First",
-    status: "Narrative Verified",
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
-    content: `# Architecture Overview\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.\n\n## Human Handoff\nNarratives are maintained as high-level maps, ensuring every team member stays aligned with the machine rules.`
-  },
   agent: {
     title: "AGENTS/rules.md",
     mode: "Execution-First",
     status: "Execution Ready",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
-    content: `# Agent Execution Rules\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.\n\n## Execution Context\n- Root Path: ./\n- Mode: layer-aware execution guidance`
+    content: `# Agent Execution Rules\n\nUse this skill when performing agentic tasks so the machine can work from a stable, refreshed documentation layer.\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.`
+  },
+  agentZh: {
+    title: "AGENTS.zh/rules.md",
+    mode: "执行优先",
+    status: "基础结构就绪",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
+    content: `# 智能体执行规则 (基线)\n\n在执行 Agent 任务时提供结构化说明。注：此产物为结构化契约，内容质量取决于初始生成后的刷新循环。\n\n## 核心不变式\n- 交付前验证文档化的命令路径。\n- 在结构变更后通过 refresh 保持同步。\n- 遇到真相来源冲突时，选择上报而非猜测。`
+  },
+  human: {
+    title: "docs/architecture.md",
+    mode: "Strategic-First",
+    status: "Narrative Verified",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
+    content: `# Architecture Overview\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.`
+  },
+  humanZh: {
+    title: "docs.zh/architecture.md",
+    mode: "策略优先",
+    status: "基础结构就绪",
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
+    content: `# 架构概览 (基线)\n\n## 结构意图\n本仓库设计为模块化文档引擎。注：此产物为初始结构投影，建议人工校验核心叙词。\n\n## 系统核心\n- **双效同步**: 统一单次分析产生配对产物。\n- **可持续循环**: CLI 驱动的刷新机制，减少偏移。`
   }
 };
 
 const heroCases = [
   {
     index: 0,
-    label: 'docagent init',
-    title: 'Baseline Establishment',
-    command: 'tim@macBook ~ % docagent init --target . --ai all',
+    label: 'Global Install',
+    title: 'Registering Agent Skill',
+    command: 'tim@macBook ~ % npm install -g doc-for-agent@next',
     output: [
-      { text: '[step 1/3] Scanning repository for knowledge signals...', color: 'var(--text-secondary)' },
-      { text: '✓ Detected low-doc state with scattered READMEs.', color: 'var(--accent)' },
-      { text: '[step 2/3] Building dual-doc baseline...', color: 'var(--text-secondary)' },
-      { text: '  + /AGENTS/ (execution context)', color: '#fff' },
-      { text: '  + /docs/   (human narrative guides)', color: '#fff' },
-      { text: '[step 3/3] Baseline established for supported CLI agent workflows.', color: 'var(--accent)' },
-      { text: 'Ready for install -> init -> refresh.', color: 'var(--primary)' },
+      { text: '[step 1/1] Fetching docagent engine...', color: 'var(--text-secondary)' },
+      { text: '✓ doc-for-agent installed globally.', color: 'var(--accent)' },
+      { text: '✓ Engine ready for repository initialization.', color: 'var(--accent)' },
     ]
   },
   {
     index: 1,
-    label: 'docagent refresh',
-    title: 'Knowledge Maintenance',
-    command: 'tim@macBook ~ % docagent refresh --root . --output-mode dual',
+    label: 'docagent init',
+    title: 'Baseline Establishment',
+    command: 'tim@macBook ~ % docagent init --ai codex',
     output: [
-      { text: '[step 1/2] Detecting changes affecting paired guidance...', color: 'var(--text-secondary)' },
-      { text: '✓ Found code changes that require synced docs updates.', color: 'var(--accent)' },
-      { text: '[step 2/2] Synchronizing paired artifacts...', color: 'var(--text-secondary)' },
-      { text: '  ↺ /AGENTS/ execution context synchronized.', color: '#fff' },
-      { text: '  ↺ /docs/ human guides updated.', color: '#fff' },
-      { text: 'Refresh complete. Dual-doc outputs synchronized.', color: 'var(--primary)' },
+      { text: '[step 1/3] Scanning repository signals...', color: 'var(--text-secondary)' },
+      { text: '✓ Detected low-doc state.', color: 'var(--accent)' },
+      { text: '[step 2/3] Projecting Four-View Baseline...', color: 'var(--text-secondary)' },
+      { text: '  + /AGENTS/ (EN)', color: '#fff' },
+      { text: '  + /AGENTS.zh/ (ZH)', color: '#fff' },
+      { text: '  + /docs/   (EN)', color: '#fff' },
+      { text: '  + /docs.zh/   (ZH)', color: '#fff' },
+      { text: '[step 3/3] Baseline established as structural contract.', color: 'var(--accent)' },
     ]
   },
   {
     index: 2,
-    label: 'docagent doctor',
-    title: 'System Health Audit',
-    command: 'tim@macBook ~ % docagent doctor --target .',
+    label: 'docagent refresh',
+    title: 'Knowledge Maintenance',
+    command: 'tim@macBook ~ % docagent refresh',
     output: [
-      { text: '[step 1/1] Auditing install and documentation integrity...', color: 'var(--text-secondary)' },
-      { text: '✓ Skill bundles and install targets found.', color: 'var(--accent)' },
-      { text: '✓ Refresh path is available for this repository.', color: 'var(--accent)' },
-      { text: 'Status: install state looks healthy.', color: 'var(--primary)' },
+      { text: '[step 1/2] Detecting logic evolution...', color: 'var(--text-secondary)' },
+      { text: '✓ Found code changes needing sync.', color: 'var(--accent)' },
+      { text: '[step 2/2] Synchronizing paired artifacts...', color: 'var(--text-secondary)' },
+      { text: '  ↺ /AGENTS/ synchronized.', color: '#fff' },
+      { text: '  ↺ /docs/ updated.', color: '#fff' },
+      { text: 'Maintenance cycle complete.', color: 'var(--primary)' },
     ]
   }
 ];
@@ -212,13 +226,13 @@ function App() {
       name: 'Claude Code',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
       integration: 'docagent init --ai claudecode',
-      description: 'Installs the Claude-facing skill path and keeps repository guidance aligned through the same dual-doc engine.'
+      description: 'Establishes the structural baseline for Claude Code to maintain repository grounding.'
     },
     codex: {
       name: 'Codex',
       icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" x2="15" y1="9" y2="15"/><line x1="15" x2="9" y1="9" y2="15"/></svg>,
       integration: 'docagent init --ai codex',
-      description: 'Installs the Codex-facing skill bundle and keeps execution guidance aligned with the same repository analysis.'
+      description: 'Installs the Codex-facing skill bundle to keep execution rules aligned with logic evolution.'
     },
     continue: {
       name: 'Continue',
@@ -522,26 +536,19 @@ function App() {
           
           <div className="artifact-viewer scroll-reveal premium-viewer">
             <div className="viewer-tabs sidebar-tabs">
-              <button 
-                className={`tab ${activeArtifact === 'agent' ? 'active' : ''}`} 
-                onClick={() => setActiveArtifact('agent')}
-              >
-                <div className="tab-pill-icon">{Artifacts.agent.icon}</div>
-                <div className="tab-label-group">
-                  <strong>AGENTS/context</strong>
-                  <small>Execution Rules</small>
-                </div>
-              </button>
-              <button 
-                className={`tab ${activeArtifact === 'human' ? 'active' : ''}`} 
-                onClick={() => setActiveArtifact('human')}
-              >
-                <div className="tab-pill-icon" style={{ color: 'var(--accent)' }}>{Artifacts.human.icon}</div>
-                <div className="tab-label-group">
-                  <strong>docs/narrative</strong>
-                  <small>Human Guide</small>
-                </div>
-              </button>
+              {['agent', 'agentZh', 'human', 'humanZh'].map(key => (
+                <button 
+                  key={key}
+                  className={`tab ${activeArtifact === key ? 'active' : ''}`} 
+                  onClick={() => setActiveArtifact(key)}
+                >
+                  <div className="tab-pill-icon">{Artifacts[key].icon}</div>
+                  <div className="tab-label-group">
+                    <strong>{Artifacts[key].title}</strong>
+                    <small>{Artifacts[key].mode}</small>
+                  </div>
+                </button>
+              ))}
             </div>
             
             <div className="viewer-window browser">
@@ -747,10 +754,10 @@ function App() {
             <div className="mega-install-container">
               <div className="install-box mega">
                 <span className="install-prompt">$</span>
-                <code>npm install -g doc-for-agent</code>
+                <code>npm install -g doc-for-agent@next</code>
                 <div className="install-glow" />
               </div>
-              <p className="install-hint">Works with Claude Code, Codex, Continue, and Copilot.</p>
+              <p className="install-hint">Ground your repository with <code>docagent init --ai codex</code></p>
             </div>
           </div>
         </section>
