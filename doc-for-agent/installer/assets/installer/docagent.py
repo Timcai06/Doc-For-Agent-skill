@@ -314,6 +314,14 @@ def print_update_summary(target_root: Path, platforms: Sequence[str], installed_
     print("- Restart the relevant assistant if it was already running.")
 
 
+def recommended_init_followup_command(installer_command: str, platforms: Sequence[str]) -> str:
+    if len(platforms) == 1 and platforms[0] == DEFAULT_GLOBAL_PLATFORM:
+        return f"{installer_command} init --target <repo-root>"
+    if len(platforms) == 1:
+        return f"{installer_command} init --ai {platforms[0]} --target <repo-root>"
+    return f"{installer_command} init --ai all --target <repo-root>"
+
+
 def print_global_install_summary(
     global_target_root: Path,
     platforms: Sequence[str],
@@ -332,9 +340,8 @@ def print_global_install_summary(
         print(f"- {path}")
     print("Next steps:")
     print("- Restart the relevant assistant so global skill discovery refreshes.")
-    print(
-        f"- For a specific repository workflow, run `{metadata.installer_command} init --ai {platforms[0]} --target <repo-root>`."
-    )
+    followup = recommended_init_followup_command(metadata.installer_command, platforms)
+    print(f"- For a specific repository workflow, run `{followup}`.")
 
 
 def build_parser() -> argparse.ArgumentParser:

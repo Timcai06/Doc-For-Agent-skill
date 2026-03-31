@@ -220,6 +220,42 @@ def collect_output_plan(
     return planned, archive_candidates
 
 
+def _relative_file_set_under_root(files: Dict[str, str], root_dir: Path) -> set[str]:
+    relative_paths: set[str] = set()
+    resolved_root = root_dir.resolve()
+    for absolute_path in files:
+        try:
+            relative = Path(absolute_path).resolve().relative_to(resolved_root)
+        except ValueError:
+            continue
+        relative_paths.add(str(relative).replace("\\", "/"))
+    return relative_paths
+
+
+def validate_output_contract(root: Path, output_mode: str, files: Dict[str, str]) -> None:
+    if output_mode != "quad":
+        return
+
+    agents_en_root = root / resolve_agent_output_root("en")
+    agents_zh_root = root / resolve_agent_output_root("zh")
+    docs_en_root = root / resolve_human_output_root("en")
+    docs_zh_root = root / resolve_human_output_root("zh")
+
+    agents_en_files = _relative_file_set_under_root(files, agents_en_root)
+    agents_zh_files = _relative_file_set_under_root(files, agents_zh_root)
+    docs_en_files = _relative_file_set_under_root(files, docs_en_root)
+    docs_zh_files = _relative_file_set_under_root(files, docs_zh_root)
+
+    if not agents_en_files or not agents_zh_files or not docs_en_files or not docs_zh_files:
+        raise ValueError(
+            "Quad output contract violation: expected non-empty AGENTS/, AGENTS.zh/, docs/, and docs.zh/ outputs."
+        )
+    if agents_en_files != agents_zh_files:
+        raise ValueError("Quad output contract violation: AGENTS/ and AGENTS.zh/ must have symmetric file paths.")
+    if docs_en_files != docs_zh_files:
+        raise ValueError("Quad output contract violation: docs/ and docs.zh/ must have symmetric file paths.")
+
+
 def build_generation_plan(request: EngineRequest) -> GenerationPlan:
     normalized_request = normalize_engine_request(request)
     analysis = analyze_repo(
@@ -235,6 +271,7 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
         normalized_request.human_locale,
         normalized_request.human_template_variant,
     )
+    validate_output_contract(normalized_request.root, normalized_request.output_mode, files)
     agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
     docs_dir = normalized_request.root / resolve_human_output_root(normalized_request.human_locale)
     if normalized_request.output_mode == "quad":
