@@ -34,7 +34,9 @@ npm install -g doc-for-agent@next
 pipx install doc-for-agent
 ```
 
-Then initialize the agent skill:
+Start in a repository:
+Step 2 (repo-local init): enable the workflow in the target repository.
+One-off `npx -y doc-for-agent init ...` combines both steps for temporary use. `refresh` remains the next step when you want docs written.
 
 ```bash
 docagent init --ai codex

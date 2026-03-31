@@ -34,7 +34,9 @@ npm install -g doc-for-agent@next
 pipx install doc-for-agent
 ```
 
-然后初始化 agent skill：
+在仓库中开始：
+步骤 2（repo-local init）：在目标仓库启用工作流。
+一次性 `npx -y doc-for-agent init ...` 可在临时场景下合并这两步；如果你要真正写出文档，后一步仍然是执行 `refresh`。
 
 ```bash
 docagent init --ai codex

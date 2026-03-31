@@ -6,7 +6,9 @@
 入口链路位置：本页位于 `README.md` -> `docs/landing-page.zh.md` -> `docs/quickstart.zh.md` 之后。
 两步模型：全局安装让 skill 对 agent 可见，repo-local init 启用当前仓库工作流。
 `refresh` 是 init 之后的“半步”：当你需要写入或更新 agent docs、human docs 或两者时再执行它。
-临时 Node 场景下，`npx -y doc-for-agent init ...` 可合并两步。
+临时 Node 场景下，`npx -y doc-for-agent init ...` 可合并前两步；`refresh` 仍然是独立的后一步。
+仅当你在仓库外为特定仓库接线时，才需要 `--target <repo-root>`。
+简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
 
 ## 平台矩阵
 

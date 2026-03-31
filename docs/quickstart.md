@@ -37,7 +37,7 @@ One-off Node start (no global install):
 ```bash
 npx -y doc-for-agent init --ai all --target <repo-root>
 ```
-This one-off command combines global install and repo-local init for temporary use.
+This one-off command combines global install and repo-local init for temporary use. `refresh` still comes after it when you want docs generated or updated.
 
 If you only need one platform, replace `all` with `claudecode`, `codex`, `continue`, or `copilot`.
 
