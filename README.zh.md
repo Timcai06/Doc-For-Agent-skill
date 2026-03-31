@@ -2,6 +2,10 @@
 
 [English](README.md) | 简体中文
 
+[![doc-for-agent 落地页预览](landing/public/assets/after_clean.png)](docs/landing-page.zh.md)
+
+访问落地页说明：[docs/landing-page.zh.md](docs/landing-page.zh.md)
+
 `doc-for-agent` 是一个面向 CLI coding-agent 用户的统一 CLI。
 
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。

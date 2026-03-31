@@ -2,6 +2,10 @@
 
 English | [简体中文](README.zh.md)
 
+[![doc-for-agent landing preview](landing/public/assets/after_clean.png)](docs/landing-page.md)
+
+Open the landing page overview: [docs/landing-page.md](docs/landing-page.md)
+
 `doc-for-agent` is a unified CLI for CLI coding-agent users.
 
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
