@@ -1,4 +1,4 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# 智能体核心架构总览 Entry
 
 ## Purpose
 
@@ -30,7 +30,7 @@
 ## Current Operating Posture
 
 - Keep the skill definition, generator behavior, and generated documentation in sync.
-- Current classification: `skill/meta repository` with `medium` confidence.
+- Current classification: `技能/元数据类仓库` with `medium` confidence.
 
 ## Canonical Fact Sources
 

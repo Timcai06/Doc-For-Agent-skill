@@ -1,4 +1,4 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# Glossary
 
 ## Confirmed Terms
 
@@ -9,10 +9,10 @@
 - Keep user-facing names, commands, and labels consistent across docs and scripts.
 - Prefer canonical project terms over ad-hoc synonyms.
 
-## 全局上下文信息提炼
+## 全局上下文提炼
 
-- 已扫描分析底层信源数量：`0`
-- 成功提炼主张：`0` 条确认, `0` 条矛盾, `0` 条未决
+- 已分析信源数量：`0`
+- 成功提炼结论：`0` 条确认，`0` 条矛盾，`0` 条未决
 - No supporting docs matched this role; content below is derived from repository structure and code signals.
 
 ## Candidate Terms From Code Signals
@@ -25,11 +25,11 @@
 
 ## Unresolved Terminology Items
 
-- No unresolved terminology or memory items were synthesized from supporting docs.
+- No unresolved terminology or memory items were synthesized .
 
 ## Conflicting Terminology Signals
 
-- No conflicting terminology signals were synthesized from supporting docs.
+- No conflicting terminology signals were synthesized .
 
 ## 文档刷新触发条件
 
@@ -39,10 +39,10 @@
 
 ## 文档日常维护流
 
-- Assign one maintainer owner for this document and update it in the same pull request as behavior changes.
-- Review this document at least once per sprint or before each release cut.
+- 为此文档分配一名维护责任人 and update it in the same pull request as behavior changes.
+- 每个 Sprint 至少评审一次此文档 or before each release cut.
 - Update when terminology, handoff language, or project status vocabulary changes.
-- No major synthesis conflicts were detected; focus on keeping this page current with implementation changes.
+- 未检测到严重的规则提炼冲突; focus on keeping this page current with implementation changes.
 
 ## 冷启动阶段待办 (When Docs Are Thin)
 

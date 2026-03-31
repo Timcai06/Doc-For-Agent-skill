@@ -1,17 +1,17 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# Workflows
 
 ## 核心护栏与顶层规则 (首读必看)
 
-- 第一要则： Execution contract: `docagent init --ai codex` -> `docagent refresh --root <repo-root> --output-mode agent|human|dual|quad` -> `docagent doctor --target <repo-root>` is the documented command order for setup, sync, and drift checks.
-- 第二要则： Verification gate: workflow changes are not complete until `docagent doctor --target <repo-root>` pass.
-- 第三要则： Execution constraints: keep `--target <repo-root>` explicit when commands run outside the target repo; keep `--output-mode agent` consistent across refresh runs; declare `--ai <platform>` explicitly so platform routing stays deterministic.
-- 第四要则： Verification order: 1) `docagent doctor --target <repo-root>`; stop at the first failing command before running later checks.
+- 第一原则： 执行契约： `docagent init --ai codex` -> `docagent refresh --root <repo-root> --output-mode agent|human|dual|quad` -> `docagent doctor --target <repo-root>` is the documented command order for setup, sync, and drift checks.
+- 第二原则： 验证关卡： workflow changes are not complete until `docagent doctor --target <repo-root>` pass.
+- 第三原则： 执行约束条件： keep `--target <repo-root>` explicit when commands run outside the target repo; keep `--output-mode agent` consistent across refresh runs; declare `--ai <platform>` explicitly so platform routing stays deterministic.
+- 第四原则： 验证顺序： 1) `docagent doctor --target <repo-root>`; stop at the first failing command before running later checks.
 
 ## 文档与执行层契约
 
-- This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode and `human.zh/` as the human-view root.
-- Update this page in the same PR as behavior changes; avoid narrative-only refreshes without command or contract changes.
-- Keep setup/run/verify/triage order executable from a clean checkout before marking this page done.
+- 本页面是该领域面向维护者的真相源; 保持其在双重模式下与 `AGENTS/` 的同步 and `human.zh/` 作为人类视角的根目录.
+- 在代码行为变更的同一个 PR 中同步更新此页面; 避免在没有命令或契约更改的情况下进行纯叙述性的刷新.
+- 保持 安装/运行/验证/排障 命令序列在干净环境下可执行 from a clean checkout before marking this page done.
 
 ## 双重视图对齐检查清单
 
@@ -26,16 +26,16 @@
 - Quad-mode contract: when using `--output-mode quad`, validate all four roots (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`) in the same review cycle.
 - Execution pairing rule: if `human.zh/workflows.md` changes due to command/order updates, refresh paired execution paths under both AGENTS roots.
 
-## 双向绑定契约 (执行规则)
+## 双视图强制对齐契约
 
 - Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.
-- Locale-output rule: human locale `zh` maps to `human.zh/`.
+- Locale-output rule: 中文语言包 `zh` 映射至 `human.zh/` 目录.
 - Template rule: human template variant `paired-core` is part of the pairing contract and must remain consistent across paired docs.
-- Path pair rule: `human.zh/workflows.md` pairs with `AGENTS/03-execution/008-implementation-plan.md` for setup, verify, and failure-triage order.
+- 路径对齐规则：`human.zh/workflows.md` 与 `AGENTS/03-execution/008-implementation-plan.md` 结对，用于 setup, verify, and failure-triage order.
 
-## 结对的 Agent 文档 (双向模式)
+## Paired Agent Docs (Dual Mode)
 
-- `AGENTS/03-execution/008-implementation-plan.md` for setup, verify, and failure-triage order.
+- `AGENTS/03-execution/008-implementation-plan.md` 安装、验证与排障顺序.
 
 ## 边界定义：人读区 vs 机读区
 
@@ -43,7 +43,7 @@
 - If a change affects both reader types, update both systems in one dual refresh cycle instead of patching only one side.
 - Keep maintainer runbook context in `human.zh/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs).
 
-## 双重视图设计逻辑
+## 双向视图设计逻辑
 
 - `human.zh/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.
 - When the two views diverge, treat it as refresh drift rather than independent documentation authority.
@@ -68,32 +68,32 @@ python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py'
 python3 doc-for-agent/tests/verify_generator_snapshots.py
 ```
 
-## 全局上下文信息提炼
+## 全局上下文提炼
 
-- 已扫描分析底层信源数量：`5`
-- 成功提炼主张：`6` 条确认, `0` 条矛盾, `0` 条未决
+- 已分析信源数量：`5`
+- 成功提炼结论：`6` 条确认，`0` 条矛盾，`0` 条未决
 
-## 仓库知识体系健康度
+## 仓库知识健康度
 
-### 100% 确凿基准规则库
+### 核心确立的规则库
 
-- Execution contract: `docagent init --ai codex` -> `docagent refresh --root <repo-root> --output-mode agent|human|dual|quad` -> `docagent doctor --target <repo-root>` is the documented command order for setup, sync, and drift checks.
-- Verification gate: workflow changes are not complete until `docagent doctor --target <repo-root>` pass.
-- Execution constraints: keep `--target <repo-root>` explicit when commands run outside the target repo; keep `--output-mode agent` consistent across refresh runs; declare `--ai <platform>` explicitly so platform routing stays deterministic.
-- Verification order: 1) `docagent doctor --target <repo-root>`; stop at the first failing command before running later checks.
-- Failure triage priority: 1) run `docagent doctor` first to catch install/config drift; 2) reconcile command context with `README.md`; 3) cross-check setup assumptions in `docs/quickstart.md`; 4) inspect CI logs for command/environment mismatches; 5) if failures persist, roll back generated docs to last known-good state and rerun `docagent refresh`.
+- 执行契约： `docagent init --ai codex` -> `docagent refresh --root <repo-root> --output-mode agent|human|dual|quad` -> `docagent doctor --target <repo-root>` is the documented command order for setup, sync, and drift checks.
+- 验证关卡： workflow changes are not complete until `docagent doctor --target <repo-root>` pass.
+- 执行约束条件： keep `--target <repo-root>` explicit when commands run outside the target repo; keep `--output-mode agent` consistent across refresh runs; declare `--ai <platform>` explicitly so platform routing stays deterministic.
+- 验证顺序： 1) `docagent doctor --target <repo-root>`; stop at the first failing command before running later checks.
+- 失败排查优先级： 1) run `docagent doctor` first to catch install/config drift; 2) reconcile command context with `README.md`; 3) cross-check setup assumptions in `docs/quickstart.md`; 4) inspect CI logs for command/environment mismatches; 5) if failures persist, roll back generated docs to last known-good state and rerun `docagent refresh`.
 
 ### 高价值辅助参考信号
 
-- Primary command workflow centers on `npm` package scripts and repository-local verify commands.
+- 核心命令流工作流集中于 `npm` package scripts and repository-local verify commands.
 
 ### 尚未决策的高风险清单
 
-- No unresolved execution items were synthesized from supporting docs.
+- 未检测到未决的执行项 .
 
 ### 矛盾与冲突预警监控
 
-- No direct execution conflicts were synthesized from supporting docs.
+- 未检测到直接的执行冲突 .
 
 ## 运维与上线防坑记录
 
@@ -101,15 +101,15 @@ python3 doc-for-agent/tests/verify_generator_snapshots.py
 
 ## 文档刷新触发条件
 
-- When setup/run/verify commands change, update this runbook immediately.
-- When CI checks or release gates change, sync the Verify and Operational Notes sections.
+- 当 安装/运行/验证 命令变更时，请立即更新此手册.
+- 当 CI 检查或发布门禁变更时，请同步更新验证与运维部分.
 
 ## 文档日常维护流
 
-- Assign one maintainer owner for this document and update it in the same pull request as behavior changes.
-- Review this document at least once per sprint or before each release cut.
+- 为此文档分配一名维护责任人 and update it in the same pull request as behavior changes.
+- 每个 Sprint 至少评审一次此文档 or before each release cut.
 - Update after setup/run/verify command changes or CI workflow updates.
-- No major synthesis conflicts were detected; focus on keeping this page current with implementation changes.
+- 未检测到严重的规则提炼冲突; focus on keeping this page current with implementation changes.
 
 ## 冷启动阶段待办 (When Docs Are Thin)
 

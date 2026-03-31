@@ -1,6 +1,6 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# Tech Stack
 
-## Confirmed Facts
+## 已确认的客观事实
 
 - Repo type: `skill-meta`.
 - Doc profile: `layered`.

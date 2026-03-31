@@ -1,4 +1,4 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# Frontend Guidelines
 
 ## Guidance
 

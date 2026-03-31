@@ -1,4 +1,4 @@
-<!-- @Agent: This is an automatically generated structural skeleton in English. Please translate the entire content below into professional Chinese (zh-CN) immediately, while preserving all markdown formatting, file names, and code blocks. -->
+# Lessons
 
 ## Durable Lessons
 
@@ -12,15 +12,15 @@
 
 ### 已确认的基准主张
 
-- No clear historical lessons were synthesized from supporting docs.
+- No clear historical lessons were synthesized .
 
 ### 待清理的矛盾点
 
-- No direct historical conflicts were synthesized from supporting docs.
+- No direct historical conflicts were synthesized .
 
 ### 悬而未决的问题
 
-- No unresolved historical items were synthesized from supporting docs.
+- No unresolved historical items were synthesized .
 
 ## Referenced Historical Docs
 
