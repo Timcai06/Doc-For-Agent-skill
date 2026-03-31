@@ -5,8 +5,11 @@ __pycache__/
 .coverage
 .venv/
 
-# Generated AGENTS output for this repository root only.
-/AGENTS/
+# AGENTS/ and human/ outputs are now committed to the repo for visibility.
+# /AGENTS/
+# /AGENTS.zh/
+# /human/
+# /human.zh/
 
 # Local build and packaging artifacts.
 /build/
