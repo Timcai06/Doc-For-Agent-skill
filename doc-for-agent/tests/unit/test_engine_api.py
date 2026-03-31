@@ -106,7 +106,43 @@ class EngineApiTests(unittest.TestCase):
                 str(root / "docs.zh" / "architecture.md"): "human zh mismatch",
             }
             with self.assertRaises(ValueError):
-                validate_output_contract(root, "quad", files)
+                validate_output_contract(root, "generate", "quad", "en", files, root / "AGENTS")
+
+    def test_validate_output_contract_rejects_mixed_locale_paths_for_dual_mode(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-locale-contract-") as tmpdir:
+            root = Path(tmpdir)
+            files = {
+                str(root / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
+                str(root / "docs.zh" / "overview.md"): "human zh",
+                str(root / "docs" / "overview.md"): "unexpected en doc path",
+            }
+            with self.assertRaises(ValueError):
+                validate_output_contract(root, "generate", "dual", "zh", files, root / "AGENTS")
+
+    def test_refresh_dual_is_rejected_after_quad_footprint_exists(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-refresh-quad-footprint-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="quad",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            with self.assertRaises(ValueError):
+                build_generation_plan(
+                    EngineRequest(
+                        root=sandbox_root,
+                        mode="refresh",
+                        output_mode="dual",
+                        profile="layered",
+                    )
+                )
 
     def test_migrate_mode_uses_refresh_write_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-migrate-") as tmpdir:

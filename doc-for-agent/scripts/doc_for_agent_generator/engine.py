@@ -232,7 +232,60 @@ def _relative_file_set_under_root(files: Dict[str, str], root_dir: Path) -> set[
     return relative_paths
 
 
-def validate_output_contract(root: Path, output_mode: str, files: Dict[str, str]) -> None:
+def validate_refresh_pairing_contract(root: Path, mode: str, output_mode: str) -> None:
+    if mode != "refresh" or output_mode == "quad":
+        return
+    has_quad_agent_root = (root / resolve_agent_output_root("zh")).exists()
+    has_quad_human_root = (root / resolve_human_output_root("zh")).exists()
+    if has_quad_agent_root or has_quad_human_root:
+        raise ValueError(
+            "Paired refresh contract violation: repository already has quad outputs (`AGENTS.zh/` or `docs.zh/`). "
+            "Use `--output-mode quad` for refresh so paired roots stay synchronized."
+        )
+
+
+def _validate_mode_path_contract(
+    root: Path,
+    output_mode: str,
+    human_locale: str,
+    files: Dict[str, str],
+    agent_root: Path,
+) -> None:
+    mode_roots: list[Path]
+    if output_mode == "agent":
+        mode_roots = [agent_root]
+    elif output_mode == "human":
+        mode_roots = [root / resolve_human_output_root(human_locale)]
+    elif output_mode == "dual":
+        mode_roots = [agent_root, root / resolve_human_output_root(human_locale)]
+    else:
+        mode_roots = [
+            root / resolve_agent_output_root("en"),
+            root / resolve_agent_output_root("zh"),
+            root / resolve_human_output_root("en"),
+            root / resolve_human_output_root("zh"),
+        ]
+
+    for absolute_path in files:
+        path = Path(absolute_path).resolve()
+        if any(path.is_relative_to(expected_root.resolve()) for expected_root in mode_roots):
+            continue
+        expected = ", ".join(str(item) for item in mode_roots)
+        raise ValueError(
+            f"Output path contract violation for `{output_mode}` mode: `{path}` is outside expected roots: {expected}"
+        )
+
+
+def validate_output_contract(
+    root: Path,
+    mode: str,
+    output_mode: str,
+    human_locale: str,
+    files: Dict[str, str],
+    agent_root: Path,
+) -> None:
+    validate_refresh_pairing_contract(root, mode, output_mode)
+    _validate_mode_path_contract(root, output_mode, human_locale, files, agent_root)
     if output_mode != "quad":
         return
 
@@ -271,8 +324,15 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
         normalized_request.human_locale,
         normalized_request.human_template_variant,
     )
-    validate_output_contract(normalized_request.root, normalized_request.output_mode, files)
     agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
+    validate_output_contract(
+        normalized_request.root,
+        normalized_request.mode,
+        normalized_request.output_mode,
+        normalized_request.human_locale,
+        files,
+        agents_dir,
+    )
     docs_dir = normalized_request.root / resolve_human_output_root(normalized_request.human_locale)
     if normalized_request.output_mode == "quad":
         agents_dir = normalized_request.root / resolve_agent_output_root("en")

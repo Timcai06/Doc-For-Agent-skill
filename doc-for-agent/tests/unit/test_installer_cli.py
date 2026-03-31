@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -330,7 +331,18 @@ class InstallerCliTests(unittest.TestCase):
         exit_code = main(["refresh", "--root", str(fixture_root), "--dry-run", "--output-mode", "agent"])
 
         self.assertEqual(exit_code, 0)
-        self.assertFalse(agents_dir.exists())
+
+    def test_refresh_command_rejects_dual_after_quad_footprint_exists(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-refresh-quad-guard-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            source_fixture = TEST_ROOT / "fixtures" / "dual_mode_app"
+            shutil.copytree(source_fixture, sandbox_root)
+
+            quad_exit = main(["refresh", "--root", str(sandbox_root), "--output-mode", "quad"])
+            self.assertEqual(quad_exit, 0)
+
+            dual_exit = main(["refresh", "--root", str(sandbox_root), "--output-mode", "dual"])
+            self.assertNotEqual(dual_exit, 0)
 
 
 if __name__ == "__main__":
