@@ -149,6 +149,18 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("doc-for-agent global-install", text)
             self.assertIn(f"Global target root: {Path(tmpdir).resolve()}", text)
             self.assertIn("Next steps:", text)
+            self.assertIn("docagent init --target <repo-root>", text)
+            self.assertNotIn("docagent init --ai codex --target <repo-root>", text)
+
+    def test_global_install_non_default_platform_keeps_explicit_ai_flag(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-global-install-claude-") as tmpdir:
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(["global-install", "--ai", "claudecode", "--global-root", tmpdir])
+
+            self.assertEqual(exit_code, 0)
+            text = stdout.getvalue()
+            self.assertIn("docagent init --ai claudecode --target <repo-root>", text)
 
     def test_doctor_command_prints_summary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:

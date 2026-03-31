@@ -18,6 +18,7 @@ from doc_for_agent_generator.engine import (  # noqa: E402
     build_generation_plan,
     effective_profile_for_mode,
     execute_engine_request,
+    validate_output_contract,
     write_strategy_for_mode,
 )
 
@@ -94,6 +95,18 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").exists())
             self.assertTrue((sandbox_root / "docs" / "overview.md").exists())
             self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
+
+    def test_validate_output_contract_rejects_asymmetric_quad_plan(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-quad-contract-") as tmpdir:
+            root = Path(tmpdir)
+            files = {
+                str(root / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
+                str(root / "AGENTS.zh" / "00-entry" / "AGENTS.md"): "agent zh",
+                str(root / "docs" / "overview.md"): "human en",
+                str(root / "docs.zh" / "architecture.md"): "human zh mismatch",
+            }
+            with self.assertRaises(ValueError):
+                validate_output_contract(root, "quad", files)
 
     def test_migrate_mode_uses_refresh_write_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-migrate-") as tmpdir:
