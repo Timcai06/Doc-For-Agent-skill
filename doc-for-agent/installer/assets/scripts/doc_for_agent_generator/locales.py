@@ -1,0 +1,65 @@
+# Centrally managed UI strings for the documentation generator.
+# This ensures that when the engine runs in 'zh' mode, it uses native Chinese instead of mixed output.
+
+STRINGS = {
+    "en": {
+        "lessons_header": "# Lessons",
+        "durable_lessons_sub": "## Durable Lessons",
+        "supporting_doc_sub": "## Supporting Doc Synthesis",
+        "confirmed_sub": "### Confirmed",
+        "conflicting_sub": "### Conflicting",
+        "unresolved_sub": "### Unresolved",
+        "referenced_docs_sub": "## Referenced Historical Docs",
+        "product_header": "# Product",
+        "architecture_header": "# Architecture",
+        "execution_header": "# Execution",
+        "memory_header": "# Memory",
+        "glossary_header": "# Glossary",
+        "workflows_header": "# Workflows",
+        "top_rules_sub": "## Top Rules (Read First)",
+        "confirmed_facts_sub": "## Confirmed Facts",
+        "constraints_sub": "## Constraints To Preserve",
+        "maintenance_sub": "## Maintenance Workflow",
+        "update_triggers_sub": "## Update Triggers",
+        "bootstrap_backlog_sub": "## Bootstrap Backlog (When Docs Are Thin)",
+        "provenance_sub": "## Provenance",
+        "fallback_lessons": "Add durable lessons that should survive session resets.",
+        "no_historical_lessons": "No clear historical lessons were synthesized from supporting docs.",
+        "no_historical_conflicts": "No direct historical conflicts were synthesized from supporting docs.",
+        "no_historical_unresolved": "No unresolved historical items were synthesized from supporting docs.",
+        "no_additional_docs": "No additional lessons or status docs were detected automatically.",
+        "rule_prefix": "Rule",
+    },
+    "zh": {
+        "lessons_header": "# 经验教训与知识记忆",
+        "durable_lessons_sub": "## 持久化经验 (Durable Lessons)",
+        "supporting_doc_sub": "## 辅助参考文档提炼",
+        "confirmed_sub": "### 已确认的基准主张",
+        "conflicting_sub": "### 待清理的矛盾点",
+        "unresolved_sub": "### 悬而未决的问题",
+        "referenced_docs_sub": "## 核心参考历史文档",
+        "product_header": "# 产品意图与业务核心",
+        "architecture_header": "# 系统架构与边界",
+        "execution_header": "# 运行与执行手册",
+        "memory_header": "# 术语表与知识记忆",
+        "glossary_header": "# 术语词汇表",
+        "workflows_header": "# 运行工作流控制",
+        "top_rules_sub": "## 核心护栏与顶层规则 (首读必看)",
+        "confirmed_facts_sub": "## 已确认的客观事实",
+        "constraints_sub": "## 严禁打破的开发约束",
+        "maintenance_sub": "## 文档日常维护流",
+        "update_triggers_sub": "## 文档刷新触发条件",
+        "bootstrap_backlog_sub": "## 冷启动阶段待办 (文档薄弱时)",
+        "provenance_sub": "## 溯源证明 (依据文件)",
+        "fallback_lessons": "在此添加应在会话重置后保留的持久化经验教训。",
+        "no_historical_lessons": "未从支持文档中提炼出明确的历史经验教训。",
+        "no_historical_conflicts": "未从支持文档中检测到直接的历史冲突。",
+        "no_historical_unresolved": "未检测到未决的历史项目。",
+        "no_additional_docs": "未自动检测到额外的经验或状态文档。",
+        "rule_prefix": "规则",
+    }
+}
+
+def get_ui_string(key: str, locale: str) -> str:
+    lang = "zh" if locale == "zh" else "en"
+    return STRINGS.get(lang, STRINGS["en"]).get(key, STRINGS["en"][key])

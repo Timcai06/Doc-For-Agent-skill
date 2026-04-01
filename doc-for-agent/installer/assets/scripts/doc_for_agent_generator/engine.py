@@ -185,12 +185,11 @@ def collect_output_plan(
 ) -> tuple[Dict[str, str], list[Path]]:
     planned: Dict[str, str] = {}
     archive_candidates: list[Path] = []
-    agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis))
-
-    # Removed agent HTML header hook in favor of native localization
 
     # Localization pipeline: En files remain pure En, Zh files undergo native mapping
     if output_mode in {"agent", "dual"}:
+        # Default to English for individual AGENTS folder unless we add a locale flag later
+        agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis, locale="en"))
         agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
         for name, content in agent_files.items():
             planned[str(agents_dir / name)] = content
@@ -198,9 +197,12 @@ def collect_output_plan(
 
     if output_mode == "quad":
         for agent_locale in SUPPORTED_AGENT_LOCALES:
+            # IMPORTANT: Re-run the generator with the specific locale
+            agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis, locale=agent_locale))
             agent_root = root / resolve_agent_output_root(agent_locale)
             for name, content in agent_files.items():
                 if agent_locale == "zh":
+                    # We still apply translate_to_zh as a safety net for any strings not yet move to locales.py
                     content = translate_to_zh(content)
                 planned[str(agent_root / name)] = content
         archive_candidates = list(analysis.docs_inventory.archive_candidates)

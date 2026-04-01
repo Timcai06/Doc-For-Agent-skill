@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, Sequence
 
 from .analysis import supporting_doc_roles
+from .locales import get_ui_string
 from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
@@ -1911,48 +1912,65 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_layered_lessons(analysis: RepoAnalysis) -> str:
-    lessons = [
-        "Read the entry and architecture docs before large structural edits.",
-        "Refresh generated agent docs after meaningful repository-shape changes.",
-        "Prefer explicit contracts and stable names over agent improvisation.",
-    ]
+def build_layered_lessons(analysis: RepoAnalysis, locale: str = "en") -> str:
+    lang_lessons = {
+        "en": [
+            "Read the entry and architecture docs before large structural edits.",
+            "Refresh generated agent docs after meaningful repository-shape changes.",
+            "Prefer explicit contracts and stable names over agent improvisation.",
+        ],
+        "zh": [
+            "在大规模结构修改前，请务必阅读入口文档 (entry) 和架构文档 (architecture)。",
+            "在发生明显的仓库形态变更后，请立即刷新生成的智能体文档。",
+            "优先使用明确的契约和稳定的名称，而不是让智能体自行发挥命名。",
+        ]
+    }
+    lessons = lang_lessons.get(locale, lang_lessons["en"])[:]
+
     if analysis.repo_type == "skill-meta":
-        lessons.append("Keep manifests, README examples, and generator behavior aligned so the skill does not overpromise.")
+        if locale == "zh":
+            lessons.append("保持清单文件、README 示例与生成器行为一致，确保技能不出现“过度承诺”。")
+        else:
+            lessons.append("Keep manifests, README examples, and generator behavior aligned so the skill does not overpromise.")
+    
     if analysis.classification.conflicting_signals:
-        lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
+        if locale == "zh":
+            lessons.append("混合的仓库信号是一种警告，在跨边界重构前请务必仔细检查。")
+        else:
+            lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
+
     references = supporting_docs_for_role(analysis, "memory")
     confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
-    return f"""# Lessons
+    return f"""{get_ui_string('lessons_header', locale)}
 
-## Durable Lessons
+{get_ui_string('durable_lessons_sub', locale)}
 
-{format_bullets(lessons, "Add durable lessons that should survive session resets.")}
+{format_bullets(lessons, get_ui_string('fallback_lessons', locale))}
 
-## Supporting Doc Synthesis (Memory)
+{get_ui_string('supporting_doc_sub', locale)} (Memory)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear historical lessons were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_historical_lessons', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct historical conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_historical_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved historical items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_historical_unresolved', locale))}
 
-## Referenced Historical Docs
+{get_ui_string('referenced_docs_sub', locale)}
 
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional lessons or status docs were detected automatically.")}
+{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
 """
 
 
-def generate_bootstrap_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+def generate_bootstrap_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
     return {
         "README.md": build_readme(analysis),
         "product.md": build_product(analysis),
@@ -1964,7 +1982,9 @@ def generate_bootstrap_docs(analysis: RepoAnalysis) -> Dict[str, str]:
     }
 
 
-def generate_layered_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+def generate_layered_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
+    # Placeholder: In a full refactor, all sub-builders would take 'locale'
+    # For now, let's ensure the core requested view (lessons) is perfect
     return {
         "00-entry/AGENTS.md": build_layered_entry(analysis),
         "01-product/001-core-goals.md": build_layered_core_goals(analysis),
@@ -1976,14 +1996,14 @@ def generate_layered_docs(analysis: RepoAnalysis) -> Dict[str, str]:
         "02-architecture/007-architecture-compatibility.md": build_layered_architecture_compatibility(analysis),
         "03-execution/008-implementation-plan.md": build_layered_implementation_plan(analysis),
         "04-memory/009-progress.md": build_layered_progress(analysis),
-        "04-memory/010-lessons.md": build_layered_lessons(analysis),
+        "04-memory/010-lessons.md": build_layered_lessons(analysis, locale=locale),
     }
 
 
-def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
+def generate_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
     if analysis.doc_profile == "layered":
-        return generate_layered_docs(analysis)
-    return generate_bootstrap_docs(analysis)
+        return generate_layered_docs(analysis, locale=locale)
+    return generate_bootstrap_docs(analysis, locale=locale)
 
 
 def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_locale: str, human_template_variant: str) -> str:
