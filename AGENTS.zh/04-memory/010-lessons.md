@@ -25,16 +25,3 @@
 ## 核心参考历史文档
 
 - 未自动检测到额外的经验或状态文档。
-
-## Preserved Notes
-
-- Durable Lessons
-  - Preserved from previous manual edits.
-  - Read the entry and architecture docs before large structural edits.
-  - Refresh generated agent docs after meaningful repository-shape changes.
-  - Prefer explicit contracts and stable names over agent improvisation.
-  - Keep manifests, README examples, and generator behavior aligned so the skill does not overpromise.
-  - Mixed repository signals are a warning to inspect before refactoring across boundaries.
-- Referenced Historical Docs
-  - Preserved from previous manual edits.
-  - No additional lessons or status docs were detected automatically.
