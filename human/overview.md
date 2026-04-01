@@ -88,11 +88,11 @@
 
 ### Decision Backlog
 
-- No unresolved project items were synthesized from supporting docs.
+- No unresolved product items were synthesized from supporting docs.
 
 ### Conflict Watchlist
 
-- No direct project conflicts were synthesized from supporting docs.
+- No direct product conflicts were synthesized from supporting docs.
 
 ## Current Priorities
 

@@ -1,4 +1,4 @@
-# 智能体核心架构总览 Entry
+# AGENTS Entry
 
 ## Purpose
 
@@ -30,13 +30,13 @@
 ## Current Operating Posture
 
 - Keep the skill definition, generator behavior, and generated documentation in sync.
-- Current classification: `技能/元数据类仓库` with `medium` confidence.
+- Current classification: `skill/meta repository` (confidence: `medium`).
 
 ## Canonical Fact Sources
 
 - Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).
 
-## 核心参考代码区与文档
+## Referenced Historical Docs
 
 - `README.md`
 - `docs/landing-page.md`
@@ -50,3 +50,20 @@
 - `docs/platforms.zh.md`
 - `docs/quickstart.md`
 - `docs/quickstart.zh.md`
+
+## Preserved Notes
+
+- 核心参考代码区与文档
+  - Preserved from previous manual edits.
+  - `README.md`
+  - `docs/landing-page.md`
+  - `docs/landing-page.zh.md`
+  - `docs/maintainers.md`
+  - `README.md`
+  - `docs/platforms.md`
+  - `docs/platforms.zh.md`
+  - `README.md`
+  - `docs/platforms.md`
+  - `docs/platforms.zh.md`
+  - `docs/quickstart.md`
+  - `docs/quickstart.zh.md`

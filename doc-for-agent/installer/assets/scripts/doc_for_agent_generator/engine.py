@@ -197,13 +197,10 @@ def collect_output_plan(
 
     if output_mode == "quad":
         for agent_locale in SUPPORTED_AGENT_LOCALES:
-            # IMPORTANT: Re-run the generator with the specific locale
+            # Re-run the generator with the specific locale - No more translate_to_zh patch here!
             agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis, locale=agent_locale))
             agent_root = root / resolve_agent_output_root(agent_locale)
             for name, content in agent_files.items():
-                if agent_locale == "zh":
-                    # We still apply translate_to_zh as a safety net for any strings not yet move to locales.py
-                    content = translate_to_zh(content)
                 planned[str(agent_root / name)] = content
         archive_candidates = list(analysis.docs_inventory.archive_candidates)
 
@@ -214,8 +211,6 @@ def collect_output_plan(
             human_template_variant=human_template_variant,
         )
         for name, content in human_files.items():
-            if human_locale == "zh":
-                content = translate_to_zh(content)
             planned[str(root / name)] = content
     elif output_mode == "quad":
         for locale in SUPPORTED_HUMAN_LOCALES:
@@ -225,8 +220,6 @@ def collect_output_plan(
                 human_template_variant=human_template_variant,
             )
             for name, content in human_files.items():
-                if locale == "zh":
-                    content = translate_to_zh(content)
                 planned[str(root / name)] = content
 
     return planned, archive_candidates

@@ -35,15 +35,3 @@
 ### Unresolved
 
 - No unresolved product items were synthesized from supporting docs.
-
-## Preserved Notes
-
-- Referenced Repository Docs
-  - Preserved from previous manual edits.
-  - `README.md`
-  - `docs/landing-page.md`
-  - `docs/landing-page.zh.md`
-  - `docs/maintainers.md`
-- Open Questions
-  - Preserved from previous manual edits.
-  - Confirm the top-level success criteria and non-goals for this repository.

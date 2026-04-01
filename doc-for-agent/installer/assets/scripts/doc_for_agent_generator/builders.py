@@ -1341,7 +1341,7 @@ def build_glossary(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_layered_entry(analysis: RepoAnalysis) -> str:
+def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
     reading_order = [
         "`01-product/001-core-goals.md`",
         "`01-product/002-prd.md`",
@@ -1355,47 +1355,60 @@ def build_layered_entry(analysis: RepoAnalysis) -> str:
     if analysis.repo_type in {"web-app", "skill-meta", "cli-tool"}:
         reading_order.insert(3, "`01-product/003-app-flow.md`")
         reading_order.insert(5, "`02-architecture/005-frontend-guidelines.md`")
+    
+    if locale == "zh":
+        rules = [
+            "在大规模重构前，请务必阅读产品与架构文档。",
+            "在发生明显的仓库形态、工作流或术语变更后，请立即刷新 `AGENTS/` 目录。",
+            "优先采用已确认的事实，而非推测性的路线图语言。",
+            "当刷新安全性至关重要时，通过手动编辑块保护手写的笔记内容。",
+        ]
+        if analysis.repo_type == "skill-meta":
+            rules.append("保持技能清单、SKILL.md 指引与生成器行为一致。")
+        elif analysis.repo_type == "web-app":
+            rules.append("将前端路由、后端端点和交付契约视为相互关联的交互界面。")
+    else:
+        rules = [
+            "Read product and architecture docs before broad refactors.",
+            "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
+            "Prefer confirmed facts over speculative roadmap language.",
+            "Protect hand-maintained notes with manual blocks when refresh safety matters.",
+        ]
+        if analysis.repo_type == "skill-meta":
+            rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
+        elif analysis.repo_type == "web-app":
+            rules.append("Treat frontend routes, backend endpoints, and result contracts as linked surfaces.")
+
     supporting_docs = supporting_docs_for_role(analysis, "product") + supporting_docs_for_role(analysis, "architecture") + supporting_docs_for_role(analysis, "execution")
 
-    rules = [
-        "Read product and architecture docs before broad refactors.",
-        "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
-        "Prefer confirmed facts over speculative roadmap language.",
-        "Protect hand-maintained notes with manual blocks when refresh safety matters.",
-    ]
-    if analysis.repo_type == "skill-meta":
-        rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
-    elif analysis.repo_type == "web-app":
-        rules.append("Treat frontend routes, backend endpoints, and result contracts as linked surfaces.")
+    return f"""{get_ui_string('entry_header', locale)}
 
-    return f"""# AGENTS Entry
+{get_ui_string('purpose_sub', locale)}
 
-## Purpose
+{get_ui_string('purpose_bullet_1', locale)}
+{get_ui_string('purpose_bullet_2', locale)}
+{get_ui_string('purpose_bullet_3', locale)}
 
-- Define the reading order before an agent changes code or docs
-- State the operating rules that should survive session resets
-- Point future agents at the repository's canonical fact sources
+{get_ui_string('reading_order_sub', locale)}
 
-## Reading Order
+{format_bullets(reading_order, get_ui_string('no_reading_order', locale))}
 
-{format_bullets(reading_order, "Add a repository-specific reading order.")}
+{get_ui_string('rules_sub', locale)}
 
-## Rules
+{format_bullets(rules, get_ui_string('no_rules', locale))}
 
-{format_bullets(rules, "Add repository-specific execution rules.")}
-
-## Current Operating Posture
+{get_ui_string('operating_posture_sub', locale)}
 
 - {current_operating_posture(analysis)}
-- Current classification: `{repo_type_label(analysis.repo_type)}` with `{analysis.classification.confidence}` confidence.
+- {get_ui_string('current_classification', locale)}: `{repo_type_label(analysis.repo_type)}` ({get_ui_string('confidence', locale)}: `{analysis.classification.confidence}`).
 
-## Canonical Fact Sources
+{get_ui_string('canonical_sources_sub', locale)}
 
-{format_bullets(list(analysis.repo_type_reasons), "Needs human confirmation: add canonical fact sources and classification reasons.")}
+{format_bullets(list(analysis.repo_type_reasons), get_ui_string('no_reasons', locale))}
 
-## Referenced Repository Docs
+{get_ui_string('referenced_docs_sub', locale)}
 
-{format_bullets(supporting_doc_lines(supporting_docs, analysis.root), "No additional repository docs were referenced automatically.")}
+{format_bullets(supporting_doc_lines(supporting_docs, analysis.root), get_ui_string('no_additional_docs', locale))}
 """
 
 
@@ -2036,6 +2049,7 @@ def generate_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
 
 
 def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_locale: str, human_template_variant: str) -> str:
+    locale = human_locale
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
@@ -2066,116 +2080,138 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
     core = []
     if analysis.summary:
         core.append(analysis.summary)
-    core.append(f"Current repo shape: `{repo_type_label(analysis.repo_type)}`.")
-    if analysis.frontend_root:
-        core.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
-    if analysis.backend_root:
-        core.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+    
+    if locale == "zh":
+        core.append(f"当前仓库形态： `{repo_type_label(analysis.repo_type)}`。")
+        if analysis.frontend_root:
+            core.append(f"前端代码根目录： `{rel_path(analysis.frontend_root, analysis.root)}`。")
+        if analysis.backend_root:
+            core.append(f"后端代码根目录： `{rel_path(analysis.backend_root, analysis.root)}`。")
+    else:
+        core.append(f"Current repo shape: `{repo_type_label(analysis.repo_type)}`.")
+        if analysis.frontend_root:
+            core.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
+        if analysis.backend_root:
+            core.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+            
     priorities = []
-    if conflicting:
-        priorities.append("Resolve conflicting product statements before locking roadmap or interface commitments.")
-    if unresolved:
-        priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
-    if not priorities:
-        priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
+    if locale == "zh":
+        if conflicting:
+            priorities.append("在锁定路线图或接口承诺前，请先解决冲突的产品陈述。")
+        if unresolved:
+            priorities.append("将被列为“未决”的事项转化为明确的 责任人+期限 决策。")
+        if not priorities:
+            priorities.append("在 `docs/` 中记录最新决策，并确保在变更后同步更新 AGENTS 文档。")
+    else:
+        if conflicting:
+            priorities.append("Resolve conflicting product statements before locking roadmap or interface commitments.")
+        if unresolved:
+            priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
+        if not priorities:
+            priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
+
     documentation_gaps = list(unresolved)
     if not documentation_gaps:
-        documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
+        if locale == "zh":
+            documentation_gaps.append("未从支持文档中检测到明显的产品文档缺失。")
+        else:
+            documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
+            
     maintenance = human_maintenance_lines(analysis, "product", len(unresolved), len(conflicting))
     update_triggers = human_update_trigger_lines(analysis, "product")
     bootstrap_backlog = human_bootstrap_backlog_lines("product", bool(provenance))
 
-    return f"""# Project Overview
+    return f"""{get_ui_string('overview_header', locale)}
 
-## What This Project Is
+{get_ui_string('what_this_is_sub', locale)}
 
-{format_bullets(core, "Project overview should be confirmed with maintainers.")}
+{format_bullets(core, get_ui_string('no_overview', locale))}
 
-## Top Rules (Read First)
+{get_ui_string('top_rules_sub', locale)}
 
-{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
+{format_bullets(top_rules, get_ui_string('fallback_product_rules', locale))}
 
-## Document Contract
+{get_ui_string('doc_contract_sub', locale)}
 
-{format_bullets(human_doc_contract_lines("product", human_output_root), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(human_doc_contract_lines("product", human_output_root), get_ui_string('no_contract_rules', locale))}
 
-## Dual Sync Checklist
+{get_ui_string('dual_sync_sub', locale)}
 
-{format_bullets(human_dual_sync_checklist_lines("product", human_output_root), "Add dual-system synchronization checks for this page.")}
+{format_bullets(human_dual_sync_checklist_lines("product", human_output_root), get_ui_string('no_sync_checks', locale))}
 
-## Paired Refresh Rules
+{get_ui_string('paired_refresh_sub', locale)}
 
-{format_bullets(human_paired_refresh_rule_lines("product", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+{format_bullets(human_paired_refresh_rule_lines("product", human_output_root), get_ui_string('no_refresh_rules', locale))}
 
-## Dual Pairing Contract (Rules)
+{get_ui_string('dual_pairing_sub', locale)}
 
-{format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+{format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), get_ui_string('no_pairing_rules', locale))}
 
-## Paired Agent Docs (Dual Mode)
+{get_ui_string('paired_agent_docs_sub', locale)}
 
-{format_bullets(paired_agent_doc_lines(analysis, "product"), "Add the paired agent-facing product docs for dual mode.")}
+{format_bullets(paired_agent_doc_lines(analysis, "product"), get_ui_string('no_paired_docs', locale))}
 
-## Output Boundary (Human vs Agent)
+{get_ui_string('output_boundary_sub', locale)}
 
-{format_bullets(human_output_boundary_lines("product", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(human_output_boundary_lines("product", human_output_root), get_ui_string('no_boundary_rules', locale))}
 
-## Dual View Rationale
+{get_ui_string('dual_view_rationale_sub', locale)}
 
-{format_bullets(human_dual_view_rationale_lines("product", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(human_dual_view_rationale_lines("product", human_output_root), get_ui_string('no_rationale', locale))}
 
-## Intended Audience
+{get_ui_string('intended_audience_sub', locale)}
 
-{format_bullets(audiences, "Add the primary maintainer audiences for this project.")}
+{format_bullets(audiences, get_ui_string('no_audience', locale))}
 
-## Key Entry Points
+{get_ui_string('key_entry_points_sub', locale)}
 
-{format_bullets(product_entry_point_lines(analysis), "No clear routes or invocation entrypoints were detected automatically.")}
+{format_bullets(product_entry_point_lines(analysis), get_ui_string('no_entry_points', locale))}
 
-## Synthesis Summary
+{get_ui_string('synthesis_summary_sub', locale)}
 
-{format_bullets(synthesis_summary, "No synthesis summary available.")}
+{format_bullets(synthesis_summary, get_ui_string('no_synthesis', locale))}
 
-## Knowledge Status
+{get_ui_string('knowledge_status_sub', locale)}
 
-### Confirmed Rules
+{get_ui_string('confirmed_rules_sub', locale)}
 
-{format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_product_confirmed', locale))}
 
-### Supporting Signals
+{get_ui_string('supporting_signals_sub', locale)}
 
-{format_bullets(inferred, "No additional derived product signals were detected from repository structure.")}
+{format_bullets(inferred, get_ui_string('no_signals', locale))}
 
-### Decision Backlog
+{get_ui_string('decision_backlog_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_product_unresolved', locale))}
 
-### Conflict Watchlist
+{get_ui_string('conflict_watchlist_sub', locale)}
 
-{format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_product_conflicts', locale))}
 
-## Current Priorities
+{get_ui_string('current_priorities_sub', locale)}
 
-{format_bullets(priorities, "No immediate priorities were derived automatically.")}
+{format_bullets(priorities, get_ui_string('no_priorities', locale))}
 
-## Documentation Gaps To Close
+{get_ui_string('doc_gaps_sub', locale)}
 
-{format_bullets(documentation_gaps, "No explicit product documentation gaps were detected.")}
+{format_bullets(documentation_gaps, get_ui_string('no_gaps', locale))}
 
-## Update Triggers
+{get_ui_string('update_triggers_sub', locale)}
 
-{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+{format_bullets(update_triggers, get_ui_string('no_triggers', locale))}
 
-## Maintenance Workflow
+{get_ui_string('maintenance_sub', locale)}
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+{format_bullets(maintenance, get_ui_string('no_maintenance', locale))}
 
-## Bootstrap Backlog (When Docs Are Thin)
+{get_ui_string('bootstrap_backlog_sub', locale)}
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+{format_bullets(bootstrap_backlog, get_ui_string('no_backlog', locale))}
 
-## Provenance
+{get_ui_string('provenance_sub', locale)}
 
-{format_bullets(provenance, "No supporting product documents were discovered outside generated outputs.")}
+{format_bullets(provenance, get_ui_string('no_provenance', locale))}
 """
 
 

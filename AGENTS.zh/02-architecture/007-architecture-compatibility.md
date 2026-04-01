@@ -1,10 +1,10 @@
-# 系统架构与边界 Compatibility
+# Architecture Compatibility
 
-## 核心护栏与顶层规则 (首读必看)
+## Top Rules (Read First)
 
-- 第一原则： CLI 交互边界： keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
-- 第二原则： 真相源边界： on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
-- 第三原则： 分发结构： keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
+- Rule 1: CLI boundary: keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
+- Rule 2: Source-of-truth boundary: on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
+- Rule 3: Distribution structure: keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
 
 ## Repo-Type Signals
 
@@ -18,23 +18,23 @@
 - `doc-for-agent/scripts/` for generation behavior and repository scanning
 - `doc-for-agent/references/` for documentation structure and writing constraints
 
-## 辅助参考文档提炼 (Architecture)
+## Supporting Doc Synthesis (Architecture)
 
-### 已确认的基准主张
+### Confirmed
 
-- CLI 交互边界： keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
-- 真相源边界： on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
-- 分发结构： keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
+- CLI boundary: keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
+- Source-of-truth boundary: on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
+- Distribution structure: keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
 - Conflict handling order: 1) check `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md`; 2) then edit adapter/config mappings.
-- 简路径（uipro-cli 风格）：npm install -g doc-for-agent@next -> docagent init --ai codex / docagent init --ai claudecode。 
+- 简路径（uipro-cli 风格）：npm install -g doc-for-agent@next -> docagent init --ai codex / docagent init --ai claudecode。 (sources: `docs/platforms.zh.md`)
 
-### 待清理的矛盾点
+### Conflicting
 
-- 未检测到直接的架构冲突 .
+- No direct architecture conflicts were synthesized from supporting docs.
 
-### 悬而未决的问题
+### Unresolved
 
-- 未检测到未决的架构项 .
+- No unresolved architecture items were synthesized from supporting docs.
 
 ## Referenced Architecture Docs
 
@@ -51,3 +51,28 @@
 ## Conflicting Signals
 
 - Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities.
+
+## Preserved Notes
+
+- 核心护栏与顶层规则 (首读必看)
+  - Preserved from previous manual edits.
+  - 第一原则： CLI 交互边界： keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
+  - 第二原则： 真相源边界： on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
+  - 第三原则： 分发结构： keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
+- 辅助参考文档提炼 (Architecture)
+  - Preserved from previous manual edits.
+  ### 已确认的基准主张
+
+  - CLI 交互边界： keep `docagent` as the single entry surface for `codex`, `claude`, `continue`, `copilot` workflows.
+  - 真相源边界： on conflicts, arbitrate against `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md` before changing CLI entry, adapter wiring, or distribution behavior.
+  - 分发结构： keep platform mappings in adapter/config docs (`Claude Code` -> `docagent init --ai claudecode`) while CLI contract changes stay centralized.
+  - Conflict handling order: 1) check `readme.md`, `docs/platforms.md`, `docs/platforms.zh.md`; 2) then edit adapter/config mappings.
+  - 简路径（uipro-cli 风格）：npm install -g doc-for-agent@next -> docagent init --ai codex / docagent init --ai claudecode。 
+
+  ### 待清理的矛盾点
+
+  - 未检测到直接的架构冲突 .
+
+  ### 悬而未决的问题
+
+  - 未检测到未决的架构项 .
