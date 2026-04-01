@@ -6,6 +6,7 @@ from typing import Sequence
 
 from ..locales import STRINGS, get_ui_string
 from ..models import RepoAnalysis
+from ..translator import translate_to_zh
 from ..utils import rel_path
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
@@ -77,6 +78,12 @@ def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> s
     if not paths:
         return f"- {empty_line}"
     return "\n".join(f"- `{rel_path(path, root)}`" for path in paths)
+
+
+def localize_lines(lines: Sequence[str], locale: str = "en") -> list[str]:
+    if locale != "zh":
+        return list(lines)
+    return [translate_to_zh(line) for line in lines]
 
 
 def supporting_doc_lines(paths: Sequence[Path], root: Path) -> list[str]:
@@ -402,8 +409,6 @@ def human_dual_view_rationale_lines(role: str, human_output_root: str, locale: s
         get_ui_string("rationale_rule_1", locale).format(root=human_output_root),
         get_ui_string("rationale_rule_2", locale),
     ]
-    if locale != "en":
-        lines.append(get_ui_string("rationale_rule_1", "en").format(root=human_output_root))
     if role == "product":
         lines.append(get_ui_string("rationale_rule_product", locale).format(root=human_output_root))
     elif role == "architecture":
@@ -437,12 +442,14 @@ def human_dual_pairing_contract_lines(
         get_ui_string("pairing_rule_2", human_locale).format(locale=human_locale, root=human_output_root),
         get_ui_string("pairing_rule_3", human_locale).format(variant=resolved_variant),
     ]
-    if human_locale != "en":
-        lines.append(get_ui_string("pairing_rule_2", "en").format(locale=human_locale, root=human_output_root))
     human_rel = human_doc_relative_path(role)
     for relative, purpose in HUMAN_PAIRED_PATH_RULES[profile].get(role, []):
         lines.append(
-            f"Path pair rule: `{human_output_root}/{human_rel}` pairs with `AGENTS/{relative}` for {purpose}."
+            get_ui_string("pairing_rule_path", human_locale).format(
+                human_path=f"{human_output_root}/{human_rel}",
+                agent_path=f"AGENTS/{relative}",
+                purpose=purpose,
+            )
         )
     return lines
 

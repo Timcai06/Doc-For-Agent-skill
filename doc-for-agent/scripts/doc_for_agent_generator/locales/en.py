@@ -188,4 +188,5 @@ STRINGS_EN = {
         "pairing_rule_1": "Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.",
         "pairing_rule_2": "Locale-output rule: human locale `{locale}` maps to `{root}/`.",
         "pairing_rule_3": "Template rule: human template variant `{variant}` is part of the pairing contract and must remain consistent across paired docs.",
+        "pairing_rule_path": "Path pair rule: `{human_path}` pairs with `{agent_path}` for {purpose}.",
 }

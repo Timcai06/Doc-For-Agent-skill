@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict
 
 from ..models import RepoAnalysis
+from ..translator import translate_to_zh
 from ..utils import rel_path
 from .detectors import (
     append_package_script_commands,
@@ -636,7 +637,7 @@ def build_glossary(analysis: RepoAnalysis) -> str:
 
 
 def generate_bootstrap_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
-    return {
+    docs = {
         "README.md": build_readme(analysis),
         "product.md": build_product(analysis),
         "architecture.md": build_architecture(analysis),
@@ -645,4 +646,6 @@ def generate_bootstrap_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[
         "workflows.md": build_workflows(analysis),
         "glossary.md": build_glossary(analysis),
     }
-
+    if locale == "zh":
+        return {path: translate_to_zh(content) for path, content in docs.items()}
+    return docs

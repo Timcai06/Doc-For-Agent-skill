@@ -2,23 +2,23 @@
 
 {{DESCRIPTION}}
 
-Use this workflow when the user wants to create or refresh an `AGENTS/` directory for a repository.
+Use this workflow when the user wants to initialize or refresh the repository documentation system from a compatible agent surface.
 
 ## Workflow
 
 1. Inspect the repository root and infer the repo shape.
-2. Run the generator in `refresh` mode first.
-3. Prefer `--profile layered` when the repository is long-lived or phase-driven.
+2. Use `docagent init --ai <platform>` to wire the repository workflow.
+3. Run `docagent refresh --root "<repo-root>" --output-mode quad` when four-view output is required.
 4. Use `--dry-run` or `--explain` when the repository shape is unclear.
 
 ## Commands
 
 ```bash
-python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh
+docagent init --ai <platform>
 ```
 
 ```bash
-python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh --profile layered
+docagent refresh --root "<repo-root>" --output-mode quad
 ```
 
 ## Installed For

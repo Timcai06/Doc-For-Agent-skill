@@ -1,7 +1,7 @@
 {
   "name": "doc-for-agent",
   "version": "0.3.0-dev.1",
-  "description": "Unified docagent CLI for Claude/Codex/CodeBuddy-style terminal agent workflows.",
+  "description": "Multi-agent repository documentation skill package with a CLI adapter for install, init, refresh, and doctor workflows.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,12 +11,17 @@
   "keywords": [
     "agents",
     "documentation",
+    "skill",
+    "skills",
+    "multi-agent",
+    "agent-native",
     "cli",
     "npx",
     "installer",
     "codex",
-    "codebuddy",
-    "claude",
+    "claudecode",
+    "claude-code",
+    "continue",
     "copilot"
   ],
   "bin": {
@@ -24,6 +29,7 @@
     "doc-for-agent": "doc-for-agent/installer/node/docagent.js"
   },
   "files": [
+    "doc-for-agent/SKILL.md",
     "doc-for-agent/installer/node",
     "doc-for-agent/installer/assets",
     "README.md",

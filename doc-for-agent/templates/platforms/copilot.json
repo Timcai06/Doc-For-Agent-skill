@@ -10,7 +10,7 @@
   },
   "frontmatter": {},
   "default_title": "doc-for-agent prompt",
-  "default_description": "Repository documentation bootstrap prompt for Copilot users. Generates or refreshes AGENTS documentation from real project structure.",
+  "default_description": "Repository documentation workflow prompt for a compatible agent surface. Use it to initialize wiring and refresh agent/human docs from real project structure.",
   "quick_reference": false,
   "script_relpath": ".github/prompts/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [

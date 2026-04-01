@@ -230,25 +230,24 @@ def render_quickstart(target_root: Path) -> str:
     repo_placeholder = "<repo-root>"
     lines = [
         f"{metadata.product_name} quickstart",
-        "- Product flow: install -> init -> refresh",
-        "- Install:",
-        "- Node users: `npm install -g doc-for-agent@next`",
-        "- Node one-off start: `npx -y doc-for-agent init --ai codex`",
-        "- Alternate platform option: use `--ai claudecode`.",
-        "- Python users: `pipx install doc-for-agent`",
-        "- Init (one command shape):",
+        "- Skill package flow: install -> init -> refresh",
+        "- Install the npm-distributed skill package:",
+        "- `npm install -g doc-for-agent@next`",
+        "- One-off npm start:",
+        "- `npx -y doc-for-agent init --ai codex`",
+        "- Primary init shape:",
         f"- `docagent init --ai <codex|claudecode|continue|copilot|all>`",
-        "- Common picks:",
+        "- First-class platforms:",
         f"- `docagent init --ai codex`",
         f"- `docagent init --ai claudecode`",
-        "- CodeBuddy users usually start with `--ai codex`.",
+        "- Compatibility platforms remain available through `--ai continue`, `--ai copilot`, or `--ai all`.",
         f"- Optional repository wiring: add `--target {repo_placeholder}`",
-        "- Refresh:",
+        "- Refresh the repository documentation system:",
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
         "- Optional modes: `--output-mode human`, `--output-mode dual`, or `--output-mode quad`",
         "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`",
-        "- Not AGENTS-only: choose output mode based on your docs audience",
-        "- Verify:",
+        "- Four-view mode establishes structure for bilingual agent/human docs; it does not claim bilingual content polish is complete.",
+        "- Verify repository wiring and version state:",
         f"- `docagent doctor --target {repo_placeholder}`",
         f"- `docagent versions --target {repo_placeholder}`",
         "- Supported `--ai` values: codex, claudecode, continue, copilot, all",
@@ -353,15 +352,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog=metadata.installer_command,
         description=(
-            f"Unified {metadata.product_name} product CLI. "
-            "Use `init` as the primary entry to install platform adapters."
+            f"CLI adapter for the {metadata.product_name} skill package. "
+            "Use `init` to install platform adapters and wire a repository workflow."
         ),
         epilog=(
-            "Product CLI v1:\n"
+            "doc-for-agent skill package:\n"
             f"  primary commands: {primary_commands}\n"
             f"  compatibility commands: {compatibility_commands}\n"
             f"  generate/refresh output modes: {output_modes}\n"
-            "30-second start:\n"
+            "Quick start:\n"
             "  npm install -g doc-for-agent@next\n"
             f"  docagent init --ai {DEFAULT_GLOBAL_PLATFORM}\n"
             "  docagent init --ai claudecode\n"

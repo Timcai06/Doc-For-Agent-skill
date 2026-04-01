@@ -2,24 +2,30 @@
 
 {{DESCRIPTION}}
 
-Use this skill when the user wants to initialize or refresh an `AGENTS/` directory for a repository so future coding agents can work from a stable project-specific documentation layer.
+Use this skill when the user needs a repository documentation system that agents and maintainers can both rely on. The skill package is the product surface; the bundled scripts are the workflow adapter.
 
 ## When To Use
 
-- Create an `AGENTS/` directory for a new repository
-- Refresh existing agent docs against the latest codebase
-- Bootstrap agent-facing docs before multi-agent or multi-worktree work
-- Generate a layered entry/execution/memory topology for long-lived projects
+- Initialize or refresh a repository documentation system from real repository structure
+- Generate or update `AGENTS/`, `docs/`, or the full four-view layout
+- Audit drift between commands, manifests, docs, and repository behavior
+- Bootstrap agent-facing and maintainer-facing docs before multi-agent or long-lived work
 
 ## Core Commands
 
-Initialize or refresh the lean profile:
+Initialize repository wiring for this platform:
 
 ```bash
-python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh
+docagent init --ai <platform>
 ```
 
-Prefer the layered profile for long-lived or phase-driven repositories:
+Refresh the repository documentation system:
+
+```bash
+docagent refresh --root "<repo-root>" --output-mode quad
+```
+
+Use the generator directly when you need a lower-level workflow:
 
 ```bash
 python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh --profile layered
@@ -46,8 +52,9 @@ python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh --repo-type cli-
 ## Notes
 
 - The engine scans the real repository before generating docs.
-- `bootstrap` is the safer default profile.
-- `layered` is better for projects with explicit phases, execution plans, and durable memory files.
+- `docagent` is the install + workflow adapter, not the product itself.
+- Four-view output writes `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
+- Four-view structure does not imply bilingual content polish is already complete.
 - Manual blocks wrapped in `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->` are preserved during refresh.
 
 ## Installed For

@@ -188,4 +188,5 @@ STRINGS_ZH = {
         "pairing_rule_1": "结对模式规则：在 `dual` 模式下，人和机器的文档同源生成，必须作为一个完整的变更集进行评审。",
         "pairing_rule_2": "语言输出规则：人类视图语言 `{locale}` 映射至目录 `{root}/`。",
         "pairing_rule_3": "模板规则：人类视图模板变体 `{variant}` 是结对契约的一部分，在配对文档间必须保持一致。",
+        "pairing_rule_path": "路径对齐规则：`{human_path}` 与 `{agent_path}` 结对，用于 {purpose}。",
 }

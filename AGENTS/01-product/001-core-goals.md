@@ -35,3 +35,10 @@
 ### Unresolved
 
 - No unresolved product items were synthesized from supporting docs.
+
+## Referenced Historical Docs
+
+- `README.md`
+- `docs/landing-page.md`
+- `docs/landing-page.zh.md`
+- `docs/maintainers.md`

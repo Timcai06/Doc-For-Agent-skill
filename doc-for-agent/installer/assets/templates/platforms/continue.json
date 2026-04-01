@@ -10,10 +10,10 @@
   },
   "frontmatter": {
     "name": "doc-for-agent",
-    "description": "Generate and maintain AGENTS documentation for coding agents."
+    "description": "Repository documentation workflow adapter for compatible coding agents."
   },
   "default_title": "doc-for-agent",
-  "default_description": "Project documentation bootstrapper for coding agents. Generates lean or layered AGENTS directories from the real repository structure.",
+  "default_description": "Repository documentation workflow adapter for a compatible agent surface. Use it to initialize wiring and refresh agent/human docs from the real repository structure.",
   "quick_reference": false,
   "script_relpath": ".continue/skills/doc-for-agent/scripts/init_agents_docs.py",
   "post_install_notes": [

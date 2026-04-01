@@ -28,9 +28,3 @@
 ## Referenced Historical Docs
 
 - No additional lessons or status docs were detected automatically.
-
-## Preserved Notes
-
-- Referenced Memory Docs
-  - Preserved from previous manual edits.
-  - No additional progress or memory docs were detected automatically.

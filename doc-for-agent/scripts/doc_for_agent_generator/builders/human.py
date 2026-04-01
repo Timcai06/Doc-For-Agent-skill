@@ -5,6 +5,7 @@ from typing import Dict
 
 from ..locales import get_ui_string
 from ..models import RepoAnalysis
+from ..translator import translate_to_zh
 from ..utils import rel_path
 from .detectors import (
     append_package_script_commands,
@@ -32,6 +33,7 @@ from .helpers import (
     paired_agent_doc_lines,
     prune_weak_human_inferences,
     repo_type_label,
+    localize_lines,
     resolve_human_output_root,
     resolve_human_template_variant,
     role_first_screen_rules,
@@ -123,39 +125,39 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
 
 {get_ui_string('top_rules_sub', locale)}
 
-{format_bullets(top_rules, get_ui_string('fallback_product_rules', locale))}
+{format_bullets(localize_lines(top_rules, locale), get_ui_string('fallback_product_rules', locale))}
 
 {get_ui_string('doc_contract_sub', locale)}
 
-{format_bullets(human_doc_contract_lines("product", human_output_root), get_ui_string('no_contract_rules', locale))}
+{format_bullets(localize_lines(human_doc_contract_lines("product", human_output_root), locale), get_ui_string('no_contract_rules', locale))}
 
 {get_ui_string('dual_sync_sub', locale)}
 
-{format_bullets(human_dual_sync_checklist_lines("product", human_output_root), get_ui_string('no_sync_checks', locale))}
+{format_bullets(localize_lines(human_dual_sync_checklist_lines("product", human_output_root), locale), get_ui_string('no_sync_checks', locale))}
 
 {get_ui_string('paired_refresh_sub', locale)}
 
-{format_bullets(human_paired_refresh_rule_lines("product", human_output_root), get_ui_string('no_refresh_rules', locale))}
+{format_bullets(localize_lines(human_paired_refresh_rule_lines("product", human_output_root), locale), get_ui_string('no_refresh_rules', locale))}
 
 {get_ui_string('dual_pairing_sub', locale)}
 
-{format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), get_ui_string('no_pairing_rules', locale))}
+{format_bullets(localize_lines(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), locale), get_ui_string('no_pairing_rules', locale))}
 
 {get_ui_string('paired_agent_docs_sub', locale)}
 
-{format_bullets(paired_agent_doc_lines(analysis, "product"), get_ui_string('no_paired_docs', locale))}
+{format_bullets(localize_lines(paired_agent_doc_lines(analysis, "product"), locale), get_ui_string('no_paired_docs', locale))}
 
 {get_ui_string('output_boundary_sub', locale)}
 
-{format_bullets(human_output_boundary_lines("product", human_output_root, locale=locale), get_ui_string('no_boundary_rules', locale))}
+{format_bullets(localize_lines(human_output_boundary_lines("product", human_output_root, locale=locale), locale), get_ui_string('no_boundary_rules', locale))}
 
 {get_ui_string('dual_view_rationale_sub', locale)}
 
-{format_bullets(human_dual_view_rationale_lines("product", human_output_root, locale=locale), get_ui_string('no_rationale', locale))}
+{format_bullets(localize_lines(human_dual_view_rationale_lines("product", human_output_root, locale=locale), locale), get_ui_string('no_rationale', locale))}
 
 {get_ui_string('intended_audience_sub', locale)}
 
-{format_bullets(audiences, get_ui_string('no_audience', locale))}
+{format_bullets(localize_lines(audiences, locale), get_ui_string('no_audience', locale))}
 
 {get_ui_string('key_entry_points_sub', locale)}
 
@@ -163,45 +165,45 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
 
 {get_ui_string('synthesis_summary_sub', locale)}
 
-{format_bullets(synthesis_summary, get_ui_string('no_synthesis', locale))}
+{format_bullets(localize_lines(synthesis_summary, locale), get_ui_string('no_synthesis', locale))}
 
 {get_ui_string('knowledge_status_sub', locale)}
 
 {get_ui_string('confirmed_rules_sub', locale)}
 
-{format_bullets(confirmed, get_ui_string('no_product_confirmed', locale))}
+{format_bullets(localize_lines(confirmed, locale), get_ui_string('no_product_confirmed', locale))}
 
 {get_ui_string('supporting_signals_sub', locale)}
 
-{format_bullets(inferred, get_ui_string('no_signals', locale))}
+{format_bullets(localize_lines(inferred, locale), get_ui_string('no_signals', locale))}
 
 {get_ui_string('decision_backlog_sub', locale)}
 
-{format_bullets(unresolved, get_ui_string('no_product_unresolved', locale))}
+{format_bullets(localize_lines(unresolved, locale), get_ui_string('no_product_unresolved', locale))}
 
 {get_ui_string('conflict_watchlist_sub', locale)}
 
-{format_bullets(conflicting, get_ui_string('no_product_conflicts', locale))}
+{format_bullets(localize_lines(conflicting, locale), get_ui_string('no_product_conflicts', locale))}
 
 {get_ui_string('current_priorities_sub', locale)}
 
-{format_bullets(priorities, get_ui_string('no_priorities', locale))}
+{format_bullets(localize_lines(priorities, locale), get_ui_string('no_priorities', locale))}
 
 {get_ui_string('doc_gaps_sub', locale)}
 
-{format_bullets(documentation_gaps, get_ui_string('no_gaps', locale))}
+{format_bullets(localize_lines(documentation_gaps, locale), get_ui_string('no_gaps', locale))}
 
 {get_ui_string('update_triggers_sub', locale)}
 
-{format_bullets(update_triggers, get_ui_string('no_triggers', locale))}
+{format_bullets(localize_lines(update_triggers, locale), get_ui_string('no_triggers', locale))}
 
 {get_ui_string('maintenance_sub', locale)}
 
-{format_bullets(maintenance, get_ui_string('no_maintenance', locale))}
+{format_bullets(localize_lines(maintenance, locale), get_ui_string('no_maintenance', locale))}
 
 {get_ui_string('bootstrap_backlog_sub', locale)}
 
-{format_bullets(bootstrap_backlog, get_ui_string('no_backlog', locale))}
+{format_bullets(localize_lines(bootstrap_backlog, locale), get_ui_string('no_backlog', locale))}
 
 {get_ui_string('provenance_sub', locale)}
 
@@ -265,35 +267,35 @@ def build_human_architecture(
 
 {get_ui_string('top_rules_sub', human_locale)}
 
-{format_bullets(top_rules, get_ui_string('fallback_architecture_rules', human_locale))}
+{format_bullets(localize_lines(top_rules, human_locale), get_ui_string('fallback_architecture_rules', human_locale))}
 
 {get_ui_string('doc_contract_sub', human_locale)}
 
-{format_bullets(human_doc_contract_lines("architecture", human_output_root), get_ui_string('no_contract_rules', human_locale))}
+{format_bullets(localize_lines(human_doc_contract_lines("architecture", human_output_root), human_locale), get_ui_string('no_contract_rules', human_locale))}
 
 {get_ui_string('dual_sync_sub', human_locale)}
 
-{format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), get_ui_string('no_sync_checks', human_locale))}
+{format_bullets(localize_lines(human_dual_sync_checklist_lines("architecture", human_output_root), human_locale), get_ui_string('no_sync_checks', human_locale))}
 
 {get_ui_string('paired_refresh_sub', human_locale)}
 
-{format_bullets(human_paired_refresh_rule_lines("architecture", human_output_root), get_ui_string('no_refresh_rules', human_locale))}
+{format_bullets(localize_lines(human_paired_refresh_rule_lines("architecture", human_output_root), human_locale), get_ui_string('no_refresh_rules', human_locale))}
 
 {get_ui_string('dual_pairing_sub', human_locale)}
 
-{format_bullets(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), get_ui_string('no_pairing_rules', human_locale))}
+{format_bullets(localize_lines(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), human_locale), get_ui_string('no_pairing_rules', human_locale))}
 
 {get_ui_string('paired_agent_docs_sub', human_locale)}
 
-{format_bullets(paired_agent_doc_lines(analysis, "architecture"), get_ui_string('no_paired_docs', human_locale))}
+{format_bullets(localize_lines(paired_agent_doc_lines(analysis, "architecture"), human_locale), get_ui_string('no_paired_docs', human_locale))}
 
 {get_ui_string('output_boundary_sub', human_locale)}
 
-{format_bullets(human_output_boundary_lines("architecture", human_output_root, locale=human_locale), get_ui_string('no_boundary_rules', human_locale))}
+{format_bullets(localize_lines(human_output_boundary_lines("architecture", human_output_root, locale=human_locale), human_locale), get_ui_string('no_boundary_rules', human_locale))}
 
 {get_ui_string('dual_view_rationale_sub', human_locale)}
 
-{format_bullets(human_dual_view_rationale_lines("architecture", human_output_root, locale=human_locale), get_ui_string('no_rationale', human_locale))}
+{format_bullets(localize_lines(human_dual_view_rationale_lines("architecture", human_output_root, locale=human_locale), human_locale), get_ui_string('no_rationale', human_locale))}
 
 {get_ui_string('detected_signals_sub', human_locale)}
 
@@ -305,41 +307,41 @@ def build_human_architecture(
 
 {get_ui_string('synthesis_summary_sub', human_locale)}
 
-{format_bullets(synthesis_summary, get_ui_string('no_synthesis', human_locale))}
+{format_bullets(localize_lines(synthesis_summary, human_locale), get_ui_string('no_synthesis', human_locale))}
 
 {get_ui_string('knowledge_status_sub', human_locale)}
 
 {get_ui_string('confirmed_rules_sub', human_locale)}
 
-{format_bullets(confirmed, get_ui_string('no_architecture_confirmed', human_locale))}
+{format_bullets(localize_lines(confirmed, human_locale), get_ui_string('no_architecture_confirmed', human_locale))}
 
 {get_ui_string('supporting_signals_sub', human_locale)}
 
-{format_bullets(inferred, get_ui_string('no_signals', human_locale))}
+{format_bullets(localize_lines(inferred, human_locale), get_ui_string('no_signals', human_locale))}
 
 {get_ui_string('decision_backlog_sub', human_locale)}
 
-{format_bullets(unresolved, get_ui_string('no_architecture_unresolved', human_locale))}
+{format_bullets(localize_lines(unresolved, human_locale), get_ui_string('no_architecture_unresolved', human_locale))}
 
 {get_ui_string('conflict_watchlist_sub', human_locale)}
 
-{format_bullets(conflicting, get_ui_string('no_architecture_conflicts', human_locale))}
+{format_bullets(localize_lines(conflicting, human_locale), get_ui_string('no_architecture_conflicts', human_locale))}
 
 {get_ui_string('stability_boundaries_sub', human_locale)}
 
-{format_bullets(boundaries, get_ui_string('no_boundaries', human_locale))}
+{format_bullets(localize_lines(boundaries, human_locale), get_ui_string('no_boundaries', human_locale))}
 
 {get_ui_string('update_triggers_sub', human_locale)}
 
-{format_bullets(update_triggers, get_ui_string('no_triggers', human_locale))}
+{format_bullets(localize_lines(update_triggers, human_locale), get_ui_string('no_triggers', human_locale))}
 
 {get_ui_string('maintenance_sub', human_locale)}
 
-{format_bullets(maintenance, get_ui_string('no_maintenance', human_locale))}
+{format_bullets(localize_lines(maintenance, human_locale), get_ui_string('no_maintenance', human_locale))}
 
 {get_ui_string('bootstrap_backlog_sub', human_locale)}
 
-{format_bullets(bootstrap_backlog, get_ui_string('no_backlog', human_locale))}
+{format_bullets(localize_lines(bootstrap_backlog, human_locale), get_ui_string('no_backlog', human_locale))}
 
 {get_ui_string('provenance_sub', human_locale)}
 
@@ -451,35 +453,35 @@ def build_human_workflows(
 
 ## Top Rules (Read First)
 
-{format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
+{format_bullets(localize_lines(top_rules, human_locale), "State 2-4 execution rules before setup/run/verify details.")}
 
 ## Document Contract
 
-{format_bullets(human_doc_contract_lines("execution", human_output_root), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(localize_lines(human_doc_contract_lines("execution", human_output_root), human_locale), "Add maintainer-facing contract rules for this page.")}
 
 ## Dual Sync Checklist
 
-{format_bullets(human_dual_sync_checklist_lines("execution", human_output_root), "Add dual-system synchronization checks for this page.")}
+{format_bullets(localize_lines(human_dual_sync_checklist_lines("execution", human_output_root), human_locale), "Add dual-system synchronization checks for this page.")}
 
 ## Paired Refresh Rules
 
-{format_bullets(human_paired_refresh_rule_lines("execution", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+{format_bullets(localize_lines(human_paired_refresh_rule_lines("execution", human_output_root), human_locale), "Add paired refresh rules for dual/quad outputs.")}
 
 ## Dual Pairing Contract (Rules)
 
-{format_bullets(human_dual_pairing_contract_lines(analysis, "execution", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+{format_bullets(localize_lines(human_dual_pairing_contract_lines(analysis, "execution", human_output_root, human_locale, human_template_variant), human_locale), "Add explicit dual pairing rules for this page.")}
 
 ## Paired Agent Docs (Dual Mode)
 
-{format_bullets(paired_agent_doc_lines(analysis, "execution"), "Add the paired agent-facing execution docs for dual mode.")}
+{format_bullets(localize_lines(paired_agent_doc_lines(analysis, "execution"), human_locale), "Add the paired agent-facing execution docs for dual mode.")}
 
 ## Output Boundary (Human vs Agent)
 
-{format_bullets(human_output_boundary_lines("execution", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(localize_lines(human_output_boundary_lines("execution", human_output_root), human_locale), "Add output boundary rules between docs/ and AGENTS/.")}
 
 ## Dual View Rationale
 
-{format_bullets(human_dual_view_rationale_lines("execution", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(localize_lines(human_dual_view_rationale_lines("execution", human_output_root), human_locale), "Explain why docs/ and AGENTS/ are paired views of one system.")}
 
 ## Setup
 
@@ -501,41 +503,41 @@ def build_human_workflows(
 
 ## Synthesis Summary
 
-{format_bullets(synthesis_summary, "No synthesis summary available.")}
+{format_bullets(localize_lines(synthesis_summary, human_locale), "No synthesis summary available.")}
 
 ## Knowledge Status
 
 ### Confirmed Rules
 
-{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+{format_bullets(localize_lines(confirmed, human_locale), "No clear execution facts were synthesized from supporting docs.")}
 
 ### Supporting Signals
 
-{format_bullets(inferred, "No additional derived execution signals were detected from repository structure.")}
+{format_bullets(localize_lines(inferred, human_locale), "No additional derived execution signals were detected from repository structure.")}
 
 ### Decision Backlog
 
-{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+{format_bullets(localize_lines(unresolved, human_locale), "No unresolved execution items were synthesized from supporting docs.")}
 
 ### Conflict Watchlist
 
-{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+{format_bullets(localize_lines(conflicting, human_locale), "No direct execution conflicts were synthesized from supporting docs.")}
 
 ## Operational Notes
 
-{format_bullets(operational_notes, "No additional operational notes were derived automatically.")}
+{format_bullets(localize_lines(operational_notes, human_locale), "No additional operational notes were derived automatically.")}
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+{format_bullets(localize_lines(update_triggers, human_locale), "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+{format_bullets(localize_lines(maintenance, human_locale), "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+{format_bullets(localize_lines(bootstrap_backlog, human_locale), "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
@@ -543,7 +545,7 @@ def build_human_workflows(
 """
 
 
-def build_human_glossary(analysis: RepoAnalysis) -> str:
+def build_human_glossary(analysis: RepoAnalysis, human_locale: str = "en") -> str:
     terms = [re.sub(r"^[-*]\s+", "", entry).strip() for entry in analysis.glossary_entries if entry.strip()]
     if analysis.skill_meta.skill_name:
         terms.append(f"`skill`: `{analysis.skill_meta.skill_name}`")
@@ -573,7 +575,7 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 ## Confirmed Terms
 
-{format_bullets(confirmed, "No canonical terms were detected automatically.")}
+{format_bullets(localize_lines(confirmed, human_locale), "No canonical terms were detected automatically.")}
 
 ## Naming Rules
 
@@ -582,7 +584,7 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 ## Synthesis Summary
 
-{format_bullets(synthesis_summary, "No synthesis summary available.")}
+{format_bullets(localize_lines(synthesis_summary, human_locale), "No synthesis summary available.")}
 
 ## Candidate Terms From Code Signals
 
@@ -590,27 +592,27 @@ def build_human_glossary(analysis: RepoAnalysis) -> str:
 
 ## Derived Terminology Signals
 
-{format_bullets(inferred, "No additional derived terminology signals were detected from repository structure.")}
+{format_bullets(localize_lines(inferred, human_locale), "No additional derived terminology signals were detected from repository structure.")}
 
 ## Unresolved Terminology Items
 
-{format_bullets(unresolved, "No unresolved terminology or memory items were synthesized from supporting docs.")}
+{format_bullets(localize_lines(unresolved, human_locale), "No unresolved terminology or memory items were synthesized from supporting docs.")}
 
 ## Conflicting Terminology Signals
 
-{format_bullets(conflicting, "No conflicting terminology signals were synthesized from supporting docs.")}
+{format_bullets(localize_lines(conflicting, human_locale), "No conflicting terminology signals were synthesized from supporting docs.")}
 
 ## Update Triggers
 
-{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+{format_bullets(localize_lines(update_triggers, human_locale), "No explicit update triggers were derived automatically.")}
 
 ## Maintenance Workflow
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+{format_bullets(localize_lines(maintenance, human_locale), "No maintenance workflow suggestions were derived automatically.")}
 
 ## Bootstrap Backlog (When Docs Are Thin)
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+{format_bullets(localize_lines(bootstrap_backlog, human_locale), "No bootstrap backlog suggestions were derived automatically.")}
 
 ## Provenance
 
@@ -625,7 +627,7 @@ def generate_human_docs(
 ) -> Dict[str, str]:
     resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
     output_root = resolve_human_output_root(human_locale)
-    return {
+    docs = {
         f"{output_root}/overview.md": build_human_overview(analysis, output_root, human_locale, resolved_variant),
         f"{output_root}/architecture.md": build_human_architecture(
             analysis,
@@ -639,5 +641,8 @@ def generate_human_docs(
             human_locale,
             resolved_variant,
         ),
-        f"{output_root}/glossary.md": build_human_glossary(analysis),
+        f"{output_root}/glossary.md": build_human_glossary(analysis, human_locale),
     }
+    if human_locale == "zh":
+        return {path: translate_to_zh(content) for path, content in docs.items()}
+    return docs

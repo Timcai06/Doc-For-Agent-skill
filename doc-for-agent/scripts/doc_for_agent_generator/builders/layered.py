@@ -4,6 +4,7 @@ from typing import Dict
 
 from ..locales import STRINGS, get_ui_string
 from ..models import RepoAnalysis
+from ..translator import translate_to_zh
 from ..utils import rel_path
 from .detectors import (
     append_package_script_commands,
@@ -41,19 +42,6 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
         reading_order.insert(3, "`01-product/003-app-flow.md`")
         reading_order.insert(5, "`02-architecture/005-frontend-guidelines.md`")
     
-    if locale == "zh":
-        rules = [
-         "01-product/001-core-goals.md",
-         "01-product/002-prd.md",
-         "02-architecture/004-tech-stack.md",
-         "01-product/003-app-flow.md",
-         "02-architecture/006-backend-structure.md",
-         "02-architecture/005-frontend-guidelines.md",
-         "02-architecture/007-architecture-compatibility.md",
-         "03-execution/008-implementation-plan.md",
-         "04-memory/009-progress.md",
-         "04-memory/010-lessons.md",
-    ]
     rules = [
         "Read product and architecture docs before broad refactors.",
         "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
@@ -671,7 +659,7 @@ def build_layered_lessons(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 
 def generate_layered_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
-    return {
+    docs = {
         "00-entry/AGENTS.md": build_layered_entry(analysis, locale=locale),
         "01-product/001-core-goals.md": build_layered_core_goals(analysis, locale=locale),
         "01-product/002-prd.md": build_layered_prd(analysis, locale=locale),
@@ -684,3 +672,6 @@ def generate_layered_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[st
         "04-memory/009-progress.md": build_layered_progress(analysis, locale=locale),
         "04-memory/010-lessons.md": build_layered_lessons(analysis, locale=locale),
     }
+    if locale == "zh":
+        return {path: translate_to_zh(content) for path, content in docs.items()}
+    return docs

@@ -1,39 +1,106 @@
 ---
 name: "doc-for-agent"
-description: "智能体原生 (Agent-Native) 全量仓库智理剧本"
+description: "Repository documentation skill package for coding agents"
 ---
-# doc-for-agent 智理化刷新剧本 (Agent-Native Playbook)
+# doc-for-agent
 
-当你执行此技能时，请将自己视为本仓库的**“首席文档架构师”**。本技能已进化至 **原生对齐 (Native Alignment)** 架构，实现了基于事实的多视图同步。
+Use this skill when a coding agent needs to understand, initialize, refresh, or audit a repository documentation system for both agents and human maintainers.
 
-## ⚠️ 核心工作流 (The Triad Loop)
+This package is not just a standalone CLI. The product has two layers:
 
-### 阶段 1：机器事实提取 (Machine Layer)
-**执行指令**：`docagent refresh --output-mode quad`
-- **原生优势**：引擎已集成全量 `locales.py`。生成的 `.zh` 视图（`AGENTS.zh/` 和 `human.zh/`）默认已具备 **100% 纯净的中文标题与系统逻辑**。
-- **职责**：确保命令在目标目录中成功执行，生成四视图基准。
+- `doc-for-agent` is the **skill package** that agents discover and load.
+- `docagent` is the **workflow adapter** that installs the skill, wires a repository, and runs `init / refresh / doctor`.
 
-### 阶段 2：逻辑智理与对齐 (Logic Refinement)
-**职责边界**：你不再是一个翻译者，而是一个**“规则审计员”**。
-- **事实对齐**：遍历 `AGENTS.zh/` 下的子文件（001 到 010+），核实引擎提取的“已确认事实”是否与代码现状、PRD 或 `SKILL.md` 的最新定义一致。
-- **母语级精修**：针对核心产品逻辑、技术栈细节进行地道润色，确保表达符合“高级软件工程师”的沟通直觉。
-- **Quad-View 校准**：确保英文视图 (`AGENTS/`) 保持纯净英文，中文视图 (`AGENTS.zh/`) 保持纯净中文，严禁出现语言漂移。
+## When To Use
 
-### 阶段 3：架构一致性审计 (Architectural Consistency)
-- **索引对正**：核实 `AGENTS.zh/AGENTS.md` 是否已作为根索引文件，并清晰引导了阅读路径。
-- **术语同步**：对照 `human.zh/glossary.md` 中的定义，确保所有视图中的业务名词解释（如 `skill-meta`, `dual-sync`）高度统一。
+- A repository needs a stable agent-facing and maintainer-facing documentation baseline.
+- The user wants repository docs that can be refreshed after code, workflow, or terminology changes.
+- The repository has drift between README, manifests, commands, and actual implementation.
+- Multi-agent or long-lived work needs shared contracts instead of one-off markdown summaries.
 
-## 🚥 质量门禁 (Verification Gate)
+## Product Model
 
-1. **语言纯度**：英/中两个视图是否都实现了 100% 的语言解耦？
-2. **事实精准度**：文档中的 CLI 命令、路径和包管理器名称是否与代码实际完全一致？
-3. **入口透明度**：根目录下的 `AGENTS.md` 是否已正确建立？
+### 1. Repository Analysis
 
----
+- Inspect the real repository structure first.
+- Classify the repository shape from code, manifests, routes, commands, and supporting docs.
+- Prefer repository facts over narrative assumptions.
 
-## 常用命令参考
+### 2. Documentation System Refresh
 
-- **深度初始化**：`docagent init --ai codex --target .`
-- **全量 Quad 刷新**：`docagent refresh --output-mode quad`
-- **配置漂移检查**：`docagent doctor --target .`
-- **版本对齐校验**：`docagent versions`
+- Build or refresh the paired documentation system from repository facts.
+- Output roots:
+  - `AGENTS/`
+  - `AGENTS.zh/`
+  - `docs/`
+  - `docs.zh/`
+- Treat four-view output as a **structure contract**. Do not assume bilingual content quality is already complete.
+
+### 3. Consistency Audit
+
+- Check that install paths, commands, platform names, and documentation roots stay aligned.
+- Treat disagreement between views as sync drift.
+- Prefer one coherent refresh cycle over one-sided manual patching.
+
+## Execution Model
+
+### Skill Layer
+
+- Use `SKILL.md`, `references/`, `templates/`, and `scripts/` progressively.
+- Start from the workflow in this file.
+- Load extra references only when the current task needs them.
+
+### Workflow Adapter Layer
+
+- Install / wire repository workflow with `docagent`.
+- Current primary distribution path:
+
+```bash
+npm install -g doc-for-agent@next
+```
+
+- Current first-class init paths:
+
+```bash
+docagent init --ai codex
+docagent init --ai claudecode
+```
+
+- Current repository refresh path:
+
+```bash
+docagent refresh --root . --output-mode quad
+```
+
+## Working Rules
+
+1. Analyze the repository before describing it.
+2. Treat `codex` and `claudecode` as first-class platform targets.
+3. Keep `continue` and `copilot` as compatibility targets, not equal discoverability claims.
+4. Do not describe `docagent` as the product itself; it is the skill distribution and repo workflow adapter.
+5. Do not claim `AGENTS.zh/` or `docs.zh/` are fully polished translations unless the generated content actually proves it.
+6. Keep installation facts, commands, and directory names exact.
+
+## Verification Gate
+
+Before considering the task complete, verify:
+
+1. Commands match the real CLI surface.
+2. Platform names match the current product contract (`codex`, `claudecode`, `continue`, `copilot`).
+3. Output roots match the current four-view structure.
+4. Chinese views do not contain large untranslated English rule blocks.
+
+## Common Commands
+
+- Install the npm-distributed skill package:
+  - `npm install -g doc-for-agent@next`
+- Initialize a repository for Codex:
+  - `docagent init --ai codex`
+- Initialize a repository for Claude Code:
+  - `docagent init --ai claudecode`
+- Refresh all four roots:
+  - `docagent refresh --root . --output-mode quad`
+- Check install / wiring status:
+  - `docagent doctor --target .`
+- Inspect current version state:
+  - `docagent versions --target .`

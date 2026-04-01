@@ -95,6 +95,12 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").exists())
             self.assertTrue((sandbox_root / "docs" / "overview.md").exists())
             self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
+            zh_overview = (sandbox_root / "docs.zh" / "overview.md").read_text(encoding="utf-8")
+            zh_agents_entry = (sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").read_text(encoding="utf-8")
+            self.assertNotIn("This page is maintainer-facing source-of-truth", zh_overview)
+            self.assertNotIn("Locale-output rule:", zh_overview)
+            self.assertNotIn("Path pair rule:", zh_overview)
+            self.assertNotIn("Read product and architecture docs before broad refactors.", zh_agents_entry)
 
     def test_validate_output_contract_rejects_asymmetric_quad_plan(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-quad-contract-") as tmpdir:
@@ -344,8 +350,11 @@ class EngineApiTests(unittest.TestCase):
             self.assertTrue((sandbox_root / "docs.zh" / "architecture.md").exists())
             self.assertFalse((sandbox_root / "docs" / "overview.md").exists())
             overview = (sandbox_root / "docs.zh" / "overview.md").read_text(encoding="utf-8")
-            self.assertIn("`docs.zh/` and `AGENTS/` are two views generated from the same repository analysis", overview)
-            self.assertIn("Locale-output rule: human locale `zh` maps to `docs.zh/`.", overview)
+            self.assertIn("`docs.zh/` 与 `AGENTS/` 是基于同一份仓库分析和事实锚点生成的两套视图。", overview)
+            self.assertIn("语言输出规则", overview)
+            self.assertIn("`docs.zh/`", overview)
+            self.assertNotIn("This page is maintainer-facing source-of-truth", overview)
+            self.assertNotIn("Locale-output rule:", overview)
 
     def test_invalid_human_template_variant_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-template-invalid-") as tmpdir:
