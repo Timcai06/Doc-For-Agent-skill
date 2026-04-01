@@ -36,13 +36,14 @@
 
 - 未检测到未决的产品内容项 .
 
-## 核心参考代码区与文档
+## Preserved Notes
 
-- `README.md`
-- `docs/landing-page.md`
-- `docs/landing-page.zh.md`
-- `docs/maintainers.md`
-
-## 核心决策待填补区
-
-- Confirm the top-level success criteria and non-goals for this repository.
+- 核心参考代码区与文档
+  - Preserved from previous manual edits.
+  - `README.md`
+  - `docs/landing-page.md`
+  - `docs/landing-page.zh.md`
+  - `docs/maintainers.md`
+- 核心决策待填补区
+  - Preserved from previous manual edits.
+  - Confirm the top-level success criteria and non-goals for this repository.

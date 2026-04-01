@@ -36,13 +36,14 @@
 
 - No unresolved product items were synthesized from supporting docs.
 
-## Referenced Repository Docs
+## Preserved Notes
 
-- `README.md`
-- `docs/landing-page.md`
-- `docs/landing-page.zh.md`
-- `docs/maintainers.md`
-
-## Open Questions
-
-- Confirm the top-level success criteria and non-goals for this repository.
+- Referenced Repository Docs
+  - Preserved from previous manual edits.
+  - `README.md`
+  - `docs/landing-page.md`
+  - `docs/landing-page.zh.md`
+  - `docs/maintainers.md`
+- Open Questions
+  - Preserved from previous manual edits.
+  - Confirm the top-level success criteria and non-goals for this repository.

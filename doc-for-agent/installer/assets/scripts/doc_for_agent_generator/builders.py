@@ -1399,65 +1399,73 @@ def build_layered_entry(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_layered_core_goals(analysis: RepoAnalysis) -> str:
+def build_layered_core_goals(analysis: RepoAnalysis, locale: str = "en") -> str:
     goals = []
     if analysis.summary:
         goals.append(analysis.summary)
-    goals.append(f"This repository is currently best understood as a `{repo_type_label(analysis.repo_type)}`.")
-    if analysis.repo_type == "skill-meta":
-        goals.append("The core product is the reusable agent-documentation workflow, not only the generated files themselves.")
-    elif analysis.repo_type == "web-app":
-        goals.append("The core product includes both the user-facing flow and the runtime contract that supports it.")
+        
+    if locale == "zh":
+        goals.append(f"本代码库目前的最佳定位是 `{repo_type_label(analysis.repo_type)}`。")
+        if analysis.repo_type == "skill-meta":
+            goals.append("核心产品价值在于可复用的“智能体文档工作流”，而不仅仅是生成的文档文件本身。")
+        elif analysis.repo_type == "web-app":
+            goals.append("核心产品既包括面向用户的交互流，也包括支撑其运行的运行时契约。")
+    else:
+        goals.append(f"This repository is currently best understood as a `{repo_type_label(analysis.repo_type)}`.")
+        if analysis.repo_type == "skill-meta":
+            goals.append("The core product is the reusable agent-documentation workflow, not only the generated files themselves.")
+        elif analysis.repo_type == "web-app":
+            goals.append("The core product includes both the user-facing flow and the runtime contract that supports it.")
 
-    constraints = [
-        "Avoid drifting away from the repository's real code, scripts, and naming conventions.",
-        "Prefer stable entrypoints and contracts over broad structural churn.",
-    ]
-    if analysis.classification.conflicting_signals:
-        constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
+    if locale == "zh":
+        constraints = [
+            "避免偏离仓库真实的业务代码、脚本和命名规范。",
+            "优先保持稳定的入口和契约，而不是进行大规模的解构。",
+        ]
+        if analysis.classification.conflicting_signals:
+            constraints.append("在将仓库简化为单一思维模型前，务必审查各种交错的信号。")
+    else:
+        constraints = [
+            "Avoid drifting away from the repository's real code, scripts, and naming conventions.",
+            "Prefer stable entrypoints and contracts over broad structural churn.",
+        ]
+        if analysis.classification.conflicting_signals:
+            constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
+            
     references = supporting_docs_for_role(analysis, "product")
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
-    return f"""# Core Goals
+    return f"""{get_ui_string('core_goals_header', locale)}
 
-## Top Rules (Read First)
+{get_ui_string('top_rules_sub', locale)}
 
-{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
+{format_bullets(top_rules, get_ui_string('fallback_product_rules', locale))}
 
-## Confirmed Facts
+{get_ui_string('confirmed_facts_sub', locale)}
 
-{format_bullets(goals, "Needs human confirmation: add a concise project goal statement.")}
+{format_bullets(goals, get_ui_string('fallback_project_goals', locale))}
 
-## Constraints To Preserve
+{get_ui_string('constraints_sub', locale)}
 
-{format_bullets(constraints, "Add repository-specific constraints.")}
+{format_bullets(constraints, get_ui_string('fallback_constraints', locale))}
 
-## Supporting Doc Synthesis (Product)
+{get_ui_string('supporting_doc_sub', locale)} (Product)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_product_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_product_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
-
-## Referenced Repository Docs
-
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional product-oriented repository docs were referenced automatically.")}
-
-## Open Questions
-
-{format_bullets(list(analysis.repo_type_questions), "Confirm the top-level success criteria and non-goals for this repository.")}
+{format_bullets(unresolved, get_ui_string('no_product_unresolved', locale))}
 """
-
 
 def build_layered_prd(analysis: RepoAnalysis) -> str:
     users = [
@@ -1524,54 +1532,75 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
 """
 
 
-def build_layered_app_flow(analysis: RepoAnalysis) -> str:
+def build_layered_app_flow(analysis: RepoAnalysis, locale: str = "en") -> str:
     stages = []
     if analysis.routes:
-        stages.extend([f"Browser route: `{route}`" for route in analysis.routes[:8]])
+        if locale == "zh":
+             stages.extend([f"浏览器路由：`{route}`" for route in analysis.routes[:8]])
+        else:
+             stages.extend([f"Browser route: `{route}`" for route in analysis.routes[:8]])
     if analysis.components:
-        stages.extend([f"Component surface: `{component}`" for component in analysis.components[:6]])
+        if locale == "zh":
+             stages.extend([f"组件表面：`{component}`" for component in analysis.components[:6]])
+        else:
+             stages.extend([f"Component surface: `{component}`" for component in analysis.components[:6]])
     if analysis.cli_entrypoints:
-        stages.extend([f"Command surface: `{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+        if locale == "zh":
+             stages.extend([f"启动入口：`{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+        else:
+             stages.extend([f"Command surface: `{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
     if analysis.skill_meta.agent_manifests:
-        stages.extend(
-            [f"Agent manifest surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
-        )
+        if locale == "zh":
+             stages.extend([f"智能体清单入口：`{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]])
+        else:
+             stages.extend([f"Agent manifest surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]])
 
-    guidance = [
-        "Treat the first visible or invoked surface as part of the product contract.",
-        "Keep user-facing names aligned across README examples, manifests, routes, and commands.",
-    ]
-    if analysis.repo_type == "web-app":
-        guidance.append("Preserve route semantics and component hierarchy before redesigning layout or navigation.")
-    elif analysis.repo_type == "skill-meta":
-        guidance.append("Treat install, invocation, and prompt surfaces as the equivalent of a frontend contract.")
+    if locale == "zh":
+        guidance = [
+            "将第一个可见或被调用的入口视为产品契约的一部分。",
+            "保持面向用户的名称在 README 示例、清单、路由和命令中对齐。",
+        ]
+        if analysis.repo_type == "web-app":
+            guidance.append("在重设计布局或导航前，保持路由语义和组件层级。")
+        elif analysis.repo_type == "skill-meta":
+            guidance.append("将安装、调用和提示词入口视为等同于前端契约。")
+    else:
+        guidance = [
+            "Treat the first visible or invoked surface as part of the product contract.",
+            "Keep user-facing names aligned across README examples, manifests, routes, and commands.",
+        ]
+        if analysis.repo_type == "web-app":
+            guidance.append("Preserve route semantics and component hierarchy before redesigning layout or navigation.")
+        elif analysis.repo_type == "skill-meta":
+            guidance.append("Treat install, invocation, and prompt surfaces as the equivalent of a frontend contract.")
+            
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
-    return f"""# App Flow
+    return f"""{get_ui_string('app_flow_header', locale)}
 
-## Surfaces Detected
+{get_ui_string('surfaces_sub', locale)}
 
-{format_bullets(stages, "No routes, command surfaces, or manifest surfaces were detected automatically.")}
+{format_bullets(stages, get_ui_string('no_surfaces', locale))}
 
-## Guidance
+{get_ui_string('guidance_sub', locale)}
 
-{format_bullets(guidance, "Add repository-specific flow guidance.")}
+{format_bullets(guidance, get_ui_string('no_guidance', locale))}
 
-## Supporting Doc Synthesis (Flow)
+{get_ui_string('supporting_doc_sub', locale)} (Flow)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear flow facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_flow_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct flow conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_flow_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved flow items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_flow_unresolved', locale))}
 """
 
 
