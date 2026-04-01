@@ -56,7 +56,7 @@ class InstallerCliTests(unittest.TestCase):
 
             self.assertIn("Continue (continue)", report)
             self.assertIn("assistant folder will be created", report)
-            self.assertIn("Version: 0.3.0.dev0", report)
+            self.assertIn("Version: 0.3.0.dev1", report)
 
     def test_install_command_writes_platform_bundle(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:
@@ -205,8 +205,8 @@ class InstallerCliTests(unittest.TestCase):
             main(["install", "--platform", "codex", "--target", tmpdir])
             report = render_versions_report(Path(tmpdir), collect_doctor_statuses(Path(tmpdir), ["codex"]))
 
-            self.assertIn("Source version: 0.3.0.dev0", report)
-            self.assertIn("Codex (codex): 0.3.0.dev0", report)
+            self.assertIn("Source version: 0.3.0.dev1", report)
+            self.assertIn("Codex (codex): 0.3.0.dev1", report)
 
     def test_versions_command_prints_summary(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-install-") as tmpdir:

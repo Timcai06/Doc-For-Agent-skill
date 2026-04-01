@@ -122,3 +122,47 @@ python3 doc-for-agent/tests/verify_generator_snapshots.py
 - `docs/platforms.zh.md`
 - `docs/quickstart.md`
 - `docs/quickstart.zh.md`
+
+## Preserved Notes
+
+- 顶层规则 (首读必看)
+  - Preserved from previous manual edits.
+  - **规则 1：执行契约** —— 标准的操作顺序为：`docagent init` -> `docagent refresh` -> `docagent doctor`。这是环境配置、同步及其漂移检查的标准路径。
+  - **规则 2：验证门禁** —— 在 `docagent doctor` 验证通过之前，任何关于文档工作流的变更均视为未完成。
+  - **规则 3：执行约束** —— 当在目标仓库目录外运行命令时，必须显式指明 `--target` 参数；在多次刷新过程中应保持 `--output-mode` 参数的一致性。
+  - **规则 4：验证顺序** —— 1) 首先运行 `docagent doctor`；若出现失败项，应立即停止并排查，严禁带病运行后续检查。
+- 文档维护契约
+  - Preserved from previous manual edits.
+  - **事实来源**：本页面是维护者维度的核心事实来源。在双视图模式下，必须确保其与 `AGENTS/` 目录以及 `human.zh/` 根视图的高度同步。
+  - **变更驱动**：仅在行为发生实际变更时更新本页面，避免仅进行无实质命令变动的叙述性刷新。
+- 双视图同步清单
+  - Preserved from previous manual edits.
+  - **对齐检查**：编辑后，在 `dual` 模式下刷新并验证双端文档是否在同一个变更集中。
+  - **漂移处理**：如果发现一侧更新而另一侧未动，应将其视为“文档漂移”，必须在合并代码前予以解决。
+- 结对刷新规则 (Pairing Rules)
+  - Preserved from previous manual edits.
+  - **刷新契约**：必须执行能够同时更新配对视图的刷新动作；严禁孤立地修补单一受众的文档。
+  - **四视图契约**：使用 `--output-mode quad` 时，需在一个评审周期内同时验证四个根目录（`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`）。
+- 关键流程节点
+  - Preserved from previous manual edits.
+  ### 环境初始化 (Setup)
+  ```bash
+  npm install
+  ```
+
+  ### 核心运行 (Run)
+  ```bash
+  # 执行 README 示例中的本地核心命令
+  ```
+
+  ### 验证门禁 (Verify)
+  ```bash
+  # 运行单元测试与生成器快照验证
+  python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py'
+  python3 doc-for-agent/tests/verify_generator_snapshots.py
+  ```
+- 知识状态与故障排查
+  - Preserved from previous manual edits.
+  ### 确认的规则
+  - **故障排查优先级**：1) 运行 `docagent doctor` 捕获配置漂移；2) 确认命令语境与 `README.md` 一致；3) 交叉检查 `docs/quickstart.zh.md` 中的假设。
+  - **验证门禁**：所有工作流变更必须通过 `docagent doctor` 的自动化检查。

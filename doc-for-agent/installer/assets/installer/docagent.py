@@ -441,7 +441,7 @@ def build_parser() -> argparse.ArgumentParser:
     refresh_parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
-        default="agent",
+        default="quad",
         help="Output docs mode: agent, human, dual, or quad.",
     )
     refresh_parser.add_argument("--explain", action="store_true")
@@ -459,7 +459,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate_parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
-        default="agent",
+        default="quad",
         help="Output docs mode: agent, human, dual, or quad.",
     )
     generate_parser.add_argument("--explain", action="store_true")

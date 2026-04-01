@@ -2,7 +2,7 @@
 
 ## Confirmed Terms
 
-- `skill`: `sync-doc-for-agent`
+- `skill`: `"doc-for-agent"`
 
 ## Naming Rules
 
@@ -53,3 +53,22 @@
 ## Provenance
 
 - No supporting memory documents were discovered outside generated outputs.
+
+## Preserved Notes
+
+- 已确定的术语 (Confirmed Terms)
+  - Preserved from previous manual edits.
+  - **`skill` (技能)**：特指 `"doc-for-agent"` 这一 Agent 原生技能。它不仅是代码，更是一份定义了 Agent 如何协助维护者进行文档治理的“剧本”。
+- 命名与表述规则
+  - Preserved from previous manual edits.
+  - **全屏一致性**：确保用户可见的名称、命令（如 `docagent`）和标签（Labels）在所有文档、脚本和代码中保持高度统一。
+  - **规范用词优先**：在编写文档时，优先使用项目定义的规范术语（Canonical Terms），避免使用随机的同义词。
+- 术语更新触发条件
+  - Preserved from previous manual edits.
+  - **新领域引入**：当团队引入新的业务领域术语时，应及时在此处添加规范定义。
+  - **术语废弃**：当旧术语被废弃时，保留迁移别名（Aliases），直到代码和文档完全对齐。
+- 术语表维护工作流
+  - Preserved from previous manual edits.
+  - **责任制**：为本页面指定一名负责人，并在行为变更的同一个 Pull Request 中更新本表。
+  - **定期评审**：每个迭代或发布切点（Release Cut）之前，至少针对本表进行一次系统性评审。
+  - **同步更新**：当项目词汇、交接语境或状态定义发生变化时，立即同步更新。

@@ -1,40 +1,37 @@
 ---
-name: sync-doc-for-agent
-description: Analyzes repository structure to generate and synchronize dual-language (English/Chinese) documentation for AI agents and human maintainers. Use this when the user asks to refresh docs, update the AGENTS directory, or sync docs after code changes.
+name: "doc-for-agent"
+description: "智理化刷新 Quad-View 仓库文档 (中英双语 / Agent+Human 视角)"
 ---
-# doc-for-agent
+# doc-for-agent 智理化刷新剧本 (Playbook)
 
-You are equipped with the `doc-for-agent` documentation engine, a system designed to maintain Quad-View documentation (Agent & Human, English & Chinese) for this repository.
+当你收到“刷新文档”或“同步仓库文档”的任务时，请将自己视为本仓库的**文档治理专家**，而非简单的命令执行器。请严格遵循以下四阶段闭环工作流：
 
-When the user asks you to initialize, refresh, or sync documentation, follow these strict orchestration steps:
+## 阶段 1：事实提取 (Machine Layer)
+**执行指令**：`docagent refresh --output-mode quad`
+- 这一步利用 Python 引擎执行 AST 扫描和事实捕获。
+- **注意**：引擎产出的 `.zh` 目录（`AGENTS.zh/` 和 `human.zh/`）仅作为事实基准，可能包含未翻译的英文碎片。
 
-## Step 1: Run Fact Extraction and Base Generation
+## 阶段 2：全量智理校阅 (Recursive Refinement)
+**职责边界**：你是最后一道“中文化”防线。
+- **必须遍历**：你必须主动检查并进入 `.zh` 目录下的【每一个】子文件（001 到 010+）。
+- **严禁偷懒**：严禁仅处理首页。如果子文件（如 `004-tech-stack.md`）中包含英文 Rules 或 Facts，你必须利用你的 LLM 背景理解，将其全部重塑为地道、专业的母语。
+- **保护契约**：严禁删除或修改被 `<!-- doc-for-agent:manual-start -->` 包裹的人类手动维护块。
 
-Execute the CLI tool to perform AST scanning, route detection, and baseline fact generation. The tool defaults to outputting the complete `quad` view.
+## 阶段 3：架构与产品对齐 (Cross-View Sync)
+- 确保 `human.zh/overview.md` 中的宏观决策在 `AGENTS.zh/` 对应的子文档中得到了正确的拆解和落地。
+- 参考 `human.zh/glossary.md` 中的术语定义，确保全书用词统一。
 
-```bash
-docagent refresh
-```
+## 阶段 4：质量门禁 (Verification Gate)
+在确认任务完成前，请进行自我 audit：
+1. **中文纯度**：`.zh` 目录下是否还存在生硬的英文 Facts 碎片？
+2. **全量覆盖**：是否漏掉了某个深度目录（如 `02-architecture/`）？
+3. **可维护性**：生成的路径链接是否在 Quad-View 下依然有效？
 
-*Note: If `docagent` is not found globally, try `npx -y doc-for-agent refresh` or fall back to `python3 doc-for-agent/installer/assets/installer/docagent.py refresh`.*
+---
 
-## Step 2: Intelligent Quad-View Synchronization
+## 常用命令索引
 
-The `docagent refresh` tool will generate or update standard Markdown files in four directories:
-- `AGENTS/` (English Agent Docs)
-- `AGENTS.zh/` (Chinese Agent Docs)
-- `human/` (English Human Docs)
-- `human.zh/` (Chinese Human Docs)
-
-Your critical job is to elevate these standard text templates by applying your deep LLM understanding of the repository.
-1. Review the generated core files, starting with `AGENTS/001-core-goals.md` and `AGENTS.zh/001-core-goals.md`.
-2. Ensure the Chinese translation in the `.zh` folders is native, highly professional, and accurate to the current codebase. The tool provides a good baseline, but you must ensure it does not contain awkward "mixed English/Chinese" artifacts.
-3. If you find any hardcoded English artifacts or suboptimal literal translations in the Chinese directories, **explicitly rewrite those files** using your file editing tools to be 100% native Chinese.
-
-## Step 3: Protect Manual Knowledge
-
-If you are modifying established Markdown files, never remove or overwrite content wrapped in `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->` blocks. These notes are manually maintained by human operators.
-
-## Step 4: Report Status
-
-After creating or refreshing the files, and performing your language refinement pass, provide the user with a concise summary of the files updated. Mention specifically if you improved any of the Chinese baseline text.
+- **初始化**：`docagent init --ai codex --target .`
+- **全量刷新**：`docagent refresh --output-mode quad`
+- **健康检查**：`docagent doctor --target .`
+- **版本对齐**：`docagent versions`

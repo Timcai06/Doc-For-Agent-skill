@@ -51,3 +51,32 @@
 ## Conflicting Signals
 
 - Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities.
+
+## Preserved Notes
+
+- 顶层规则 (首读必看)
+  - Preserved from previous manual edits.
+  - **规则 1：CLI 边界** —— 保持 `docagent` 作为所有智能体工作流（Codex, Claude, Continue, Copilot 等）的唯一入口界面。
+  - **规则 2：事实来源边界** —— 在发生冲突时，应首先根据 `README.md` 和 `docs/platforms.zh.md` 提供的基准事实进行仲裁，随后再决定是否修改 CLI 入口或适配器逻辑。
+  - **规则 3：分发结构** —— 确保平台映射关系保留在适配器配置中，而核心 CLI 契约的变更必须保持在引擎内部的中心化管理。
+- 仓库类型识别信号
+  - Preserved from previous manual edits.
+  - **检测到 Skill 标记**：存在 `SKILL.md`、智能体清单文件（Manifests）以及已有的 `AGENTS/` 目录结构。
+- 事实来源 (Source Of Truth)
+  - Preserved from previous manual edits.
+  - **`README.md`**：定义了项目目标、安装预期和用户示例。
+  - **`doc-for-agent/SKILL.md`**：定义了智能体触发条件和维护者工作流。
+  - **`doc-for-agent/agents/openai.yaml`**：提供了启动器和市场调用的元数据。
+  - **`doc-for-agent/scripts/`**：定义了文档生成的具体行为和仓库扫描逻辑。
+- 支撑文档综合 (架构维度)
+  - Preserved from previous manual edits.
+  ### 已确认 (Confirmed)
+
+  - **入口一致性**：坚持使用 `docagent` 作为跨平台的统一入口。
+  - **冲突处理顺序**：1) 检查核心文档；2) 随后才修改适配器/配置映射。
+
+  ### 兼容性边界
+
+  - **由于架构逻辑决定**：优先修改源代码和配置，随后通过刷新 `AGENTS/` 文档来同步。
+  - **严禁偏差**：确保生成的文档绝不脱离仓库实际的入口点和工作流。
+  - **一致性要求**：技能清单、README 示例与生成器输出必须描述同一个能力表面。

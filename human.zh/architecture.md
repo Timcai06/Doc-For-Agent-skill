@@ -119,3 +119,30 @@
 - `README.md`
 - `docs/platforms.md`
 - `docs/platforms.zh.md`
+
+## Preserved Notes
+
+- 事实来源 (Source Of Truth)
+  - Preserved from previous manual edits.
+  - **`README.md`**：明确了项目目标、安装方式和用户示例。
+  - **`doc-for-agent/SKILL.md`**：定义了智能体的触发条件和维护者工作流。
+  - **`doc-for-agent/scripts/`**：定义了文档生成的具体行为和仓库扫描逻辑。
+- 顶层规则 (首读必看)
+  - Preserved from previous manual edits.
+  - **规则 1：CLI 边界** —— 保持 `docagent` 作为所有智能体平台（Codex, Claude, Continue, Copilot）的唯一统一入口。
+  - **规则 2：事实来源边界** —— 发生冲突时，在修改 CLI 逻辑或分发行为前，优先参考 `README.md` 和 `docs/platforms.zh.md`。
+  - **规则 3：分发结构** —— 确保平台映射关系保留在适配器中，而核心 CLI 契约保持中心化。
+- 文档维护契约
+  - Preserved from previous manual edits.
+  - **事实性检查**：在编辑 CLI 或构建路径行为前，必须先解决事实来源（Source-of-truth）中的冲突。
+  - **同步要求**：在同一个 PR 中，随行为变更同步更新本页面；严禁在缺乏命令或契约变更的情况下进行纯文字刷新。
+- 结对刷新规则 (Pairing Rules)
+  - Preserved from previous manual edits.
+  - **路径契约**：验证变更文件必须同时包括 `AGENTS*/` 和 `docs*/` 的对应部分。
+  - **架构配对规则**：若 `human.zh/architecture.md` 同步发生变更，必须刷新各 AGENTS 目录下的配对路径。
+  - **四视图验证**：在使用 `--output-mode quad` 时，需同步验证所有四个根目录的架构一致性。
+- 技术栈与兼容性边界
+  - Preserved from previous manual edits.
+  - **确认的事实**：坚持 `docagent` 作为跨平台的单点入口。
+  - **兼容性原则**：优先修改源代码和配置，随后通过刷新指令来同步文档；严禁生成的文档脱离真实的仓库入口和工作流。
+  - **一致性基准**：技能清单、README 示例与生成器输出必须描述完全一致的功能面。

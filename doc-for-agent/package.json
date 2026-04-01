@@ -1,6 +1,6 @@
 {
   "name": "doc-for-agent",
-  "version": "0.3.0-dev.0",
+  "version": "0.3.0-dev.1",
   "description": "Unified CLI for generating and refreshing agent docs, human docs, or both from a repository.",
   "license": "UNLICENSED",
   "private": false,

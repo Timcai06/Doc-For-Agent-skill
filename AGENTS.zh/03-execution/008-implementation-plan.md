@@ -61,3 +61,16 @@ python3 doc-for-agent/tests/verify_generator_snapshots.py
 - `docs/platforms.zh.md`
 - `docs/quickstart.md`
 - `docs/quickstart.zh.md`
+
+## Preserved Notes
+
+- 核心工作流规则
+  - Preserved from previous manual edits.
+  - **设置与配置**：优先检查 `docagent doctor` 以确保多平台适配器路径正确无误。
+  - **验证流程**：在本地修改后，必须运行 `node doc-for-agent/installer/node/docagent.js refresh`（或全局 `docagent refresh`）验证四视图同步性。
+  - **故障排除**：若出现参数不支持报错（Unrecognized arguments），优先核查是否安装了旧版本 npm 包或资产同步是否缺失。
+- 已确认的实施细节
+  - Preserved from previous manual edits.
+  - 本仓库当前处于 **快速交付与架构重构** 阶段。
+  - 实施重心已从“纯工具开发”转向“智能体原生能力集成”。
+  - 发布流程：`sync_assets.py` -> `npm publish`。

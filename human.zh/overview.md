@@ -124,3 +124,21 @@
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
 - `docs/maintainers.md`
+
+## Preserved Notes
+
+- 结对刷新规则 (Pairing Rules)
+  - Preserved from previous manual edits.
+  - **刷新契约**：必须运行能够同时更新配对视图的刷新/生成动作；严禁孤立地修补单一语言或受众的文档。
+  - **路径契约**：当行为变更影响 shared source-of-truth 时，验证变更文件是否同时包含 `AGENTS*/` 和 `docs*/` 的对应部分。
+  - **四视图契约**：使用 `--output-mode quad` 时，在同一个评审周期内验证所有四个根目录（`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`）。
+  - **产品配对规则**：如果 `human.zh/overview.md` 发生变更，请同步刷新各 AGENTS 根目录下的配对产品路径。
+- 文档输出边界 (人类 vs 智能体)
+  - Preserved from previous manual edits.
+  - `human.zh/`：存储面向维护者的政策、决策和宏观背景。
+  - `AGENTS/`：存储面向执行的顺序、命令接线和 Agent 操作手册（Runbooks）。
+  - 如果变更影响双端读者，请在一次双视图刷新周期内完成，而非只打一侧的补丁。
+- 核心入口点 (Entry Points)
+  - Preserved from previous manual edits.
+  - `doc-for-agent/SKILL.md` (Agent 技能剧本)
+  - `doc-for-agent/agents/openai.yaml` (Agent 配置适配)
