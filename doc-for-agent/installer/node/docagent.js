@@ -59,6 +59,14 @@ function main() {
     forwardedArgs.push("quickstart");
   } else if (forwardedArgs[0] === "help") {
     forwardedArgs[0] = "--help";
+  } else if (forwardedArgs[0] === "init") {
+    try {
+      const initScript = require("./init");
+      initScript.runInit(forwardedArgs);
+    } catch (e) {
+      console.error("[docagent Node] Error during native template injection:", e.message);
+    }
+    // Proceed to run Python so it initializes the directories too.
   }
   return runPython(cliScript, forwardedArgs);
 }

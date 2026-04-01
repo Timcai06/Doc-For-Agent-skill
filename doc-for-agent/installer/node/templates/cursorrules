@@ -1,0 +1,14 @@
+# doc-for-agent rules
+
+As an AI coding assistant (Cursor/Windsurf/Copilot), you must follow these rules regarding documentation maintenance for this repository:
+
+1. This project utilizes `doc-for-agent` to maintain a strict dual-layer documentation architecture.
+2. `docs/` contains human-readable references.
+3. `AGENTS/` contains machine-level context and execution plans for AI agents.
+4. **Mandatory Action**: Whenever you, the AI, complete a significant feature, rewrite core logic, or change architectural dependencies, you MUST run:
+   ```bash
+   npx -y doc-for-agent refresh --output-mode quad
+   ```
+   to synchronize the `AGENTS/` context with your latest code changes automatically, without user prompt.
+5. Do not manually edit the `AGENTS/` directory structure unless explicitly using `docagent` commands, as they represent the ground truth of the system's generated context.
+6. To check for drift, run `npx -y doc-for-agent doctor`.

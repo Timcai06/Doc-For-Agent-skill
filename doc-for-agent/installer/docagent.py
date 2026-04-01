@@ -347,7 +347,7 @@ def print_global_install_summary(
 def build_parser() -> argparse.ArgumentParser:
     metadata = load_product_metadata()
     primary_commands = "init, refresh, doctor, generate, update, versions"
-    compatibility_commands = "global-install, install, all"
+    compatibility_commands = "install, all"
     output_modes = ", ".join(SUPPORTED_OUTPUT_MODES)
     parser = argparse.ArgumentParser(
         prog=metadata.installer_command,
@@ -401,32 +401,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional repository root override. If omitted, repository-local wiring uses the current directory.",
     )
     init_parser.add_argument(
-        "--no-local",
+        "--global",
+        dest="global_only",
         action="store_true",
         help="Skip repository-local wiring and perform global assistant discovery install only.",
     )
 
-    global_install_parser = subparsers.add_parser(
-        "global-install",
-        help="Install adapter bundle(s) to global assistant discovery directories (separate from repo-local init).",
-    )
-    global_install_parser.add_argument(
-        "--ai",
-        type=parse_ai_choice,
-        default=DEFAULT_GLOBAL_PLATFORM,
-        metavar=PUBLIC_AI_METAVAR,
-        help="Select target AI platform (`all` installs every supported platform globally).",
-    )
-    global_install_parser.add_argument(
-        "--global-root",
-        help=f"Optional global root override (default: ${GLOBAL_ROOT_ENV} or current user home).",
-    )
-    global_install_parser.add_argument(
-        "--bundle-strategy",
-        choices=SUPPORTED_BUNDLE_STRATEGIES,
-        default="copy",
-        help="Skill bundle placement strategy for global install: copy (default) or symlink.",
-    )
+
 
     doctor_parser = subparsers.add_parser("doctor", help="Primary v1: inspect install state for target platform(s).")
     doctor_parser.add_argument("--target", default=".", help="Repository root where assistant folders should live.")
@@ -456,7 +437,7 @@ def build_parser() -> argparse.ArgumentParser:
     refresh_parser.add_argument("--project-name", help="Optional explicit project name.")
     refresh_parser.add_argument("--dry-run", action="store_true")
     refresh_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
-    refresh_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
+    refresh_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="layered")
     refresh_parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
@@ -474,7 +455,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate_parser.add_argument("--mode", choices=["init", "refresh"], default="refresh")
     generate_parser.add_argument("--dry-run", action="store_true")
     generate_parser.add_argument("--repo-type", choices=SUPPORTED_REPO_TYPES)
-    generate_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="bootstrap")
+    generate_parser.add_argument("--profile", choices=SUPPORTED_DOC_PROFILES, default="layered")
     generate_parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
@@ -558,21 +539,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         local_target_root: Optional[Path] = None
         local_paths: List[Path] = []
-        if not args.no_local:
+        if not args.global_only:
             local_target_root = resolve_target_root(args.target or ".")
             local_paths = install_selected_platforms(local_target_root, platforms)
         print_init_summary(global_target_root, platforms, global_paths, local_target_root, local_paths)
-        return 0
-
-    if args.command == "global-install":
-        global_target_root = resolve_global_target_root(args.global_root)
-        platforms = resolve_ai_platforms(args.ai)
-        installed_paths = install_selected_platforms(
-            global_target_root,
-            platforms,
-            bundle_strategy=args.bundle_strategy,
-        )
-        print_global_install_summary(global_target_root, platforms, installed_paths, args.bundle_strategy)
         return 0
 
     if args.command in {"install", "all"}:

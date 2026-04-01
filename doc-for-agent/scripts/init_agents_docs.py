@@ -78,7 +78,7 @@ def main() -> None:
     parser.add_argument(
         "--profile",
         choices=SUPPORTED_DOC_PROFILES,
-        default="bootstrap",
+        default="layered",
         help="Select the AGENTS documentation topology to generate.",
     )
     parser.add_argument(
@@ -119,6 +119,14 @@ def main() -> None:
             print(line)
 
     print(result.summary)
+    
+    created = sum(1 for a in result.planned_actions if a.startswith("- create "))
+    updated = sum(1 for a in result.planned_actions if a.startswith("- update "))
+    unchanged = sum(1 for a in result.planned_actions if a.startswith("- unchanged "))
+    
+    if not args.dry_run:
+        print(f"✓ Created {created} files, Updated {updated} files, Skipped {unchanged} (unchanged)")
+        
     if args.dry_run:
         for line in result.planned_actions:
             print(line)

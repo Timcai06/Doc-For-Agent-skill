@@ -18,8 +18,8 @@ AGENT_LOCALE_OUTPUT_ROOTS = {
 SUPPORTED_HUMAN_LOCALES = ("en", "zh")
 SUPPORTED_HUMAN_TEMPLATE_VARIANTS = ("paired-core",)
 HUMAN_LOCALE_OUTPUT_ROOTS = {
-    "en": "docs",
-    "zh": "docs.zh",
+    "en": "human",
+    "zh": "human.zh",
 }
 DEFAULT_HUMAN_TEMPLATE_BY_LOCALE = {
     "en": "paired-core",

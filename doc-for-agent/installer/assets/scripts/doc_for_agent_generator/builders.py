@@ -1,18 +1,77 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Dict, Sequence
 
+from .analysis import supporting_doc_roles
 from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
+SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
+SUPPORTED_AGENT_LOCALES = ("en", "zh")
+AGENT_LOCALE_OUTPUT_ROOTS = {
+    "en": "AGENTS",
+    "zh": "AGENTS.zh",
+}
+SUPPORTED_HUMAN_LOCALES = ("en", "zh")
+SUPPORTED_HUMAN_TEMPLATE_VARIANTS = ("paired-core",)
+HUMAN_LOCALE_OUTPUT_ROOTS = {
+    "en": "human",
+    "zh": "human.zh",
+}
+DEFAULT_HUMAN_TEMPLATE_BY_LOCALE = {
+    "en": "paired-core",
+    "zh": "paired-core",
+}
+HUMAN_PAIRED_PATH_RULES = {
+    "bootstrap": {
+        "product": [
+            ("product.md", "agent-facing product rules and scope guardrails"),
+        ],
+        "architecture": [
+            ("architecture.md", "source-of-truth and repository boundary rules"),
+        ],
+        "execution": [
+            ("workflows.md", "setup, verify, and failure-triage order"),
+        ],
+    },
+    "layered": {
+        "product": [
+            ("01-product/001-core-goals.md", "agent-facing product rules and scope guardrails"),
+            ("01-product/002-prd.md", "agent-facing user and outcome contract"),
+            ("01-product/003-app-flow.md", "agent-facing flow and entry-surface notes"),
+        ],
+        "architecture": [
+            ("02-architecture/004-tech-stack.md", "stack facts and platform anchors"),
+            ("02-architecture/007-architecture-compatibility.md", "source-of-truth and compatibility rules"),
+        ],
+        "execution": [
+            ("03-execution/008-implementation-plan.md", "setup, verify, and failure-triage order"),
+        ],
+    },
+}
 
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:
     if not items:
         return f"- {empty_line}"
     return "\n".join(f"- {item}" for item in items)
+
+
+def resolve_human_output_root(human_locale: str) -> str:
+    return HUMAN_LOCALE_OUTPUT_ROOTS.get(human_locale, HUMAN_LOCALE_OUTPUT_ROOTS["en"])
+
+
+def resolve_agent_output_root(agent_locale: str) -> str:
+    return AGENT_LOCALE_OUTPUT_ROOTS.get(agent_locale, AGENT_LOCALE_OUTPUT_ROOTS["en"])
+
+
+def resolve_human_template_variant(human_locale: str, human_template_variant: str | None = None) -> str:
+    if human_template_variant:
+        return human_template_variant
+    return DEFAULT_HUMAN_TEMPLATE_BY_LOCALE.get(human_locale, DEFAULT_HUMAN_TEMPLATE_BY_LOCALE["en"])
 
 
 def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> str:
@@ -23,6 +82,442 @@ def format_path_bullets(paths: Sequence[Path], root: Path, empty_line: str) -> s
 
 def supporting_doc_lines(paths: Sequence[Path], root: Path) -> list[str]:
     return [f"`{rel_path(path, root)}`" for path in paths]
+
+
+def supporting_doc_insight_lines(analysis: RepoAnalysis, role: str, kind: str) -> list[str]:
+    role_insights = analysis.supporting_doc_insights.get(role, {})
+    values = role_insights.get(kind, [])
+    return [value for value in values if value]
+
+
+def supporting_doc_provenance_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    return [f"`{path}`" for path in analysis.supporting_doc_provenance.get(role, [])]
+
+
+def synthesis_summary_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    role_insights = analysis.supporting_doc_insights.get(role, {})
+    role_sources = analysis.supporting_doc_provenance.get(role, [])
+    confirmed_count = len(role_insights.get("confirmed", []))
+    conflicting_count = len(role_insights.get("conflicting", []))
+    unresolved_count = len(role_insights.get("unresolved", []))
+    lines = [
+        f"Sources analyzed: `{len(role_sources)}`",
+        f"Synthesized statements: `{confirmed_count}` confirmed, `{conflicting_count}` conflicting, `{unresolved_count}` unresolved",
+    ]
+    if not role_sources:
+        lines.append("No supporting docs matched this role; content below is derived from repository structure and code signals.")
+    return lines
+
+
+def human_audience_lines(analysis: RepoAnalysis) -> list[str]:
+    lines = [
+        "Repository maintainers responsible for day-to-day delivery and operational stability.",
+    ]
+    if analysis.repo_type == "web-app":
+        lines.append("Cross-functional engineers coordinating frontend and backend changes.")
+    elif analysis.repo_type == "backend-service":
+        lines.append("Backend operators and API maintainers responsible for service behavior.")
+    elif analysis.repo_type == "cli-tool":
+        lines.append("CLI maintainers preserving command UX and script compatibility.")
+    elif analysis.repo_type == "library-sdk":
+        lines.append("SDK maintainers preserving public API behavior for downstream consumers.")
+    elif analysis.repo_type == "skill-meta":
+        lines.append("Skill maintainers keeping manifests, prompts, and generator behavior aligned.")
+    return lines
+
+
+def human_inferred_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    lines: list[str] = []
+    if role == "product":
+        if analysis.summary:
+            lines.append(f"Project intent from README/code signals: {analysis.summary}")
+        if analysis.classification.reasons:
+            lines.append(f"Repo type signal: `{repo_type_label(analysis.repo_type)}` ({analysis.classification.reasons[0]})")
+        if analysis.routes:
+            lines.append(f"User-facing flow includes routes such as {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
+        if analysis.endpoints:
+            lines.append(f"Service-facing flow includes endpoints such as {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
+    elif role == "architecture":
+        if analysis.frontend_root and analysis.backend_root:
+            lines.append("Architecture is split between a frontend surface and a backend/runtime surface.")
+        elif analysis.frontend_root:
+            lines.append("Architecture is frontend-led with runtime behavior anchored in package scripts and routes.")
+        elif analysis.backend_root:
+            lines.append("Architecture is backend-led with runtime behavior anchored in service files and endpoints.")
+        if analysis.routes:
+            lines.append(f"Routing structure suggests primary interface paths under {', '.join(f'`{route}`' for route in analysis.routes[:3])}.")
+        if analysis.endpoints:
+            lines.append(f"Endpoint decorators suggest service contract anchors at {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:3])}.")
+    elif role == "execution":
+        package_manager_label = analysis.package_manager or "npm"
+        lines.append(f"Primary command workflow centers on `{package_manager_label}` package scripts and repository-local verify commands.")
+        if analysis.frontend_scripts:
+            lines.append(
+                f"Frontend workflows depend on scripts: {', '.join(f'`{name}`' for name in list(analysis.frontend_scripts.keys())[:4])}."
+            )
+        if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
+            lines.append("Backend setup requires Python dependency installation from `requirements.txt`.")
+    elif role == "memory":
+        if analysis.glossary_entries:
+            lines.append("Canonical terminology can be seeded from detected glossary entries and then curated by maintainers.")
+        if analysis.routes:
+            lines.append("Route names are useful term candidates for product and operations vocabulary alignment.")
+        if analysis.endpoints:
+            lines.append("Endpoint labels are useful term candidates for integration and runbook language.")
+    return lines
+
+
+def human_maintenance_lines(analysis: RepoAnalysis, role: str, unresolved_count: int, conflicting_count: int) -> list[str]:
+    lines: list[str] = [
+        "Assign one maintainer owner for this document and update it in the same pull request as behavior changes.",
+        "Review this document at least once per sprint or before each release cut.",
+    ]
+    if role == "product":
+        lines.append("Update after roadmap, target user, or feature scope decisions.")
+    elif role == "architecture":
+        lines.append("Update after boundary, dependency, or interface contract changes.")
+    elif role == "execution":
+        lines.append("Update after setup/run/verify command changes or CI workflow updates.")
+    elif role == "memory":
+        lines.append("Update when terminology, handoff language, or project status vocabulary changes.")
+
+    if conflicting_count:
+        lines.append("Prioritize resolving conflicting statements before treating this document as canonical.")
+    if unresolved_count:
+        lines.append("Track unresolved items as named decisions with owner and due date.")
+    if unresolved_count == 0 and conflicting_count == 0:
+        lines.append("No major synthesis conflicts were detected; focus on keeping this page current with implementation changes.")
+    return lines
+
+
+def human_bootstrap_backlog_lines(role: str, has_supporting_provenance: bool) -> list[str]:
+    if has_supporting_provenance:
+        return ["Supporting docs were found; continue consolidating them into this page and archive stale duplicates."]
+
+    if role == "product":
+        return [
+            "Write a one-paragraph project mission and a one-release priority list.",
+            "Record primary users and success signals in concrete terms.",
+            "Capture top open product decisions with owner + target date.",
+        ]
+    if role == "architecture":
+        return [
+            "Document top-level system boundaries (frontend/backend/services) in 5-8 bullets.",
+            "List canonical files that define runtime behavior and public contracts.",
+            "Create an initial decision backlog for unresolved architecture tradeoffs.",
+        ]
+    if role == "execution":
+        return [
+            "Verify setup/run/verify commands from a clean environment and keep only working commands.",
+            "Define a minimum release checklist shared by maintainers.",
+            "Record failure recovery steps for the most common local/CI breakages.",
+        ]
+    return [
+        "Promote repeated domain terms into canonical glossary entries.",
+        "Note deprecated or ambiguous terms and map them to preferred wording.",
+        "Review docs for vocabulary drift each sprint.",
+    ]
+
+
+def human_update_trigger_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    lines: list[str] = []
+    if role == "product":
+        lines.append("When new user-facing routes, commands, or APIs are added, update scope and audience notes.")
+        lines.append("When priorities change in release planning, update the project overview and open decision list.")
+    elif role == "architecture":
+        lines.append("When source-of-truth files, service boundaries, or runtime dependencies change, update this page.")
+        lines.append("When integration contracts change (routes/endpoints/storage), refresh architecture notes in the same PR.")
+    elif role == "execution":
+        lines.append("When setup/run/verify commands change, update this runbook immediately.")
+        lines.append("When CI checks or release gates change, sync the Verify and Operational Notes sections.")
+    elif role == "memory":
+        lines.append("When teams introduce new domain terms, add canonical definitions and preferred wording.")
+        lines.append("When old terms are deprecated, keep migration aliases until docs and code are fully aligned.")
+
+    if not analysis.supporting_doc_provenance.get(role):
+        lines.append("No supporting docs were found for this role; prioritize adding one maintainer-verified baseline note.")
+    return lines
+
+
+def normalize_evidence_line(line: str) -> str:
+    without_sources = re.sub(r"\s*\(sources:\s*.*\)$", "", line).strip().lower()
+    return re.sub(r"[^a-z0-9]+", " ", without_sources).strip()
+
+
+def compact_human_evidence(
+    confirmed: Sequence[str],
+    inferred: Sequence[str],
+    unresolved: Sequence[str],
+    conflicting: Sequence[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    confirmed_out: list[str] = []
+    inferred_out: list[str] = []
+    unresolved_out: list[str] = []
+    conflicting_out: list[str] = []
+    seen: set[str] = set()
+
+    for line in confirmed:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            confirmed_out.append(line)
+            seen.add(key)
+
+    for line in inferred:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            inferred_out.append(line)
+            seen.add(key)
+
+    for line in unresolved:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            unresolved_out.append(line)
+            seen.add(key)
+
+    for line in conflicting:
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            conflicting_out.append(line)
+            seen.add(key)
+
+    return confirmed_out, inferred_out, unresolved_out, conflicting_out
+
+
+def trim_human_evidence_density(
+    role: str,
+    confirmed: Sequence[str],
+    inferred: Sequence[str],
+    unresolved: Sequence[str],
+    conflicting: Sequence[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    limits = {
+        "product": {"confirmed": 4, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "architecture": {"confirmed": 5, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "execution": {"confirmed": 5, "inferred": 2, "unresolved": 3, "conflicting": 3},
+        "memory": {"confirmed": 5, "inferred": 3, "unresolved": 4, "conflicting": 4},
+    }
+    role_limits = limits.get(role, limits["memory"])
+    return (
+        list(confirmed)[: role_limits["confirmed"]],
+        list(inferred)[: role_limits["inferred"]],
+        list(unresolved)[: role_limits["unresolved"]],
+        list(conflicting)[: role_limits["conflicting"]],
+    )
+
+
+def human_doc_contract_lines(role: str, human_output_root: str) -> list[str]:
+    base = [
+        f"This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode and `{human_output_root}/` as the human-view root.",
+        "Update this page in the same PR as behavior changes; avoid narrative-only refreshes without command or contract changes.",
+    ]
+    if role == "product":
+        base.append("Record scope decisions as explicit rules and owners; move stale discussion text to decision backlog.")
+    elif role == "architecture":
+        base.append("Resolve source-of-truth conflicts before editing CLI, adapter, or build-path behavior.")
+    elif role == "execution":
+        base.append("Keep setup/run/verify/triage order executable from a clean checkout before marking this page done.")
+    else:
+        base.append("Keep terminology and decision memory aligned with current docs and command surfaces.")
+    return base
+
+
+def human_dual_sync_checklist_lines(role: str, human_output_root: str) -> list[str]:
+    base = [
+        f"After edits, refresh in dual mode and verify both `AGENTS/` and `{human_output_root}/` were updated in the same change set.",
+        "If one side changed without the other, treat it as documentation drift and resolve before merge.",
+    ]
+    if role == "execution":
+        base.append("Run documented verify commands after refresh and keep failure-triage order aligned across both doc systems.")
+    elif role == "architecture":
+        base.append("When source-of-truth files move, update references in both doc systems before adjusting adapter/build-path rules.")
+    elif role == "product":
+        base.append("When scope or audience changes, update project positioning and retention rules in both doc systems together.")
+    return base
+
+
+def human_paired_refresh_rule_lines(role: str, human_output_root: str) -> list[str]:
+    lines = [
+        "Refresh contract: run one refresh/generate action that updates paired views together; do not patch one locale/audience in isolation.",
+        "Path contract: verify changed files include both `AGENTS*/` and `docs*/` counterparts when behavior changes affect shared source-of-truth.",
+        "Quad-mode contract: when using `--output-mode quad`, validate all four roots (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`) in the same review cycle.",
+    ]
+    if role == "product":
+        lines.append(
+            f"Product pairing rule: if `{human_output_root}/overview.md` changes due to scope/value decisions, refresh paired product paths under both AGENTS roots."
+        )
+    elif role == "architecture":
+        lines.append(
+            f"Architecture pairing rule: if `{human_output_root}/architecture.md` changes due to boundary/source-of-truth updates, refresh paired architecture paths under both AGENTS roots."
+        )
+    elif role == "execution":
+        lines.append(
+            f"Execution pairing rule: if `{human_output_root}/workflows.md` changes due to command/order updates, refresh paired execution paths under both AGENTS roots."
+        )
+    return lines
+
+
+def paired_agent_doc_lines(analysis: RepoAnalysis, role: str) -> list[str]:
+    profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
+    mapping = HUMAN_PAIRED_PATH_RULES[profile]
+
+    lines: list[str] = []
+    for relative, purpose in mapping.get(role, []):
+        lines.append(f"`AGENTS/{relative}` for {purpose}.")
+    return lines
+
+
+def prune_weak_human_inferences(lines: Sequence[str]) -> list[str]:
+    weak_markers = ("likely", "appears to", "suggests", "could", "might")
+    filtered: list[str] = []
+    for line in lines:
+        lowered = line.lower()
+        if any(marker in lowered for marker in weak_markers):
+            continue
+        filtered.append(line)
+    return filtered
+
+
+def strip_supporting_sources_suffix(lines: Sequence[str]) -> list[str]:
+    compacted: list[str] = []
+    for line in lines:
+        compacted.append(re.sub(r"\s*\(sources:\s*.*\)$", "", line).strip())
+    return [line for line in compacted if line]
+
+
+def human_output_boundary_lines(role: str, human_output_root: str) -> list[str]:
+    shared = [
+        f"Use `{human_output_root}/` for maintainer-facing policy and decisions; use `AGENTS/` for execution order, command wiring, and handoff runbooks.",
+        "If a change affects both reader types, update both systems in one dual refresh cycle instead of patching only one side.",
+    ]
+    if role == "product":
+        shared.append(
+            f"Keep user/value framing in `{human_output_root}/overview.md`; keep edit-time operating rules in `AGENTS/product.md` (or layered product docs)."
+        )
+    elif role == "architecture":
+        shared.append(
+            f"Keep architecture rationale in `{human_output_root}/architecture.md`; keep CLI/build/source-of-truth guardrails in `AGENTS/architecture.md` (or layered architecture docs)."
+        )
+    elif role == "execution":
+        shared.append(
+            f"Keep maintainer runbook context in `{human_output_root}/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs)."
+        )
+    return shared
+
+
+def human_dual_view_rationale_lines(role: str, human_output_root: str) -> list[str]:
+    lines = [
+        f"`{human_output_root}/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.",
+        "When the two views diverge, treat it as refresh drift rather than independent documentation authority.",
+    ]
+    if role == "product":
+        lines.append(
+            f"Product intent lives in `{human_output_root}/overview.md`, while execution-facing preservation rules live in paired AGENTS product docs."
+        )
+    elif role == "architecture":
+        lines.append(
+            f"Architecture rationale lives in `{human_output_root}/architecture.md`, while operational boundaries for agents live in paired AGENTS architecture docs."
+        )
+    elif role == "execution":
+        lines.append(
+            f"Maintainer runbook context lives in `{human_output_root}/workflows.md`, while step ordering for agent actions lives in paired AGENTS execution docs."
+        )
+    return lines
+
+
+def human_doc_relative_path(role: str) -> str:
+    mapping = {
+        "product": "overview.md",
+        "architecture": "architecture.md",
+        "execution": "workflows.md",
+        "memory": "glossary.md",
+    }
+    return mapping.get(role, "overview.md")
+
+
+def human_dual_pairing_contract_lines(
+    analysis: RepoAnalysis,
+    role: str,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> list[str]:
+    resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
+    profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
+    lines = [
+        "Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.",
+        f"Locale-output rule: human locale `{human_locale}` maps to `{human_output_root}/`.",
+        f"Template rule: human template variant `{resolved_variant}` is part of the pairing contract and must remain consistent across paired docs.",
+    ]
+    human_rel = human_doc_relative_path(role)
+    for relative, purpose in HUMAN_PAIRED_PATH_RULES[profile].get(role, []):
+        lines.append(
+            f"Path pair rule: `{human_output_root}/{human_rel}` pairs with `AGENTS/{relative}` for {purpose}."
+        )
+    return lines
+
+
+def role_first_screen_rules(analysis: RepoAnalysis, role: str) -> list[str]:
+    prefixes_by_role = {
+        "product": ("Product positioning:", "Repository adaptation scope:", "Retention value:"),
+        "architecture": ("CLI boundary:", "Source-of-truth boundary:", "Build-path rule:", "Distribution structure:"),
+        "execution": (
+            "Execution contract:",
+            "Verification gate:",
+            "Verification order:",
+            "Failure triage priority:",
+            "Execution constraints:",
+        ),
+    }
+    conflict_prefix_by_role = {
+        "architecture": "Conflict rule:",
+    }
+    selected: list[str] = []
+    seen: set[str] = set()
+    confirmed = supporting_doc_insight_lines(analysis, role, "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, role, "conflicting")
+    prefixes = prefixes_by_role.get(role, ())
+
+    for line in confirmed:
+        if prefixes and not line.startswith(prefixes):
+            continue
+        key = normalize_evidence_line(line)
+        if key and key not in seen:
+            selected.append(line)
+            seen.add(key)
+
+    conflict_prefix = conflict_prefix_by_role.get(role)
+    if conflict_prefix:
+        for line in conflicting:
+            if not line.startswith(conflict_prefix):
+                continue
+            key = normalize_evidence_line(line)
+            if key and key not in seen:
+                selected.append(line)
+                seen.add(key)
+            break
+
+    if selected:
+        return selected[:4]
+
+    fallback_by_role = {
+        "product": [
+            "State repository scope and user value as explicit rules before writing broad product narrative.",
+            "Use lifecycle language (`init/refresh/doctor/migrate`) to keep docs maintainable over one-shot generation.",
+        ],
+        "architecture": [
+            "Resolve source-of-truth conflicts before changing CLI, adapter, or build-path behavior.",
+            "Treat platform adapters as distribution details; keep contract changes centralized at CLI entry.",
+        ],
+        "execution": [
+            "Run documented setup/run/verify commands in order before editing scripts or docs.",
+            "On failures, triage install/config drift first, then command context, then CI environment mismatches.",
+        ],
+    }
+    return fallback_by_role.get(role, [])
+
+
+def enumerate_rules(lines: Sequence[str]) -> list[str]:
+    return [f"Rule {index + 1}: {line}" for index, line in enumerate(lines)]
 
 
 def repo_type_label(repo_type: str) -> str:
@@ -117,24 +612,8 @@ def detect_package_metadata_paths(root: Path) -> list[Path]:
 def supporting_docs_for_role(analysis: RepoAnalysis, role: str) -> list[Path]:
     role_paths: list[Path] = []
     for path in analysis.docs_inventory.reference_only_docs:
-        normalized = rel_path(path, analysis.root).lower()
-        if role == "product":
-            if normalized == "readme.md" or normalized.startswith("docs/product/") or normalized.startswith("specs/"):
-                role_paths.append(path)
-        elif role == "architecture":
-            if (
-                normalized.startswith("docs/architecture/")
-                or "/architecture/" in normalized
-                or normalized.startswith("docs/adr")
-                or "adr" in path.name.lower()
-            ):
-                role_paths.append(path)
-        elif role == "execution":
-            if normalized.startswith("plan/") or normalized.startswith("roadmap/") or "runbook" in path.name.lower():
-                role_paths.append(path)
-        elif role == "memory":
-            if any(token in normalized for token in ("progress", "lessons", "handoff", "status")):
-                role_paths.append(path)
+        if role in supporting_doc_roles(path, analysis.root):
+            role_paths.append(path)
     return role_paths
 
 
@@ -262,6 +741,12 @@ def build_readme(analysis: RepoAnalysis) -> str:
 - Multi-agent work where terminology, workflow, and ownership boundaries need to stay aligned
 - Refreshing repo-specific context after the codebase structure changes
 
+## Dual Documentation System
+
+- `AGENTS/` is the agent-facing rule/runbook layer for execution and handoff.
+- `docs/` is the human-facing system context layer for maintainers and onboarding.
+- Prefer `--output-mode dual` so both layers stay synchronized after refresh.
+
 ## Repository Classification
 
 - Detected repo type: `{repo_type_label(analysis.repo_type)}`
@@ -291,7 +776,7 @@ def build_product(analysis: RepoAnalysis) -> str:
         if analysis.skill_meta.skill_file:
             facts.append(f"Primary skill definition file: `{analysis.skill_meta.skill_file.name}`.")
         facts.append(
-            "This repository appears to ship reusable instructions and scripts for coding agents rather than a standalone product app."
+            "This repository ships reusable instructions and scripts for coding agents rather than a standalone product app."
         )
 
     inferences = [
@@ -299,15 +784,16 @@ def build_product(analysis: RepoAnalysis) -> str:
     ]
     if analysis.repo_type == "skill-meta":
         inferences.append(
-            "Primary users are likely maintainers installing or evolving the skill, plus agents that consume the generated guidance."
+            "Primary users are maintainers installing or evolving the skill, plus agents that consume the generated guidance."
         )
     elif analysis.repo_type in {"library-sdk", "cli-tool"}:
-        inferences.append("Primary users are likely developers integrating or running the packaged tooling.")
+        inferences.append("Primary users are developers integrating or running the packaged tooling.")
 
     open_questions = [
         "Confirm the primary audience and the exact outcome they expect from this repository.",
         "Confirm the core success criteria agents should optimize for before making broad edits.",
     ]
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
     return f"""# Product
 
@@ -316,6 +802,10 @@ def build_product(analysis: RepoAnalysis) -> str:
 - Planning work in this repository before editing code or docs
 - Aligning multiple agents on what this repo is trying to preserve
 - Checking whether a proposed change still matches the repository's purpose
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -369,6 +859,7 @@ def build_architecture(analysis: RepoAnalysis) -> str:
                 "When repo shape is ambiguous, inspect the README and build scripts before assuming ownership boundaries.",
             ]
         )
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
 
     return f"""# Architecture
 
@@ -377,6 +868,10 @@ def build_architecture(analysis: RepoAnalysis) -> str:
 - Building a quick mental model of repository boundaries before editing
 - Deciding which files are canonical versus generated
 - Handing work between agents without losing context
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -444,7 +939,7 @@ def build_frontend(analysis: RepoAnalysis) -> str:
     elif analysis.repo_type == "skill-meta":
         if analysis.skill_meta.agent_manifests:
             facts.append("Agent-facing interface manifests are present.")
-        facts.append("Primary user interaction likely happens through an AI assistant invoking this skill rather than a browser UI.")
+        facts.append("Primary user interaction happens through an AI assistant invoking this skill rather than a browser UI.")
         inferences.append("The closest thing to a frontend here is the installation and invocation surface exposed through skill manifests and prompts.")
     elif analysis.repo_type == "cli-tool":
         best_used_for = [
@@ -755,7 +1250,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
             run_lines.append(f"python3 {skill_script_rel} --root /path/to/target-repo --mode refresh")
             refresh_lines.append(f"python3 {skill_script_rel} --root {analysis.root} --mode refresh")
         refresh_lines.append(
-            "Review generated `AGENTS/*.md` files and tighten any sections still marked as needing human confirmation."
+            "Review generated `AGENTS/*.md` and `docs/*.md` files and tighten sections still marked as needing human confirmation."
         )
 
     if analysis.script_files:
@@ -771,7 +1266,8 @@ def build_workflows(analysis: RepoAnalysis) -> str:
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     if not refresh_lines:
-        refresh_lines = ["Refresh `AGENTS/` after major codebase, workflow, or terminology changes."]
+        refresh_lines = ["Refresh `AGENTS/` + `docs/` after major codebase, workflow, or terminology changes."]
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Workflows
 
@@ -780,6 +1276,10 @@ def build_workflows(analysis: RepoAnalysis) -> str:
 - Getting an agent from zero context to runnable context quickly
 - Running the minimum commands needed to inspect or validate changes
 - Refreshing agent docs after the repository shape changes
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
 
 ## Setup
 
@@ -915,8 +1415,16 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
     if analysis.classification.conflicting_signals:
         constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
     references = supporting_docs_for_role(analysis, "product")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
 
     return f"""# Core Goals
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
 
 ## Confirmed Facts
 
@@ -925,6 +1433,20 @@ def build_layered_core_goals(analysis: RepoAnalysis) -> str:
 ## Constraints To Preserve
 
 {format_bullets(constraints, "Add repository-specific constraints.")}
+
+## Supporting Doc Synthesis (Product)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
 
 ## Referenced Repository Docs
 
@@ -957,6 +1479,9 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
             [f"Agent surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
         )
     references = supporting_docs_for_role(analysis, "product")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
     return f"""# PRD
 
@@ -972,6 +1497,20 @@ def build_layered_prd(analysis: RepoAnalysis) -> str:
 ## Current Entry Surfaces
 
 {format_bullets(journeys, "No obvious user entry surfaces were detected automatically.")}
+
+## Supporting Doc Synthesis (Product)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
 
 ## Supporting Repository Docs
 
@@ -1005,6 +1544,9 @@ def build_layered_app_flow(analysis: RepoAnalysis) -> str:
         guidance.append("Preserve route semantics and component hierarchy before redesigning layout or navigation.")
     elif analysis.repo_type == "skill-meta":
         guidance.append("Treat install, invocation, and prompt surfaces as the equivalent of a frontend contract.")
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
     return f"""# App Flow
 
@@ -1015,6 +1557,20 @@ def build_layered_app_flow(analysis: RepoAnalysis) -> str:
 ## Guidance
 
 {format_bullets(guidance, "Add repository-specific flow guidance.")}
+
+## Supporting Doc Synthesis (Flow)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear flow facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct flow conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved flow items were synthesized from supporting docs.")}
 """
 
 
@@ -1127,6 +1683,10 @@ def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
 def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     source_of_truth = infer_source_of_truth_lines(analysis)
     references = supporting_docs_for_role(analysis, "architecture")
+    confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
 
     boundaries = [
         "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
@@ -1137,6 +1697,10 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
 
     return f"""# Architecture Compatibility
 
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
+
 ## Repo-Type Signals
 
 {format_bullets(list(analysis.repo_type_reasons), "No strong classification signals were detected automatically.")}
@@ -1144,6 +1708,20 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
 ## Source Of Truth
 
 {format_bullets(source_of_truth, "Needs human confirmation: add canonical source-of-truth files.")}
+
+## Supporting Doc Synthesis (Architecture)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
 
 ## Referenced Architecture Docs
 
@@ -1225,12 +1803,20 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     references = supporting_docs_for_role(analysis, "execution")
+    confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Implementation Plan
 
 ## Current Operating Posture
 
 - {current_operating_posture(analysis)}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before detailed command blocks.")}
 
 ## Immediate Next Steps
 
@@ -1253,6 +1839,20 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
 ```bash
 {chr(10).join(verify_lines)}
 ```
+
+## Supporting Doc Synthesis (Execution)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
 
 ## Supporting Execution Docs
 
@@ -1277,6 +1877,9 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
         "Confirm the next milestone and keep this file updated with human-approved progress.",
     ]
     references = supporting_docs_for_role(analysis, "memory")
+    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
     return f"""# Progress
 
@@ -1287,6 +1890,20 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
 ## Current Focus
 
 {format_bullets(focus, "Add the current focus items.")}
+
+## Supporting Doc Synthesis (Memory)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear progress facts were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct memory conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved memory items were synthesized from supporting docs.")}
 
 ## Referenced Memory Docs
 
@@ -1305,12 +1922,29 @@ def build_layered_lessons(analysis: RepoAnalysis) -> str:
     if analysis.classification.conflicting_signals:
         lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
     references = supporting_docs_for_role(analysis, "memory")
+    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
     return f"""# Lessons
 
 ## Durable Lessons
 
 {format_bullets(lessons, "Add durable lessons that should survive session resets.")}
+
+## Supporting Doc Synthesis (Memory)
+
+### Confirmed
+
+{format_bullets(confirmed, "No clear historical lessons were synthesized from supporting docs.")}
+
+### Conflicting
+
+{format_bullets(conflicting, "No direct historical conflicts were synthesized from supporting docs.")}
+
+### Unresolved
+
+{format_bullets(unresolved, "No unresolved historical items were synthesized from supporting docs.")}
 
 ## Referenced Historical Docs
 
@@ -1350,3 +1984,581 @@ def generate_docs(analysis: RepoAnalysis) -> Dict[str, str]:
     if analysis.doc_profile == "layered":
         return generate_layered_docs(analysis)
     return generate_bootstrap_docs(analysis)
+
+
+def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_locale: str, human_template_variant: str) -> str:
+    confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
+    inferred = human_inferred_lines(analysis, "product")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "product",
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
+    provenance = supporting_doc_provenance_lines(analysis, "product")
+    synthesis_summary = synthesis_summary_lines(analysis, "product")
+    audiences = human_audience_lines(analysis)
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
+
+    core = []
+    if analysis.summary:
+        core.append(analysis.summary)
+    core.append(f"Current repo shape: `{repo_type_label(analysis.repo_type)}`.")
+    if analysis.frontend_root:
+        core.append(f"Frontend root: `{rel_path(analysis.frontend_root, analysis.root)}`.")
+    if analysis.backend_root:
+        core.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
+    priorities = []
+    if conflicting:
+        priorities.append("Resolve conflicting product statements before locking roadmap or interface commitments.")
+    if unresolved:
+        priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
+    if not priorities:
+        priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
+    documentation_gaps = list(unresolved)
+    if not documentation_gaps:
+        documentation_gaps.append("No major product documentation gaps were detected from supporting sources.")
+    maintenance = human_maintenance_lines(analysis, "product", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "product")
+    bootstrap_backlog = human_bootstrap_backlog_lines("product", bool(provenance))
+
+    return f"""# Project Overview
+
+## What This Project Is
+
+{format_bullets(core, "Project overview should be confirmed with maintainers.")}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 product rules that should survive session resets.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("product", human_output_root), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("product", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("product", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "product", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "product"), "Add the paired agent-facing product docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("product", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("product", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+
+## Intended Audience
+
+{format_bullets(audiences, "Add the primary maintainer audiences for this project.")}
+
+## Key Entry Points
+
+{format_bullets(product_entry_point_lines(analysis), "No clear routes or invocation entrypoints were detected automatically.")}
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
+## Knowledge Status
+
+### Confirmed Rules
+
+{format_bullets(confirmed, "No clear project facts were synthesized from supporting docs.")}
+
+### Supporting Signals
+
+{format_bullets(inferred, "No additional derived product signals were detected from repository structure.")}
+
+### Decision Backlog
+
+{format_bullets(unresolved, "No unresolved project items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct project conflicts were synthesized from supporting docs.")}
+
+## Current Priorities
+
+{format_bullets(priorities, "No immediate priorities were derived automatically.")}
+
+## Documentation Gaps To Close
+
+{format_bullets(documentation_gaps, "No explicit product documentation gaps were detected.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting product documents were discovered outside generated outputs.")}
+"""
+
+
+def build_human_architecture(
+    analysis: RepoAnalysis,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> str:
+    confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "architecture", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "architecture", "unresolved")
+    inferred = human_inferred_lines(analysis, "architecture")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "architecture",
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
+    provenance = supporting_doc_provenance_lines(analysis, "architecture")
+    synthesis_summary = synthesis_summary_lines(analysis, "architecture")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
+    boundaries = [
+        "Treat source-of-truth files as canonical when supporting docs disagree.",
+        "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
+    ]
+    system_map = []
+    if analysis.frontend_root:
+        system_map.append(f"Frontend surface: `{rel_path(analysis.frontend_root, analysis.root)}`")
+    if analysis.backend_root:
+        system_map.append(f"Backend/runtime surface: `{rel_path(analysis.backend_root, analysis.root)}`")
+    if analysis.routes:
+        system_map.append(f"Route coverage detected: {', '.join(f'`{route}`' for route in analysis.routes[:4])}")
+    if analysis.endpoints:
+        system_map.append(f"Endpoint coverage detected: {', '.join(f'`{endpoint}`' for endpoint in analysis.endpoints[:4])}")
+    maintenance = human_maintenance_lines(analysis, "architecture", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "architecture")
+    bootstrap_backlog = human_bootstrap_backlog_lines("architecture", bool(provenance))
+
+    return f"""# Architecture
+
+## Source Of Truth
+
+{format_bullets(infer_source_of_truth_lines(analysis), "No canonical source-of-truth files were detected automatically.")}
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("architecture", human_output_root), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("architecture", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "architecture"), "Add the paired agent-facing architecture docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("architecture", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("architecture", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+
+## Detected Signals
+
+{format_bullets(list(analysis.repo_type_reasons), "No strong repo-type signals were detected automatically.")}
+
+## System Map
+
+{format_bullets(system_map, "No system map details were detected automatically.")}
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
+## Knowledge Status
+
+### Confirmed Rules
+
+{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+
+### Supporting Signals
+
+{format_bullets(inferred, "No additional derived architecture signals were detected from repository structure.")}
+
+### Decision Backlog
+
+{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+
+## Stability Boundaries
+
+{format_bullets(boundaries, "No architecture boundaries were derived automatically.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting architecture documents were discovered outside generated outputs.")}
+"""
+
+
+def build_human_workflows(
+    analysis: RepoAnalysis,
+    human_output_root: str,
+    human_locale: str,
+    human_template_variant: str,
+) -> str:
+    setup_lines = []
+    run_lines = []
+    verify_lines = []
+    root_package_scripts = detect_root_package_scripts(analysis.root)
+    confirmed = supporting_doc_insight_lines(analysis, "execution", "confirmed")
+    conflicting = supporting_doc_insight_lines(analysis, "execution", "conflicting")
+    unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
+    inferred = human_inferred_lines(analysis, "execution")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    inferred = prune_weak_human_inferences(inferred)
+    confirmed, inferred, unresolved, conflicting = trim_human_evidence_density(
+        "execution",
+        confirmed,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    confirmed = strip_supporting_sources_suffix(confirmed)
+    inferred = strip_supporting_sources_suffix(inferred)
+    unresolved = strip_supporting_sources_suffix(unresolved)
+    conflicting = strip_supporting_sources_suffix(conflicting)
+    provenance = supporting_doc_provenance_lines(analysis, "execution")
+    synthesis_summary = synthesis_summary_lines(analysis, "execution")
+    top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
+
+    if analysis.frontend_root:
+        frontend_prefix = (
+            f"cd {rel_path(analysis.frontend_root, analysis.root)}"
+            if analysis.frontend_root != analysis.root
+            else "# already at repo root"
+        )
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.extend([frontend_prefix, install_cmd])
+        append_package_script_commands(run_lines, analysis.package_manager, analysis.frontend_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            analysis.frontend_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
+    elif root_package_scripts:
+        install_cmd = {
+            "npm": "npm install",
+            "pnpm": "pnpm install",
+            "yarn": "yarn install",
+        }.get(analysis.package_manager, "npm install")
+        setup_lines.append(install_cmd)
+        append_package_script_commands(run_lines, analysis.package_manager, root_package_scripts, ("dev", "start"))
+        append_package_script_commands(
+            verify_lines,
+            analysis.package_manager,
+            root_package_scripts,
+            ("lint", "test", "build", "typecheck", "check"),
+        )
+
+    if analysis.backend_root and (analysis.backend_root / "requirements.txt").exists():
+        backend_prefix = (
+            f"cd {rel_path(analysis.backend_root, analysis.root)}"
+            if analysis.backend_root != analysis.root
+            else "# backend at repo root"
+        )
+        setup_lines.extend([backend_prefix, "python3 -m pip install -r requirements.txt"])
+        if (analysis.backend_root / "app").exists():
+            run_lines.extend([backend_prefix, "uvicorn app.main:app --reload"])
+
+    extend_unique(verify_lines, detect_unittest_commands(analysis.root))
+    extend_unique(verify_lines, detect_verify_script_commands(analysis.root))
+
+    if not setup_lines:
+        setup_lines = ["Review README setup steps and install dependencies with the repository's package manager."]
+    if not run_lines:
+        run_lines = ["Run the main local command from README examples."]
+    if not verify_lines:
+        verify_lines = ["Run verification commands from CI or README (lint/test/build equivalents)."]
+    operational_notes = []
+    if conflicting:
+        operational_notes.append("Resolve conflicting workflow instructions before standardizing CI or release checks.")
+    if unresolved:
+        operational_notes.append("Assign owners for unresolved runbook items to prevent drift in release operations.")
+    if not operational_notes:
+        operational_notes.append("Keep command examples in this file aligned with CI and README instructions.")
+    maintenance = human_maintenance_lines(analysis, "execution", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "execution")
+    bootstrap_backlog = human_bootstrap_backlog_lines("execution", bool(provenance))
+
+    return f"""# Workflows
+
+## Top Rules (Read First)
+
+{format_bullets(top_rules, "State 2-4 execution rules before setup/run/verify details.")}
+
+## Document Contract
+
+{format_bullets(human_doc_contract_lines("execution", human_output_root), "Add maintainer-facing contract rules for this page.")}
+
+## Dual Sync Checklist
+
+{format_bullets(human_dual_sync_checklist_lines("execution", human_output_root), "Add dual-system synchronization checks for this page.")}
+
+## Paired Refresh Rules
+
+{format_bullets(human_paired_refresh_rule_lines("execution", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+
+## Dual Pairing Contract (Rules)
+
+{format_bullets(human_dual_pairing_contract_lines(analysis, "execution", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+
+## Paired Agent Docs (Dual Mode)
+
+{format_bullets(paired_agent_doc_lines(analysis, "execution"), "Add the paired agent-facing execution docs for dual mode.")}
+
+## Output Boundary (Human vs Agent)
+
+{format_bullets(human_output_boundary_lines("execution", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+
+## Dual View Rationale
+
+{format_bullets(human_dual_view_rationale_lines("execution", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+
+## Setup
+
+```bash
+{chr(10).join(setup_lines)}
+```
+
+## Run
+
+```bash
+{chr(10).join(run_lines)}
+```
+
+## Verify
+
+```bash
+{chr(10).join(verify_lines)}
+```
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
+## Knowledge Status
+
+### Confirmed Rules
+
+{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+
+### Supporting Signals
+
+{format_bullets(inferred, "No additional derived execution signals were detected from repository structure.")}
+
+### Decision Backlog
+
+{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+
+### Conflict Watchlist
+
+{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+
+## Operational Notes
+
+{format_bullets(operational_notes, "No additional operational notes were derived automatically.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting execution documents were discovered outside generated outputs.")}
+"""
+
+
+def build_human_glossary(analysis: RepoAnalysis) -> str:
+    terms = [re.sub(r"^[-*]\s+", "", entry).strip() for entry in analysis.glossary_entries if entry.strip()]
+    if analysis.skill_meta.skill_name:
+        terms.append(f"`skill`: `{analysis.skill_meta.skill_name}`")
+    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
+    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
+    inferred = human_inferred_lines(analysis, "memory")
+    confirmed, inferred, unresolved, conflicting = compact_human_evidence(
+        terms,
+        inferred,
+        unresolved,
+        conflicting,
+    )
+    provenance = supporting_doc_provenance_lines(analysis, "memory")
+    synthesis_summary = synthesis_summary_lines(analysis, "memory")
+    candidate_terms = []
+    if analysis.routes:
+        candidate_terms.extend(f"- `route:{route}`" for route in analysis.routes[:4])
+    if analysis.endpoints:
+        candidate_terms.extend(f"- `endpoint:{endpoint}`" for endpoint in analysis.endpoints[:4])
+    if not candidate_terms:
+        candidate_terms.append("- No additional term candidates were derived from routes/endpoints.")
+    maintenance = human_maintenance_lines(analysis, "memory", len(unresolved), len(conflicting))
+    update_triggers = human_update_trigger_lines(analysis, "memory")
+    bootstrap_backlog = human_bootstrap_backlog_lines("memory", bool(provenance))
+
+    return f"""# Glossary
+
+## Confirmed Terms
+
+{format_bullets(confirmed, "No canonical terms were detected automatically.")}
+
+## Naming Rules
+
+- Keep user-facing names, commands, and labels consistent across docs and scripts.
+- Prefer canonical project terms over ad-hoc synonyms.
+
+## Synthesis Summary
+
+{format_bullets(synthesis_summary, "No synthesis summary available.")}
+
+## Candidate Terms From Code Signals
+
+{chr(10).join(candidate_terms)}
+
+## Derived Terminology Signals
+
+{format_bullets(inferred, "No additional derived terminology signals were detected from repository structure.")}
+
+## Unresolved Terminology Items
+
+{format_bullets(unresolved, "No unresolved terminology or memory items were synthesized from supporting docs.")}
+
+## Conflicting Terminology Signals
+
+{format_bullets(conflicting, "No conflicting terminology signals were synthesized from supporting docs.")}
+
+## Update Triggers
+
+{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+
+## Maintenance Workflow
+
+{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+
+## Bootstrap Backlog (When Docs Are Thin)
+
+{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+
+## Provenance
+
+{format_bullets(provenance, "No supporting memory documents were discovered outside generated outputs.")}
+"""
+
+
+def generate_human_docs(
+    analysis: RepoAnalysis,
+    human_locale: str = "en",
+    human_template_variant: str | None = None,
+) -> Dict[str, str]:
+    resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
+    output_root = resolve_human_output_root(human_locale)
+    return {
+        f"{output_root}/overview.md": build_human_overview(analysis, output_root, human_locale, resolved_variant),
+        f"{output_root}/architecture.md": build_human_architecture(
+            analysis,
+            output_root,
+            human_locale,
+            resolved_variant,
+        ),
+        f"{output_root}/workflows.md": build_human_workflows(
+            analysis,
+            output_root,
+            human_locale,
+            resolved_variant,
+        ),
+        f"{output_root}/glossary.md": build_human_glossary(analysis),
+    }
