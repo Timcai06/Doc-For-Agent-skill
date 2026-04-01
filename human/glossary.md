@@ -2,7 +2,7 @@
 
 ## Confirmed Terms
 
-- `skill`: `"doc-for-agent"`
+- `skill`: `sync-doc-for-agent`
 
 ## Naming Rules
 

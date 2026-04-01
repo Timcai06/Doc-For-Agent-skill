@@ -84,7 +84,7 @@ def main() -> None:
     parser.add_argument(
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
-        default="dual",
+        default="quad",
         help="Choose output set: agent, human, dual, or quad (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`).",
     )
     parser.add_argument(

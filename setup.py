@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="doc-for-agent",
-    version="0.2.0.dev0",
+    version="0.3.0.dev0",
     description="Installable unified docagent CLI v1: init, doctor, refresh, generate, update, versions.",
     python_requires=">=3.9",
     package_dir={"": "doc-for-agent"},

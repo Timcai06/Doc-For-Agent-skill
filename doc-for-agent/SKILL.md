@@ -1,66 +1,40 @@
 ---
-name: "doc-for-agent"
-description: "Generate and maintain a dual documentation system for agents and maintainers."
+name: sync-doc-for-agent
+description: Analyzes repository structure to generate and synchronize dual-language (English/Chinese) documentation for AI agents and human maintainers. Use this when the user asks to refresh docs, update the AGENTS directory, or sync docs after code changes.
 ---
 # doc-for-agent
 
-Project documentation bootstrapper for CLI coding-agent workflows. Supports `agent`, `human`, `dual`, and four-view `quad` outputs from the real repository structure.
+You are equipped with the `doc-for-agent` documentation engine, a system designed to maintain Quad-View documentation (Agent & Human, English & Chinese) for this repository.
 
-Use this skill when the user wants to initialize or refresh an `AGENTS/` directory for a repository so future coding agents can work from a stable project-specific documentation layer.
+When the user asks you to initialize, refresh, or sync documentation, follow these strict orchestration steps:
 
-## When To Use
+## Step 1: Run Fact Extraction and Base Generation
 
-- Create an `AGENTS/` directory for a new repository
-- Refresh existing agent docs against the latest codebase
-- Bootstrap agent-facing docs before multi-agent or multi-worktree work
-- Generate a layered entry/execution/memory topology for long-lived projects
-
-## Core Commands
-
-Initialize or refresh the lean profile:
+Execute the CLI tool to perform AST scanning, route detection, and baseline fact generation. The tool defaults to outputting the complete `quad` view.
 
 ```bash
-python3 .codex/skills/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh
+docagent refresh
 ```
 
-Prefer the layered profile for long-lived or phase-driven repositories:
+*Note: If `docagent` is not found globally, try `npx -y doc-for-agent refresh` or fall back to `python3 doc-for-agent/installer/assets/installer/docagent.py refresh`.*
 
-```bash
-python3 .codex/skills/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --profile layered
-```
+## Step 2: Intelligent Quad-View Synchronization
 
-Preview changes without writing files:
+The `docagent refresh` tool will generate or update standard Markdown files in four directories:
+- `AGENTS/` (English Agent Docs)
+- `AGENTS.zh/` (Chinese Agent Docs)
+- `human/` (English Human Docs)
+- `human.zh/` (Chinese Human Docs)
 
-```bash
-python3 .codex/skills/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --dry-run
-```
+Your critical job is to elevate these standard text templates by applying your deep LLM understanding of the repository.
+1. Review the generated core files, starting with `AGENTS/001-core-goals.md` and `AGENTS.zh/001-core-goals.md`.
+2. Ensure the Chinese translation in the `.zh` folders is native, highly professional, and accurate to the current codebase. The tool provides a good baseline, but you must ensure it does not contain awkward "mixed English/Chinese" artifacts.
+3. If you find any hardcoded English artifacts or suboptimal literal translations in the Chinese directories, **explicitly rewrite those files** using your file editing tools to be 100% native Chinese.
 
-Explain classification reasoning before writing:
+## Step 3: Protect Manual Knowledge
 
-```bash
-python3 .codex/skills/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --explain
-```
+If you are modifying established Markdown files, never remove or overwrite content wrapped in `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->` blocks. These notes are manually maintained by human operators.
 
-Force a repo type when auto-detection is ambiguous:
+## Step 4: Report Status
 
-```bash
-python3 .codex/skills/doc-for-agent/scripts/init_agents_docs.py --root "<repo-root>" --mode refresh --repo-type cli-tool
-```
-
-## Notes
-
-- The engine scans the real repository before generating docs.
-- `bootstrap` is the safer default profile.
-- `layered` is better for projects with explicit phases, execution plans, and durable memory files.
-- Manual blocks wrapped in `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->` are preserved during refresh.
-
-## Installed For
-
-- Platform: Codex
-- Adapter type: skill
-
-## Post-Install
-
-- Use `docagent init --ai codex` as the recommended product entry for this platform.
-- Restart Codex so the new skill is discovered in a fresh session.
-- Add `--target <repo-root>` when you want repository-local workflow wiring in the same command.
+After creating or refreshing the files, and performing your language refinement pass, provide the user with a concise summary of the files updated. Mention specifically if you improved any of the Chinese baseline text.

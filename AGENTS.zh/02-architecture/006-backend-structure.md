@@ -18,10 +18,3 @@
 ## Storage And Outputs
 
 - No storage or output rules were detected automatically.
-
-## Preserved Notes
-
-- 本地运行路径time Entry Points
-  - Preserved from previous manual edits.
-  - `doc-for-agent/scripts/init_agents_docs.py`
-  - `doc-for-agent/scripts/render_platform_adapter.py`

@@ -1,7 +1,7 @@
 {
   "product_name": "doc-for-agent",
   "product_slug": "doc-for-agent",
-  "version": "0.2.0.dev0",
+  "version": "0.3.0.dev0",
   "python_package": "doc-for-agent",
   "npm_package": "doc-for-agent",
   "cli_command": "docagent",
