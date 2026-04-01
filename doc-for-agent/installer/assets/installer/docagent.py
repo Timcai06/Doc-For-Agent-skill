@@ -279,6 +279,7 @@ def print_init_summary(
     local_installed_paths: Sequence[Path],
 ) -> None:
     metadata = load_product_metadata()
+    recommended_platform = global_platforms[0] if len(global_platforms) == 1 else DEFAULT_GLOBAL_PLATFORM
     print(f"{metadata.product_name} init")
     print(f"- Version: {metadata.version}")
     print(f"- Selected AI platforms: {', '.join(global_platforms)}")
@@ -295,8 +296,8 @@ def print_init_summary(
     print("Recommended next commands:")
     if local_target_root:
         print(f"- `{metadata.installer_command} refresh --root {local_target_root} --output-mode agent`")
-    print(f"- `{metadata.installer_command} doctor --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
-    print(f"- `{metadata.installer_command} versions --global --platform {DEFAULT_GLOBAL_PLATFORM}`")
+    print(f"- `{metadata.installer_command} doctor --global --platform {recommended_platform}`")
+    print(f"- `{metadata.installer_command} versions --global --platform {recommended_platform}`")
     print("- Restart the relevant assistant so the new skill bundle is loaded.")
 
 

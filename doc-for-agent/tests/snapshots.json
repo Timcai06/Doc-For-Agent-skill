@@ -2,12 +2,12 @@
   "cli_tool": {
     "README.md": {
       "contains": [
-        "Detected repo type: `CLI/tool repository`"
+        "Detected repo type: `CLI Tool`"
       ]
     },
     "product.md": {
       "contains": [
-        "This repository is best understood as a `CLI/tool repository`.",
+        "This repository is best understood as a `CLI Tool`.",
         "Primary users are developers integrating or running the packaged tooling.",
         "`cli/src/index.ts`"
       ]
@@ -26,12 +26,12 @@
   "library_sdk": {
     "README.md": {
       "contains": [
-        "Detected repo type: `library/SDK repository`"
+        "Detected repo type: `Library/SDK`"
       ]
     },
     "product.md": {
       "contains": [
-        "This repository is best understood as a `library/SDK repository`.",
+        "This repository is best understood as a `Library/SDK`.",
         "Primary users are developers integrating or running the packaged tooling."
       ]
     },
@@ -44,7 +44,7 @@
   "skill_meta": {
     "README.md": {
       "contains": [
-        "Detected repo type: `skill/meta repository`"
+        "Detected repo type: `Skill Meta`"
       ]
     },
     "product.md": {
@@ -68,7 +68,7 @@
   "web_app": {
     "README.md": {
       "contains": [
-        "Detected repo type: `web application repository`"
+        "Detected repo type: `Web App`"
       ]
     },
     "frontend.md": {
@@ -100,7 +100,7 @@
   "backend_service": {
     "README.md": {
       "contains": [
-        "Detected repo type: `backend service repository`"
+        "Detected repo type: `Backend Service`"
       ]
     },
     "backend.md": {
@@ -119,7 +119,7 @@
   "hybrid_skill_cli": {
     "README.md": {
       "contains": [
-        "Detected repo type: `skill/meta repository`"
+        "Detected repo type: `Skill Meta`"
       ]
     },
     "architecture.md": {
@@ -139,7 +139,7 @@
   "monorepo_workspace": {
     "README.md": {
       "contains": [
-        "Detected repo type: `monorepo`"
+        "Detected repo type: `Monorepo`"
       ]
     },
     "architecture.md": {
@@ -180,7 +180,7 @@
     "00-entry/AGENTS.md": {
       "contains": [
         "`01-product/001-core-goals.md`",
-        "Current classification: `web application repository` with `high` confidence."
+        "Keep product surface, frontend flow, and backend contract aligned while the repository evolves."
       ]
     },
     "02-architecture/004-tech-stack.md": {
