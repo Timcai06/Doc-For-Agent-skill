@@ -28,9 +28,9 @@
 
 ## Dual Pairing Contract (Rules)
 
-- Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.
-- Locale-output rule: human locale `zh` maps to `human.zh/`.
-- Template rule: human template variant `paired-core` is part of the pairing contract and must remain consistent across paired docs.
+- 结对模式规则：在 `dual` 模式下，人和机器的文档同源生成，必须作为一个完整的变更集进行评审。
+- 语言输出规则：人类视图语言 `zh` 映射至目录 `human.zh/`。
+- 模板规则：人类视图模板变体 `paired-core` 是结对契约的一部分，在配对文档间必须保持一致。
 - Path pair rule: `human.zh/workflows.md` pairs with `AGENTS/03-execution/008-implementation-plan.md` for setup, verify, and failure-triage order.
 
 ## Paired Agent Docs (Dual Mode)
@@ -127,42 +127,37 @@ python3 doc-for-agent/tests/verify_generator_snapshots.py
 
 - 顶层规则 (首读必看)
   - Preserved from previous manual edits.
-  - **规则 1：执行契约** —— 标准的操作顺序为：`docagent init` -> `docagent refresh` -> `docagent doctor`。这是环境配置、同步及其漂移检查的标准路径。
-  - **规则 2：验证门禁** —— 在 `docagent doctor` 验证通过之前，任何关于文档工作流的变更均视为未完成。
+  - **规则 1：执行契约** —— 标准操作顺序为：`docagent init` -> `docagent refresh` -> `docagent doctor`。这是环境配置、同步及其漂移检查的主路径。
+  - **规则 2：验证门禁** —— 在 `docagent doctor` 通过之前，视为本仓库的文档工作流变更尚未完成。
   - **规则 3：执行约束** —— 当在目标仓库目录外运行命令时，必须显式指明 `--target` 参数；在多次刷新过程中应保持 `--output-mode` 参数的一致性。
-  - **规则 4：验证顺序** —— 1) 首先运行 `docagent doctor`；若出现失败项，应立即停止并排查，严禁带病运行后续检查。
+  - **规则 4：验证顺序** —— 1) 执行 `docagent doctor`；2) 检查失败项。严禁带病执行后续刷新。
 - 文档维护契约
   - Preserved from previous manual edits.
-  - **事实来源**：本页面是维护者维度的核心事实来源。在双视图模式下，必须确保其与 `AGENTS/` 目录以及 `human.zh/` 根视图的高度同步。
-  - **变更驱动**：仅在行为发生实际变更时更新本页面，避免仅进行无实质命令变动的叙述性刷新。
-- 双视图同步清单
-  - Preserved from previous manual edits.
-  - **对齐检查**：编辑后，在 `dual` 模式下刷新并验证双端文档是否在同一个变更集中。
-  - **漂移处理**：如果发现一侧更新而另一侧未动，应将其视为“文档漂移”，必须在合并代码前予以解决。
+  - **事实性源**：本页面是面向维护者的核心事实来源，必须与 `AGENTS/` 目录下的执行脚本维持高频的事实对齐。
+  - **变更驱动规则**：仅在实际行为更迭时更新本页面，避免仅进行叙述性的文字刷新。
 - 结对刷新规则 (Pairing Rules)
   - Preserved from previous manual edits.
-  - **刷新契约**：必须执行能够同时更新配对视图的刷新动作；严禁孤立地修补单一受众的文档。
-  - **四视图契约**：使用 `--output-mode quad` 时，需在一个评审周期内同时验证四个根目录（`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`）。
-- 关键流程节点
+  - **对齐校验**：在编辑后运行 `quad` 模式，并验证对齐的四视图是否在同一变更集中得到了更新。
+  - **漂移处理**：如果发现语言版本间的一侧更新而另一侧停滞，应视其为“文档漂移”，并须在提交代码前予以解决。
+- 双视图配对契约
   - Preserved from previous manual edits.
-  ### 环境初始化 (Setup)
+  - **规则**：在 `dual/quad` 模式下，面向人类和智能体的文档由同一次仓库扫描生成，必须作为一个完整的变更集进行审阅。
+- 环境初始化与验证
+  - Preserved from previous manual edits.
+  ### 设置 (Setup)
   ```bash
   npm install
   ```
 
-  ### 核心运行 (Run)
+  ### 核心验证 (Verify)
   ```bash
-  # 执行 README 示例中的本地核心命令
-  ```
-
-  ### 验证门禁 (Verify)
-  ```bash
-  # 运行单元测试与生成器快照验证
+  # 运行单元测试
   python3 -m unittest discover -s doc-for-agent/tests/unit -p 'test_*.py'
+  # 验证生成器快照
   python3 doc-for-agent/tests/verify_generator_snapshots.py
   ```
 - 知识状态与故障排查
   - Preserved from previous manual edits.
   ### 确认的规则
-  - **故障排查优先级**：1) 运行 `docagent doctor` 捕获配置漂移；2) 确认命令语境与 `README.md` 一致；3) 交叉检查 `docs/quickstart.zh.md` 中的假设。
-  - **验证门禁**：所有工作流变更必须通过 `docagent doctor` 的自动化检查。
+  - **执行契约顺序**：保持 `init -> refresh -> doctor` 的闭环命令顺序。
+  - **故障排查优先级**：1) 运行 `docagent doctor` 捕获安装或配置漂移；2) 确认命令语境与 `README.md` 一致；3) 交叉对照 `docs/quickstart.zh.md`。

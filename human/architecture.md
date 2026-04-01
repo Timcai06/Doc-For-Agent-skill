@@ -83,7 +83,7 @@
 
 ### Supporting Signals
 
-- No additional derived architecture signals were detected from repository structure.
+- No additional derived product signals were detected from repository structure.
 
 ### Decision Backlog
 

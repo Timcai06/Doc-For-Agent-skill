@@ -36,7 +36,7 @@
 
 - No unresolved architecture items were synthesized from supporting docs.
 
-## Referenced Architecture Docs
+## Referenced Historical Docs
 
 - `README.md`
 - `docs/platforms.md`
@@ -51,3 +51,11 @@
 ## Conflicting Signals
 
 - Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities.
+
+## Preserved Notes
+
+- Referenced Architecture Docs
+  - Preserved from previous manual edits.
+  - `README.md`
+  - `docs/platforms.md`
+  - `docs/platforms.zh.md`

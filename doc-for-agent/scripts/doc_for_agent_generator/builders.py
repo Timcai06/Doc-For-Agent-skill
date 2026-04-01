@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Sequence
 
 from .analysis import supporting_doc_roles
-from .locales import get_ui_string
+from .locales import STRINGS, get_ui_string
 from .models import RepoAnalysis
 from .utils import find_files, load_json, rel_path
 
@@ -385,43 +385,31 @@ def strip_supporting_sources_suffix(lines: Sequence[str]) -> list[str]:
     return [line for line in compacted if line]
 
 
-def human_output_boundary_lines(role: str, human_output_root: str) -> list[str]:
+def human_output_boundary_lines(role: str, human_output_root: str, locale: str = "en") -> list[str]:
     shared = [
-        f"Use `{human_output_root}/` for maintainer-facing policy and decisions; use `AGENTS/` for execution order, command wiring, and handoff runbooks.",
-        "If a change affects both reader types, update both systems in one dual refresh cycle instead of patching only one side.",
+        get_ui_string("boundary_rule_1", locale).format(root=human_output_root),
+        get_ui_string("boundary_rule_2", locale),
     ]
     if role == "product":
-        shared.append(
-            f"Keep user/value framing in `{human_output_root}/overview.md`; keep edit-time operating rules in `AGENTS/product.md` (or layered product docs)."
-        )
+        shared.append(get_ui_string("boundary_rule_product", locale).format(root=human_output_root))
     elif role == "architecture":
-        shared.append(
-            f"Keep architecture rationale in `{human_output_root}/architecture.md`; keep CLI/build/source-of-truth guardrails in `AGENTS/architecture.md` (or layered architecture docs)."
-        )
+        shared.append(get_ui_string("boundary_rule_architecture", locale).format(root=human_output_root))
     elif role == "execution":
-        shared.append(
-            f"Keep maintainer runbook context in `{human_output_root}/workflows.md`; keep step-by-step agent execution plan in `AGENTS/workflows.md` (or layered execution docs)."
-        )
+        shared.append(get_ui_string("boundary_rule_execution", locale).format(root=human_output_root))
     return shared
 
 
-def human_dual_view_rationale_lines(role: str, human_output_root: str) -> list[str]:
+def human_dual_view_rationale_lines(role: str, human_output_root: str, locale: str = "en") -> list[str]:
     lines = [
-        f"`{human_output_root}/` and `AGENTS/` are two views generated from the same repository analysis and source-of-truth anchors.",
-        "When the two views diverge, treat it as refresh drift rather than independent documentation authority.",
+        get_ui_string("rationale_rule_1", locale).format(root=human_output_root),
+        get_ui_string("rationale_rule_2", locale),
     ]
     if role == "product":
-        lines.append(
-            f"Product intent lives in `{human_output_root}/overview.md`, while execution-facing preservation rules live in paired AGENTS product docs."
-        )
+        lines.append(get_ui_string("rationale_rule_product", locale).format(root=human_output_root))
     elif role == "architecture":
-        lines.append(
-            f"Architecture rationale lives in `{human_output_root}/architecture.md`, while operational boundaries for agents live in paired AGENTS architecture docs."
-        )
+        lines.append(get_ui_string("rationale_rule_architecture", locale).format(root=human_output_root))
     elif role == "execution":
-        lines.append(
-            f"Maintainer runbook context lives in `{human_output_root}/workflows.md`, while step ordering for agent actions lives in paired AGENTS execution docs."
-        )
+        lines.append(get_ui_string("rationale_rule_execution", locale).format(root=human_output_root))
     return lines
 
 
@@ -445,9 +433,9 @@ def human_dual_pairing_contract_lines(
     resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
     profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
     lines = [
-        "Pairing mode rule: in `dual`, human and agent docs are generated from one analysis pass and must be reviewed as one change set.",
-        f"Locale-output rule: human locale `{human_locale}` maps to `{human_output_root}/`.",
-        f"Template rule: human template variant `{resolved_variant}` is part of the pairing contract and must remain consistent across paired docs.",
+        get_ui_string("pairing_rule_1", human_locale),
+        get_ui_string("pairing_rule_2", human_locale).format(locale=human_locale, root=human_output_root),
+        get_ui_string("pairing_rule_3", human_locale).format(variant=resolved_variant),
     ]
     human_rel = human_doc_relative_path(role)
     for relative, purpose in HUMAN_PAIRED_PATH_RULES[profile].get(role, []):
@@ -521,32 +509,16 @@ def enumerate_rules(lines: Sequence[str]) -> list[str]:
     return [f"Rule {index + 1}: {line}" for index, line in enumerate(lines)]
 
 
-def repo_type_label(repo_type: str) -> str:
-    labels = {
-        "skill-meta": "skill/meta repository",
-        "cli-tool": "CLI/tool repository",
-        "library-sdk": "library/SDK repository",
-        "backend-service": "backend service repository",
-        "web-app": "web application repository",
-        "monorepo": "monorepo",
-        "unknown": "repository type not confidently classified",
-    }
-    return labels.get(repo_type, repo_type)
+def repo_type_label(repo_type: str, locale: str = "en") -> str:
+    key = f"label_{repo_type.replace('-', '_')}"
+    return get_ui_string(key, locale)
 
 
-def current_operating_posture(analysis: RepoAnalysis) -> str:
-    postures = {
-        "skill-meta": "Keep the skill definition, generator behavior, and generated documentation in sync.",
-        "web-app": "Keep product surface, frontend flow, and backend contract aligned while the repository evolves.",
-        "backend-service": "Preserve runtime contract stability while tightening service behavior and verification.",
-        "cli-tool": "Preserve command UX and script behavior while clarifying install and verification paths.",
-        "library-sdk": "Preserve public API surface and usage examples while improving implementation internals.",
-        "monorepo": "Keep boundaries between packages/apps explicit before making cross-cutting edits.",
-    }
-    return postures.get(
-        analysis.repo_type,
-        "Confirm current project phase and the next safe scope of work before making broad edits.",
-    )
+def current_operating_posture(analysis: RepoAnalysis, locale: str = "en") -> str:
+    key = f"posture_{analysis.repo_type.replace('-', '_')}"
+    if key in STRINGS[locale]:
+         return get_ui_string(key, locale)
+    return get_ui_string("posture_fallback", locale)
 
 
 def extend_unique(target: list[str], items: Sequence[str]) -> None:
@@ -1358,28 +1330,25 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
     
     if locale == "zh":
         rules = [
-            "在大规模重构前，请务必阅读产品与架构文档。",
-            "在发生明显的仓库形态、工作流或术语变更后，请立即刷新 `AGENTS/` 目录。",
-            "优先采用已确认的事实，而非推测性的路线图语言。",
-            "当刷新安全性至关重要时，通过手动编辑块保护手写的笔记内容。",
-        ]
-        if analysis.repo_type == "skill-meta":
-            rules.append("保持技能清单、SKILL.md 指引与生成器行为一致。")
-        elif analysis.repo_type == "web-app":
-            rules.append("将前端路由、后端端点和交付契约视为相互关联的交互界面。")
-    else:
-        rules = [
-            "Read product and architecture docs before broad refactors.",
-            "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
-            "Prefer confirmed facts over speculative roadmap language.",
-            "Protect hand-maintained notes with manual blocks when refresh safety matters.",
-        ]
-        if analysis.repo_type == "skill-meta":
-            rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
-        elif analysis.repo_type == "web-app":
-            rules.append("Treat frontend routes, backend endpoints, and result contracts as linked surfaces.")
-
-    supporting_docs = supporting_docs_for_role(analysis, "product") + supporting_docs_for_role(analysis, "architecture") + supporting_docs_for_role(analysis, "execution")
+         "01-product/001-core-goals.md",
+         "01-product/002-prd.md",
+         "02-architecture/004-tech-stack.md",
+         "01-product/003-app-flow.md",
+         "02-architecture/006-backend-structure.md",
+         "02-architecture/005-frontend-guidelines.md",
+         "02-architecture/007-architecture-compatibility.md",
+         "03-execution/008-implementation-plan.md",
+         "04-memory/009-progress.md",
+         "04-memory/010-lessons.md",
+    ]
+    rules = [
+        "Read product and architecture docs before broad refactors.",
+        "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
+        "Prefer confirmed facts over speculative roadmap language.",
+        "Protect hand-maintained notes with manual blocks when refresh safety matters.",
+    ]
+    if analysis.repo_type == "skill-meta":
+         rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
 
     return f"""{get_ui_string('entry_header', locale)}
 
@@ -1391,7 +1360,7 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 {get_ui_string('reading_order_sub', locale)}
 
-{format_bullets(reading_order, get_ui_string('no_reading_order', locale))}
+{format_bullets([f"`{path}`" for path in reading_order], get_ui_string('no_reading_order', locale))}
 
 {get_ui_string('rules_sub', locale)}
 
@@ -1399,57 +1368,26 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 {get_ui_string('operating_posture_sub', locale)}
 
-- {current_operating_posture(analysis)}
-- {get_ui_string('current_classification', locale)}: `{repo_type_label(analysis.repo_type)}` ({get_ui_string('confidence', locale)}: `{analysis.classification.confidence}`).
+- {current_operating_posture(analysis, locale=locale)}
 
 {get_ui_string('canonical_sources_sub', locale)}
 
-{format_bullets(list(analysis.repo_type_reasons), get_ui_string('no_reasons', locale))}
-
-{get_ui_string('referenced_docs_sub', locale)}
-
-{format_bullets(supporting_doc_lines(supporting_docs, analysis.root), get_ui_string('no_additional_docs', locale))}
+{format_bullets(supporting_doc_lines(supporting_docs_for_role(analysis, "product"), analysis.root), get_ui_string('no_reasons', locale))}
 """
 
 
 def build_layered_core_goals(analysis: RepoAnalysis, locale: str = "en") -> str:
-    goals = []
-    if analysis.summary:
-        goals.append(analysis.summary)
-        
-    if locale == "zh":
-        goals.append(f"本代码库目前的最佳定位是 `{repo_type_label(analysis.repo_type)}`。")
-        if analysis.repo_type == "skill-meta":
-            goals.append("核心产品价值在于可复用的“智能体文档工作流”，而不仅仅是生成的文档文件本身。")
-        elif analysis.repo_type == "web-app":
-            goals.append("核心产品既包括面向用户的交互流，也包括支撑其运行的运行时契约。")
-    else:
-        goals.append(f"This repository is currently best understood as a `{repo_type_label(analysis.repo_type)}`.")
-        if analysis.repo_type == "skill-meta":
-            goals.append("The core product is the reusable agent-documentation workflow, not only the generated files themselves.")
-        elif analysis.repo_type == "web-app":
-            goals.append("The core product includes both the user-facing flow and the runtime contract that supports it.")
-
-    if locale == "zh":
-        constraints = [
-            "避免偏离仓库真实的业务代码、脚本和命名规范。",
-            "优先保持稳定的入口和契约，而不是进行大规模的解构。",
-        ]
-        if analysis.classification.conflicting_signals:
-            constraints.append("在将仓库简化为单一思维模型前，务必审查各种交错的信号。")
-    else:
-        constraints = [
-            "Avoid drifting away from the repository's real code, scripts, and naming conventions.",
-            "Prefer stable entrypoints and contracts over broad structural churn.",
-        ]
-        if analysis.classification.conflicting_signals:
-            constraints.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
-            
-    references = supporting_docs_for_role(analysis, "product")
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "product"))
+
+    boundaries = [
+        "Avoid drifting away from the repository's real code, scripts, and naming conventions.",
+        "Prefer stable entrypoints and contracts over broad structural churn.",
+    ]
+    if analysis.classification.conflicting_signals:
+         boundaries.append("Review mixed signals before collapsing the repository into a single simplistic mental model.")
 
     return f"""{get_ui_string('core_goals_header', locale)}
 
@@ -1459,11 +1397,13 @@ def build_layered_core_goals(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 {get_ui_string('confirmed_facts_sub', locale)}
 
-{format_bullets(goals, get_ui_string('fallback_project_goals', locale))}
+- {get_ui_string('locale_pointer', locale) if "locale_pointer" in STRINGS["en"] else "English | [简体中文](README.zh.md)"}
+- {get_ui_string('confirmed_facts_repo_type', locale).format(repo_type=analysis.repo_type)}
+- {get_ui_string('confirmed_facts_core_value', locale)}
 
 {get_ui_string('constraints_sub', locale)}
 
-{format_bullets(constraints, get_ui_string('fallback_constraints', locale))}
+{format_bullets(boundaries, get_ui_string('fallback_constraints', locale))}
 
 {get_ui_string('supporting_doc_sub', locale)} (Product)
 
@@ -1480,65 +1420,65 @@ def build_layered_core_goals(analysis: RepoAnalysis, locale: str = "en") -> str:
 {format_bullets(unresolved, get_ui_string('no_product_unresolved', locale))}
 """
 
-def build_layered_prd(analysis: RepoAnalysis) -> str:
+def build_layered_prd(analysis: RepoAnalysis, locale: str = "en") -> str:
     users = [
-        f"Primary classification: `{repo_type_label(analysis.repo_type)}`.",
+        get_ui_string('confirmed_facts_repo_type', locale).format(repo_type=analysis.repo_type),
     ]
     if analysis.repo_type == "skill-meta":
-        users.append("Likely users are maintainers evolving the skill plus agents that consume its generated guidance.")
+        users.append(get_ui_string('users_maintainers_agents', locale))
     elif analysis.repo_type == "web-app":
-        users.append("Likely users are product operators using the app and engineers maintaining the full stack.")
+        users.append(get_ui_string('users_ops_engineers', locale))
     elif analysis.repo_type in {"cli-tool", "library-sdk"}:
-        users.append("Likely users are developers integrating or operating the tooling.")
+        users.append(get_ui_string('users_developers', locale))
 
     journeys = []
     if analysis.routes:
-        journeys.extend([f"Route or entry surface: `{route}`" for route in analysis.routes[:8]])
+        journeys.extend([get_ui_string('route_surface', locale).format(route=route) for route in analysis.routes[:8]])
     elif analysis.cli_entrypoints:
-        journeys.extend([f"CLI entrypoint: `{rel_path(path, analysis.root)}`" for path in analysis.cli_entrypoints[:6]])
+        journeys.extend([get_ui_string('cli_entrypoint_surface', locale).format(path=rel_path(path, analysis.root)) for path in analysis.cli_entrypoints[:6]])
     elif analysis.skill_meta.agent_manifests:
         journeys.extend(
-            [f"Agent surface: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
+            [get_ui_string('agent_manifest_surface', locale).format(path=rel_path(p, analysis.root)) for p in analysis.skill_meta.agent_manifests[:4]]
         )
     references = supporting_docs_for_role(analysis, "product")
     confirmed = supporting_doc_insight_lines(analysis, "product", "confirmed")
     conflicting = supporting_doc_insight_lines(analysis, "product", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "product", "unresolved")
 
-    return f"""# PRD
+    return f"""{get_ui_string('prd_header', locale)}
 
-## Best Used For
+{get_ui_string('best_used_for_sub', locale)}
 
 - Aligning agents on who this repository serves
 - Checking whether a change still supports the intended user journey
 
-## Likely Users And Outcomes
+{get_ui_string('users_outcomes_sub', locale)}
 
-{format_bullets(users, "Needs human confirmation: describe the primary users and outcomes.")}
+{format_bullets(users, get_ui_string('no_audience', locale))}
 
-## Current Entry Surfaces
+{get_ui_string('entry_surfaces_sub', locale)}
 
-{format_bullets(journeys, "No obvious user entry surfaces were detected automatically.")}
+{format_bullets(journeys, get_ui_string('no_entry_points', locale))}
 
-## Supporting Doc Synthesis (Product)
+{get_ui_string('supporting_doc_sub', locale)} (Product)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear product facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_product_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct product conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_product_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved product items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_product_unresolved', locale))}
 
-## Supporting Repository Docs
+{get_ui_string('provenance_sub', locale)}
 
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional product docs were detected outside AGENTS/.")}
+{format_bullets(supporting_doc_provenance_lines(analysis, "product"), get_ui_string('no_provenance', locale))}
 
-## Questions To Resolve
+{get_ui_string('questions_to_resolve_sub', locale)}
 
 - Confirm the primary audience and the exact outcome they expect from this repository.
 - Confirm which behaviors or labels must remain stable for downstream users.
@@ -1617,7 +1557,7 @@ def build_layered_app_flow(analysis: RepoAnalysis, locale: str = "en") -> str:
 """
 
 
-def build_layered_tech_stack(analysis: RepoAnalysis) -> str:
+def build_layered_tech_stack(analysis: RepoAnalysis, locale: str = "en") -> str:
     stack = [
         f"Repo type: `{analysis.repo_type}`.",
         f"Doc profile: `{analysis.doc_profile}`.",
@@ -1631,19 +1571,19 @@ def build_layered_tech_stack(analysis: RepoAnalysis) -> str:
     if analysis.backend_root:
         stack.append(f"Backend root: `{rel_path(analysis.backend_root, analysis.root)}`.")
 
-    return f"""# Tech Stack
+    return f"""{get_ui_string('tech_stack_header', locale)}
 
-## Confirmed Facts
+{get_ui_string('confirmed_facts_sub', locale)}
 
-{format_bullets(stack, "Needs human confirmation: record the canonical stack facts.")}
+{format_bullets(stack, get_ui_string('no_stack_facts', locale))}
 
-## Secondary Traits
+{get_ui_string('secondary_traits_sub', locale)}
 
-{format_bullets(list(analysis.classification.secondary_traits), "No secondary traits were detected automatically.")}
+{format_bullets(list(analysis.classification.secondary_traits), get_ui_string('no_secondary_traits', locale))}
 """
 
 
-def build_layered_frontend_guidelines(analysis: RepoAnalysis) -> str:
+def build_layered_frontend_guidelines(analysis: RepoAnalysis, locale: str = "en") -> str:
     guidance = [
         "Keep user-facing routes, labels, prompts, or commands stable unless the repository intentionally renames them.",
         "Review README examples and visible entry surfaces before changing interaction flows.",
@@ -1673,19 +1613,19 @@ def build_layered_frontend_guidelines(analysis: RepoAnalysis) -> str:
             [f"Detected manifest: `{rel_path(path, analysis.root)}`" for path in analysis.skill_meta.agent_manifests[:4]]
         )
 
-    return f"""# Frontend Guidelines
+    return f"""{get_ui_string('frontend_guidelines_header', locale)}
 
-## Guidance
+{get_ui_string('guidance_sub', locale)}
 
-{format_bullets(guidance, "Add repository-specific frontend or interaction-surface guidance.")}
+{format_bullets(guidance, get_ui_string('no_frontend_guidance', locale))}
 
-## Evidence
+{get_ui_string('evidence_sub', locale)}
 
-{format_bullets(evidence, "No route, component, or manifest evidence was detected automatically.")}
+{format_bullets(evidence, get_ui_string('no_frontend_evidence', locale))}
 """
 
 
-def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
+def build_layered_backend_structure(analysis: RepoAnalysis, locale: str = "en") -> str:
     responsibilities = [
         "Identify the runtime or automation entrypoint before changing behavior.",
         "Treat outputs, contracts, and side effects as downstream-facing surfaces.",
@@ -1703,27 +1643,27 @@ def build_layered_backend_structure(analysis: RepoAnalysis) -> str:
     if analysis.endpoints:
         runtime_entries.extend([f"`{endpoint}`" for endpoint in analysis.endpoints[:8]])
 
-    return f"""# Backend Structure
+    return f"""{get_ui_string('backend_structure_header', locale)}
 
-## Responsibilities
+{get_ui_string('responsibilities_sub', locale)}
 
-{format_bullets(responsibilities, "Add repository-specific backend responsibilities.")}
+{format_bullets(responsibilities, get_ui_string('no_backend_responsibilities', locale))}
 
-## Runtime Entry Points
+{get_ui_string('runtime_entries_sub', locale)}
 
-{format_bullets(runtime_entries, "No runtime entrypoints were detected automatically.")}
+{format_bullets(runtime_entries, get_ui_string('no_runtime_entries', locale))}
 
-## Stable Contract Fields
+{get_ui_string('stable_contract_fields_sub', locale)}
 
-{format_bullets(list(analysis.contract_fields), "No stable contract fields were detected automatically.")}
+{format_bullets(list(analysis.contract_fields), get_ui_string('no_contract_fields', locale))}
 
-## Storage And Outputs
+{get_ui_string('storage_outputs_sub', locale)}
 
-{format_bullets(list(analysis.storage_rules), "No storage or output rules were detected automatically.")}
+{format_bullets(list(analysis.storage_rules), get_ui_string('no_storage_rules', locale))}
 """
 
 
-def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
+def build_layered_architecture_compatibility(analysis: RepoAnalysis, locale: str = "en") -> str:
     source_of_truth = infer_source_of_truth_lines(analysis)
     references = supporting_docs_for_role(analysis, "architecture")
     confirmed = supporting_doc_insight_lines(analysis, "architecture", "confirmed")
@@ -1738,49 +1678,49 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis) -> str:
     if analysis.repo_type == "skill-meta":
         boundaries.append("Skill manifests, README examples, and generator output should describe the same capability surface.")
 
-    return f"""# Architecture Compatibility
+    return f"""{get_ui_string('architecture_compatibility_header', locale)}
 
-## Top Rules (Read First)
+{get_ui_string('top_rules_sub', locale)}
 
-{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
+{format_bullets(top_rules, get_ui_string('fallback_architecture_rules', locale))}
 
-## Repo-Type Signals
+{get_ui_string('repo_type_signals_sub', locale)}
 
-{format_bullets(list(analysis.repo_type_reasons), "No strong classification signals were detected automatically.")}
+{format_bullets(list(analysis.repo_type_reasons), get_ui_string('no_signals', locale))}
 
-## Source Of Truth
+{get_ui_string('source_of_truth_sub', locale)}
 
-{format_bullets(source_of_truth, "Needs human confirmation: add canonical source-of-truth files.")}
+{format_bullets(source_of_truth, get_ui_string('no_source_of_truth', locale))}
 
-## Supporting Doc Synthesis (Architecture)
+{get_ui_string('supporting_doc_sub', locale)} (Architecture)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_architecture_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_architecture_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_architecture_unresolved', locale))}
 
-## Referenced Architecture Docs
+{get_ui_string('referenced_docs_sub', locale)}
 
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional architecture docs were detected outside AGENTS/.")}
+{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
 
-## Compatibility Boundaries
+{get_ui_string('compatibility_boundaries_sub', locale)}
 
-{format_bullets(boundaries, "Add explicit compatibility boundaries.")}
+{format_bullets(boundaries, get_ui_string('no_boundaries', locale))}
 
-## Conflicting Signals
+{get_ui_string('conflicting_signals_sub', locale)}
 
-{format_bullets(list(analysis.classification.conflicting_signals), "No major conflicting signals were detected automatically.")}
+{format_bullets(list(analysis.classification.conflicting_signals), get_ui_string('no_conflicting_signals', locale))}
 """
 
 
-def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
+def build_layered_implementation_plan(analysis: RepoAnalysis, locale: str = "en") -> str:
     next_steps = [
         "Validate setup, run, and verify commands before broad edits.",
         "Refresh AGENTS docs after changing repository structure or workflow commands.",
@@ -1851,59 +1791,59 @@ def build_layered_implementation_plan(analysis: RepoAnalysis) -> str:
     unresolved = supporting_doc_insight_lines(analysis, "execution", "unresolved")
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
-    return f"""# Implementation Plan
+    return f"""{get_ui_string('implementation_plan_header', locale)}
 
-## Current Operating Posture
+{get_ui_string('operating_posture_sub', locale)}
 
 - {current_operating_posture(analysis)}
 
-## Top Rules (Read First)
+{get_ui_string('top_rules_sub', locale)}
 
-{format_bullets(top_rules, "State 2-4 execution rules before detailed command blocks.")}
+{format_bullets(top_rules, get_ui_string('fallback_execution_rules', locale))}
 
-## Immediate Next Steps
+{get_ui_string('immediate_next_steps_sub', locale)}
 
-{format_bullets(next_steps, "Add the next repository-specific execution steps.")}
+{format_bullets(next_steps, get_ui_string('no_next_steps', locale))}
 
-## Setup
+{get_ui_string('setup_sub', locale)}
 
 ```bash
 {chr(10).join(setup_lines)}
 ```
 
-## Run
+{get_ui_string('run_sub', locale)}
 
 ```bash
 {chr(10).join(run_lines)}
 ```
 
-## Verify
+{get_ui_string('verify_sub', locale)}
 
 ```bash
 {chr(10).join(verify_lines)}
 ```
 
-## Supporting Doc Synthesis (Execution)
+{get_ui_string('supporting_doc_sub', locale)} (Execution)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear execution facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_execution_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct execution conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_execution_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved execution items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_execution_unresolved', locale))}
 
-## Supporting Execution Docs
+{get_ui_string('supporting_execution_docs_sub', locale)}
 
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional execution docs were detected outside AGENTS/.")}
+{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
 """
 
 
-def build_layered_progress(analysis: RepoAnalysis) -> str:
+def build_layered_progress(analysis: RepoAnalysis, locale: str = "en") -> str:
     facts = [
         f"Detected repo type: `{analysis.repo_type}`.",
         f"Doc profile in use: `{analysis.doc_profile}`.",
@@ -1924,33 +1864,33 @@ def build_layered_progress(analysis: RepoAnalysis) -> str:
     conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
     unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
 
-    return f"""# Progress
+    return f"""{get_ui_string('progress_header', locale)}
 
-## Confirmed Facts
+{get_ui_string('confirmed_facts_sub', locale)}
 
-{format_bullets(facts, "Add confirmed current-state facts.")}
+{format_bullets(facts, get_ui_string('no_progress_facts', locale))}
 
-## Current Focus
+{get_ui_string('current_focus_sub', locale)}
 
-{format_bullets(focus, "Add the current focus items.")}
+{format_bullets(focus, get_ui_string('no_focus', locale))}
 
-## Supporting Doc Synthesis (Memory)
+{get_ui_string('supporting_doc_sub', locale)} (Memory)
 
-### Confirmed
+{get_ui_string('confirmed_sub', locale)}
 
-{format_bullets(confirmed, "No clear progress facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_progress_confirmed', locale))}
 
-### Conflicting
+{get_ui_string('conflicting_sub', locale)}
 
-{format_bullets(conflicting, "No direct memory conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_progress_conflicts', locale))}
 
-### Unresolved
+{get_ui_string('unresolved_sub', locale)}
 
-{format_bullets(unresolved, "No unresolved memory items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_progress_unresolved', locale))}
 
-## Referenced Memory Docs
+{get_ui_string('referenced_docs_sub', locale)}
 
-{format_bullets(supporting_doc_lines(references, analysis.root), "No additional progress or memory docs were detected automatically.")}
+{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
 """
 
 
@@ -2025,19 +1965,17 @@ def generate_bootstrap_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[
 
 
 def generate_layered_docs(analysis: RepoAnalysis, locale: str = "en") -> Dict[str, str]:
-    # Placeholder: In a full refactor, all sub-builders would take 'locale'
-    # For now, let's ensure the core requested view (lessons) is perfect
     return {
-        "00-entry/AGENTS.md": build_layered_entry(analysis),
-        "01-product/001-core-goals.md": build_layered_core_goals(analysis),
-        "01-product/002-prd.md": build_layered_prd(analysis),
-        "01-product/003-app-flow.md": build_layered_app_flow(analysis),
-        "02-architecture/004-tech-stack.md": build_layered_tech_stack(analysis),
-        "02-architecture/005-frontend-guidelines.md": build_layered_frontend_guidelines(analysis),
-        "02-architecture/006-backend-structure.md": build_layered_backend_structure(analysis),
-        "02-architecture/007-architecture-compatibility.md": build_layered_architecture_compatibility(analysis),
-        "03-execution/008-implementation-plan.md": build_layered_implementation_plan(analysis),
-        "04-memory/009-progress.md": build_layered_progress(analysis),
+        "00-entry/AGENTS.md": build_layered_entry(analysis, locale=locale),
+        "01-product/001-core-goals.md": build_layered_core_goals(analysis, locale=locale),
+        "01-product/002-prd.md": build_layered_prd(analysis, locale=locale),
+        "01-product/003-app-flow.md": build_layered_app_flow(analysis, locale=locale),
+        "02-architecture/004-tech-stack.md": build_layered_tech_stack(analysis, locale=locale),
+        "02-architecture/005-frontend-guidelines.md": build_layered_frontend_guidelines(analysis, locale=locale),
+        "02-architecture/006-backend-structure.md": build_layered_backend_structure(analysis, locale=locale),
+        "02-architecture/007-architecture-compatibility.md": build_layered_architecture_compatibility(analysis, locale=locale),
+        "03-execution/008-implementation-plan.md": build_layered_implementation_plan(analysis, locale=locale),
+        "04-memory/009-progress.md": build_layered_progress(analysis, locale=locale),
         "04-memory/010-lessons.md": build_layered_lessons(analysis, locale=locale),
     }
 
@@ -2153,11 +2091,11 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
 
 {get_ui_string('output_boundary_sub', locale)}
 
-{format_bullets(human_output_boundary_lines("product", human_output_root), get_ui_string('no_boundary_rules', locale))}
+{format_bullets(human_output_boundary_lines("product", human_output_root, locale=locale), get_ui_string('no_boundary_rules', locale))}
 
 {get_ui_string('dual_view_rationale_sub', locale)}
 
-{format_bullets(human_dual_view_rationale_lines("product", human_output_root), get_ui_string('no_rationale', locale))}
+{format_bullets(human_dual_view_rationale_lines("product", human_output_root, locale=locale), get_ui_string('no_rationale', locale))}
 
 {get_ui_string('intended_audience_sub', locale)}
 
@@ -2263,93 +2201,93 @@ def build_human_architecture(
     update_triggers = human_update_trigger_lines(analysis, "architecture")
     bootstrap_backlog = human_bootstrap_backlog_lines("architecture", bool(provenance))
 
-    return f"""# Architecture
+    return f"""{get_ui_string('architecture_header', human_locale)}
 
-## Source Of Truth
+{get_ui_string('source_of_truth_sub', human_locale)}
 
-{format_bullets(infer_source_of_truth_lines(analysis), "No canonical source-of-truth files were detected automatically.")}
+{format_bullets(infer_source_of_truth_lines(analysis), get_ui_string('no_source_of_truth', human_locale))}
 
-## Top Rules (Read First)
+{get_ui_string('top_rules_sub', human_locale)}
 
-{format_bullets(top_rules, "State 2-4 architecture rules that should survive session resets.")}
+{format_bullets(top_rules, get_ui_string('fallback_architecture_rules', human_locale))}
 
-## Document Contract
+{get_ui_string('doc_contract_sub', human_locale)}
 
-{format_bullets(human_doc_contract_lines("architecture", human_output_root), "Add maintainer-facing contract rules for this page.")}
+{format_bullets(human_doc_contract_lines("architecture", human_output_root), get_ui_string('no_contract_rules', human_locale))}
 
-## Dual Sync Checklist
+{get_ui_string('dual_sync_sub', human_locale)}
 
-{format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), "Add dual-system synchronization checks for this page.")}
+{format_bullets(human_dual_sync_checklist_lines("architecture", human_output_root), get_ui_string('no_sync_checks', human_locale))}
 
-## Paired Refresh Rules
+{get_ui_string('paired_refresh_sub', human_locale)}
 
-{format_bullets(human_paired_refresh_rule_lines("architecture", human_output_root), "Add paired refresh rules for dual/quad outputs.")}
+{format_bullets(human_paired_refresh_rule_lines("architecture", human_output_root), get_ui_string('no_refresh_rules', human_locale))}
 
-## Dual Pairing Contract (Rules)
+{get_ui_string('dual_pairing_sub', human_locale)}
 
-{format_bullets(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), "Add explicit dual pairing rules for this page.")}
+{format_bullets(human_dual_pairing_contract_lines(analysis, "architecture", human_output_root, human_locale, human_template_variant), get_ui_string('no_pairing_rules', human_locale))}
 
-## Paired Agent Docs (Dual Mode)
+{get_ui_string('paired_agent_docs_sub', human_locale)}
 
-{format_bullets(paired_agent_doc_lines(analysis, "architecture"), "Add the paired agent-facing architecture docs for dual mode.")}
+{format_bullets(paired_agent_doc_lines(analysis, "architecture"), get_ui_string('no_paired_docs', human_locale))}
 
-## Output Boundary (Human vs Agent)
+{get_ui_string('output_boundary_sub', human_locale)}
 
-{format_bullets(human_output_boundary_lines("architecture", human_output_root), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(human_output_boundary_lines("architecture", human_output_root, locale=human_locale), get_ui_string('no_boundary_rules', human_locale))}
 
-## Dual View Rationale
+{get_ui_string('dual_view_rationale_sub', human_locale)}
 
-{format_bullets(human_dual_view_rationale_lines("architecture", human_output_root), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(human_dual_view_rationale_lines("architecture", human_output_root, locale=human_locale), get_ui_string('no_rationale', human_locale))}
 
-## Detected Signals
+{get_ui_string('detected_signals_sub', human_locale)}
 
-{format_bullets(list(analysis.repo_type_reasons), "No strong repo-type signals were detected automatically.")}
+{format_bullets(list(analysis.repo_type_reasons), get_ui_string('no_signals', human_locale))}
 
-## System Map
+{get_ui_string('system_map_sub', human_locale)}
 
-{format_bullets(system_map, "No system map details were detected automatically.")}
+{format_bullets(system_map, get_ui_string('no_system_map', human_locale))}
 
-## Synthesis Summary
+{get_ui_string('synthesis_summary_sub', human_locale)}
 
-{format_bullets(synthesis_summary, "No synthesis summary available.")}
+{format_bullets(synthesis_summary, get_ui_string('no_synthesis', human_locale))}
 
-## Knowledge Status
+{get_ui_string('knowledge_status_sub', human_locale)}
 
-### Confirmed Rules
+{get_ui_string('confirmed_rules_sub', human_locale)}
 
-{format_bullets(confirmed, "No clear architecture facts were synthesized from supporting docs.")}
+{format_bullets(confirmed, get_ui_string('no_architecture_confirmed', human_locale))}
 
-### Supporting Signals
+{get_ui_string('supporting_signals_sub', human_locale)}
 
-{format_bullets(inferred, "No additional derived architecture signals were detected from repository structure.")}
+{format_bullets(inferred, get_ui_string('no_signals', human_locale))}
 
-### Decision Backlog
+{get_ui_string('decision_backlog_sub', human_locale)}
 
-{format_bullets(unresolved, "No unresolved architecture items were synthesized from supporting docs.")}
+{format_bullets(unresolved, get_ui_string('no_architecture_unresolved', human_locale))}
 
-### Conflict Watchlist
+{get_ui_string('conflict_watchlist_sub', human_locale)}
 
-{format_bullets(conflicting, "No direct architecture conflicts were synthesized from supporting docs.")}
+{format_bullets(conflicting, get_ui_string('no_architecture_conflicts', human_locale))}
 
-## Stability Boundaries
+{get_ui_string('stability_boundaries_sub', human_locale)}
 
-{format_bullets(boundaries, "No architecture boundaries were derived automatically.")}
+{format_bullets(boundaries, get_ui_string('no_boundaries', human_locale))}
 
-## Update Triggers
+{get_ui_string('update_triggers_sub', human_locale)}
 
-{format_bullets(update_triggers, "No explicit update triggers were derived automatically.")}
+{format_bullets(update_triggers, get_ui_string('no_triggers', human_locale))}
 
-## Maintenance Workflow
+{get_ui_string('maintenance_sub', human_locale)}
 
-{format_bullets(maintenance, "No maintenance workflow suggestions were derived automatically.")}
+{format_bullets(maintenance, get_ui_string('no_maintenance', human_locale))}
 
-## Bootstrap Backlog (When Docs Are Thin)
+{get_ui_string('bootstrap_backlog_sub', human_locale)}
 
-{format_bullets(bootstrap_backlog, "No bootstrap backlog suggestions were derived automatically.")}
+{format_bullets(bootstrap_backlog, get_ui_string('no_backlog', human_locale))}
 
-## Provenance
+{get_ui_string('provenance_sub', human_locale)}
 
-{format_bullets(provenance, "No supporting architecture documents were discovered outside generated outputs.")}
+{format_bullets(provenance, get_ui_string('no_provenance', human_locale))}
 """
 
 

@@ -3,7 +3,7 @@
 ## What This Project Is
 
 - English | [简体中文](README.zh.md)
-- Current repo shape: `skill/meta repository`.
+- Current repo shape: `Skill Meta`.
 
 ## Top Rules (Read First)
 
@@ -84,7 +84,7 @@
 ### Supporting Signals
 
 - Project intent from README/code signals: English | [简体中文](README.zh.md)
-- Repo type signal: `skill/meta repository` (Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).)
+- Repo type signal: `Skill Meta` (Skill markers detected (`SKILL.md`, agent manifests, or an existing `AGENTS/` directory).)
 
 ### Decision Backlog
 

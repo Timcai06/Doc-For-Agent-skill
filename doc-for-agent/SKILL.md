@@ -1,37 +1,39 @@
 ---
 name: "doc-for-agent"
-description: "智理化刷新 Quad-View 仓库文档 (中英双语 / Agent+Human 视角)"
+description: "智能体原生 (Agent-Native) 全量仓库智理剧本"
 ---
-# doc-for-agent 智理化刷新剧本 (Playbook)
+# doc-for-agent 智理化刷新剧本 (Agent-Native Playbook)
 
-当你收到“刷新文档”或“同步仓库文档”的任务时，请将自己视为本仓库的**文档治理专家**，而非简单的命令执行器。请严格遵循以下四阶段闭环工作流：
+当你执行此技能时，请将自己视为本仓库的**“首席文档架构师”**。本技能已进化至 **原生对齐 (Native Alignment)** 架构，实现了基于事实的多视图同步。
 
-## 阶段 1：事实提取 (Machine Layer)
+## ⚠️ 核心工作流 (The Triad Loop)
+
+### 阶段 1：机器事实提取 (Machine Layer)
 **执行指令**：`docagent refresh --output-mode quad`
-- 这一步利用 Python 引擎执行 AST 扫描和事实捕获。
-- **注意**：引擎产出的 `.zh` 目录（`AGENTS.zh/` 和 `human.zh/`）仅作为事实基准，可能包含未翻译的英文碎片。
+- **原生优势**：引擎已集成全量 `locales.py`。生成的 `.zh` 视图（`AGENTS.zh/` 和 `human.zh/`）默认已具备 **100% 纯净的中文标题与系统逻辑**。
+- **职责**：确保命令在目标目录中成功执行，生成四视图基准。
 
-## 阶段 2：全量智理校阅 (Recursive Refinement)
-**职责边界**：你是最后一道“中文化”防线。
-- **必须遍历**：你必须主动检查并进入 `.zh` 目录下的【每一个】子文件（001 到 010+）。
-- **严禁偷懒**：严禁仅处理首页。如果子文件（如 `004-tech-stack.md`）中包含英文 Rules 或 Facts，你必须利用你的 LLM 背景理解，将其全部重塑为地道、专业的母语。
-- **保护契约**：严禁删除或修改被 `<!-- doc-for-agent:manual-start -->` 包裹的人类手动维护块。
+### 阶段 2：逻辑智理与对齐 (Logic Refinement)
+**职责边界**：你不再是一个翻译者，而是一个**“规则审计员”**。
+- **事实对齐**：遍历 `AGENTS.zh/` 下的子文件（001 到 010+），核实引擎提取的“已确认事实”是否与代码现状、PRD 或 `SKILL.md` 的最新定义一致。
+- **母语级精修**：针对核心产品逻辑、技术栈细节进行地道润色，确保表达符合“高级软件工程师”的沟通直觉。
+- **Quad-View 校准**：确保英文视图 (`AGENTS/`) 保持纯净英文，中文视图 (`AGENTS.zh/`) 保持纯净中文，严禁出现语言漂移。
 
-## 阶段 3：架构与产品对齐 (Cross-View Sync)
-- 确保 `human.zh/overview.md` 中的宏观决策在 `AGENTS.zh/` 对应的子文档中得到了正确的拆解和落地。
-- 参考 `human.zh/glossary.md` 中的术语定义，确保全书用词统一。
+### 阶段 3：架构一致性审计 (Architectural Consistency)
+- **索引对正**：核实 `AGENTS.zh/AGENTS.md` 是否已作为根索引文件，并清晰引导了阅读路径。
+- **术语同步**：对照 `human.zh/glossary.md` 中的定义，确保所有视图中的业务名词解释（如 `skill-meta`, `dual-sync`）高度统一。
 
-## 阶段 4：质量门禁 (Verification Gate)
-在确认任务完成前，请进行自我 audit：
-1. **中文纯度**：`.zh` 目录下是否还存在生硬的英文 Facts 碎片？
-2. **全量覆盖**：是否漏掉了某个深度目录（如 `02-architecture/`）？
-3. **可维护性**：生成的路径链接是否在 Quad-View 下依然有效？
+## 🚥 质量门禁 (Verification Gate)
+
+1. **语言纯度**：英/中两个视图是否都实现了 100% 的语言解耦？
+2. **事实精准度**：文档中的 CLI 命令、路径和包管理器名称是否与代码实际完全一致？
+3. **入口透明度**：根目录下的 `AGENTS.md` 是否已正确建立？
 
 ---
 
-## 常用命令索引
+## 常用命令参考
 
-- **初始化**：`docagent init --ai codex --target .`
-- **全量刷新**：`docagent refresh --output-mode quad`
-- **健康检查**：`docagent doctor --target .`
-- **版本对齐**：`docagent versions`
+- **深度初始化**：`docagent init --ai codex --target .`
+- **全量 Quad 刷新**：`docagent refresh --output-mode quad`
+- **配置漂移检查**：`docagent doctor --target .`
+- **版本对齐校验**：`docagent versions`

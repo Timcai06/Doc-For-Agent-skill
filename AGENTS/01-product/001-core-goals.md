@@ -9,7 +9,7 @@
 ## Confirmed Facts
 
 - English | [简体中文](README.zh.md)
-- This repository is currently best understood as a `skill/meta repository`.
+- This repository is currently best understood as a `skill-meta`.
 - The core product is the reusable agent-documentation workflow, not only the generated files themselves.
 
 ## Constraints To Preserve
