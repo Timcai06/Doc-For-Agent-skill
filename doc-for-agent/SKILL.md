@@ -30,10 +30,10 @@ This package is not just a standalone CLI. The product has two layers:
 
 - Build or refresh the paired documentation system from repository facts.
 - Output roots:
-  - `AGENTS/`
-  - `AGENTS.zh/`
-  - `docs/`
-  - `docs.zh/`
+  - `dfa-doc/AGENTS/`
+  - `dfa-doc/AGENTS.zh/`
+  - `dfa-doc/handbook/`
+  - `dfa-doc/handbook.zh/`
 - Treat four-view output as a **structure contract**. Do not assume bilingual content quality is already complete.
 
 ### 3. Consistency Audit
@@ -78,7 +78,7 @@ docagent refresh --root . --output-mode quad
 2. Treat `codex` and `claudecode` as first-class platform targets.
 3. Keep `continue` and `copilot` as compatibility targets, not equal discoverability claims.
 4. Do not describe `docagent` as the product itself; it is the skill distribution and repo workflow adapter.
-5. Do not claim `AGENTS.zh/` or `docs.zh/` are fully polished translations unless the generated content actually proves it.
+5. Do not claim `dfa-doc/AGENTS.zh/` or `dfa-doc/handbook.zh/` are fully polished translations unless the generated content actually proves it.
 6. Keep installation facts, commands, and directory names exact.
 
 ## Verification Gate

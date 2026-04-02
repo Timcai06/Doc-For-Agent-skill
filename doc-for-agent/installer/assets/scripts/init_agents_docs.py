@@ -47,11 +47,13 @@ def generate_docs(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Initialize or refresh a dual documentation system for AGENTS and/or docs.")
+    parser = argparse.ArgumentParser(
+        description="Initialize or refresh a four-view documentation system under doc-for-agent/ for AGENTS and handbook outputs."
+    )
     parser.add_argument(
         "--root",
         required=True,
-        help="Repository root where AGENTS/ and/or docs/ should be created or refreshed.",
+        help="Repository root where doc-for-agent/ generated outputs should be created or refreshed.",
     )
     parser.add_argument("--project-name", help="Optional explicit project name.")
     parser.add_argument(
@@ -63,7 +65,7 @@ def main() -> None:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Preview AGENTS/docs file changes without writing anything.",
+        help="Preview generated AGENTS/handbook file changes without writing anything.",
     )
     parser.add_argument(
         "--repo-type",
@@ -85,13 +87,21 @@ def main() -> None:
         "--output-mode",
         choices=SUPPORTED_OUTPUT_MODES,
         default="quad",
-        help="Choose output set: agent, human, dual, or quad (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`).",
+        help=(
+            "Choose output set: agent, human, dual, or quad "
+            "(`dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, "
+            "`dfa-doc/handbook/`, `dfa-doc/handbook.zh/`)."
+        ),
     )
     parser.add_argument(
         "--human-locale",
         choices=SUPPORTED_HUMAN_LOCALES,
         default="en",
-        help="Locale-aware human docs output root mapping only (`en` -> `docs/`, `zh` -> `docs.zh/`); no translation applied.",
+        help=(
+            "Locale-aware human docs output root mapping only "
+            "(`en` -> `dfa-doc/handbook/`, `zh` -> `dfa-doc/handbook.zh/`); "
+            "no translation applied."
+        ),
     )
     parser.add_argument(
         "--human-template",

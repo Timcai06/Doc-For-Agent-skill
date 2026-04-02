@@ -186,11 +186,9 @@ def collect_output_plan(
     planned: Dict[str, str] = {}
     archive_candidates: list[Path] = []
 
-    # Localization pipeline: En files remain pure En, Zh files undergo native mapping
     if output_mode in {"agent", "dual"}:
-        # Default to English for individual AGENTS folder unless we add a locale flag later
         agent_files = apply_layered_migration_overlays(analysis, generate_docs(analysis, locale="en"))
-        agents_dir = analysis.docs_inventory.canonical_agents_root or (root / "AGENTS")
+        agents_dir = root / resolve_agent_output_root("en")
         for name, content in agent_files.items():
             planned[str(agents_dir / name)] = content
         archive_candidates = list(analysis.docs_inventory.archive_candidates)
@@ -244,7 +242,8 @@ def validate_refresh_pairing_contract(root: Path, mode: str, output_mode: str) -
     has_quad_human_root = (root / resolve_human_output_root("zh")).exists()
     if has_quad_agent_root or has_quad_human_root:
         raise ValueError(
-            "Paired refresh contract violation: repository already has quad outputs (`AGENTS.zh/` or `docs.zh/`). "
+            "Paired refresh contract violation: repository already has quad outputs "
+            f"(`{resolve_agent_output_root('zh')}/` or `{resolve_human_output_root('zh')}/`). "
             "Use `--output-mode quad` for refresh so paired roots stay synchronized."
         )
 
@@ -306,12 +305,20 @@ def validate_output_contract(
 
     if not agents_en_files or not agents_zh_files or not docs_en_files or not docs_zh_files:
         raise ValueError(
-            "Quad output contract violation: expected non-empty AGENTS/, AGENTS.zh/, human/, and human.zh/ outputs."
+            "Quad output contract violation: expected non-empty "
+            f"`{resolve_agent_output_root('en')}/`, `{resolve_agent_output_root('zh')}/`, "
+            f"`{resolve_human_output_root('en')}/`, and `{resolve_human_output_root('zh')}/` outputs."
         )
     if agents_en_files != agents_zh_files:
-        raise ValueError("Quad output contract violation: AGENTS/ and AGENTS.zh/ must have symmetric file paths.")
+        raise ValueError(
+            "Quad output contract violation: "
+            f"`{resolve_agent_output_root('en')}/` and `{resolve_agent_output_root('zh')}/` must have symmetric file paths."
+        )
     if docs_en_files != docs_zh_files:
-        raise ValueError("Quad output contract violation: human/ and human.zh/ must have symmetric file paths.")
+        raise ValueError(
+            "Quad output contract violation: "
+            f"`{resolve_human_output_root('en')}/` and `{resolve_human_output_root('zh')}/` must have symmetric file paths."
+        )
 
 
 def build_generation_plan(request: EngineRequest) -> GenerationPlan:
@@ -329,7 +336,7 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
         normalized_request.human_locale,
         normalized_request.human_template_variant,
     )
-    agents_dir = analysis.docs_inventory.canonical_agents_root or (normalized_request.root / "AGENTS")
+    agents_dir = normalized_request.root / resolve_agent_output_root("en")
     validate_output_contract(
         normalized_request.root,
         normalized_request.mode,
@@ -355,8 +362,7 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
 def archive_legacy_flat_files(plan: GenerationPlan) -> None:
     if plan.analysis.doc_profile != "layered":
         return
-    canonical_root = plan.analysis.docs_inventory.canonical_agents_root or (plan.analysis.root / "AGENTS")
-    archive_root = canonical_root / "_archive" / "flat"
+    archive_root = plan.request.root / resolve_agent_output_root("en") / "_archive" / "flat"
     for path in plan.archive_candidates:
         if not path.exists():
             continue
@@ -406,7 +412,7 @@ def plan_dry_run_actions(plan: GenerationPlan) -> list[str]:
             display_path = path
         lines.append(f"- {action} {display_path}")
     for path in plan.archive_candidates:
-        lines.append(f"- archive {path.name} -> AGENTS/_archive/flat/{path.name}")
+        lines.append(f"- archive {path.name} -> {resolve_agent_output_root('en')}/_archive/flat/{path.name}")
     return lines
 
 
@@ -478,7 +484,7 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
         "- Paired template/path contract: `paired-core` must keep audience-locale roots synchronized through one refresh action.",
         f"- Human locale: `{plan.request.human_locale}` (output root: `{plan.docs_dir}`)",
         f"- Human template variant: `{resolve_human_template_variant(plan.request.human_locale, plan.request.human_template_variant)}`",
-        "- Recommended output mode: `dual` (AGENTS + docs).",
+        f"- Recommended output mode: `dual` (`{resolve_agent_output_root('en')}/` + `{resolve_human_output_root('en')}/`).",
         f"- Suggested profile: `{suggested_profile}`",
         f"- Documentation state: `{analysis.docs_inventory.detected_state}`",
     ]
@@ -496,7 +502,12 @@ def build_analysis_explanation_lines(plan: GenerationPlan, command_name: str = "
             f"{command_name} --root {analysis.root} --mode refresh --profile {suggested_profile} --output-mode {plan.request.output_mode}"
         )
     if plan.request.output_mode == "quad":
-        lines.append("- Four-view mode writes AGENTS/, AGENTS.zh/, docs/, and docs.zh/ in one run (structure-only; no translation).")
+        lines.append(
+            "- Four-view mode writes "
+            f"`{resolve_agent_output_root('en')}/`, `{resolve_agent_output_root('zh')}/`, "
+            f"`{resolve_human_output_root('en')}/`, and `{resolve_human_output_root('zh')}/` in one run "
+            "(structure-only; no translation)."
+        )
     lines.append("Suggested source-of-truth files:")
     lines.extend([f"- {line}" for line in infer_source_of_truth_lines(analysis)[:6]])
     lines.append("Supporting-doc synthesis summary:")

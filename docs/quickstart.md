@@ -12,8 +12,8 @@ Use one mental model:
 Think of it as two and a half steps: global install for agent visibility, repo-local init for repository workflow, then refresh when you want to write or update docs.
 
 `refresh` supports `agent`, `human`, `dual`, and `quad` documentation outputs.
-Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
+Mode map: `agent` -> `dfa-doc/AGENTS/`, `human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, `dfa-doc/handbook.zh/`.
+Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
 That four-view contract describes the structure target, not a claim that every bilingual page is already fully polished.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 

@@ -303,7 +303,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertIn("<repo-root>", text)
             self.assertNotIn("docagent init --ai all --target <repo-root>", text)
             self.assertIn("docagent init --ai claudecode", text)
-            self.assertIn("Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`", text)
+            self.assertIn("Output mode map: `agent` -> `dfa-doc/AGENTS/`, `human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, `dfa-doc/handbook.zh/`", text)
             self.assertIn("Four-view mode establishes structure for bilingual agent/human docs; it does not claim bilingual content polish is complete.", text)
             self.assertIn("Supported `--ai` values: codex, claudecode, continue, copilot, all", text)
             self.assertIn("docs/landing-page.md (EN) / docs/landing-page.zh.md (ZH)", text)

@@ -12,8 +12,8 @@ Current landing entry doc: [docs/landing-page.md](docs/landing-page.md)
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
 
 It supports `agent`, `human`, `dual`, and `quad` outputs.
-Mode map: `agent` writes `AGENTS/`, `human` writes `docs/`, `dual` writes both, and `quad` writes `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
+Mode map: `agent` writes `dfa-doc/AGENTS/`, `human` writes `dfa-doc/handbook/`, `dual` writes both, and `quad` writes `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, and `dfa-doc/handbook.zh/`.
+Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
 That four-view contract is a structure capability, not a claim that every bilingual view is already complete.
 This is not an AGENTS-only tool: choose output mode by audience.
 

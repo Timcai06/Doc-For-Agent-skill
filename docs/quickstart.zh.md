@@ -12,8 +12,8 @@
 把它理解成“两步半”最合适：全局安装负责 agent 可见性，repo-local init 负责仓库工作流，随后在需要写入或更新文档时再执行 refresh。
 
 `refresh` 支持 `agent`、`human`、`dual`、`quad` 四种文档输出。
-模式映射：`agent` -> `AGENTS/`，`human` -> `docs/`，`dual` -> 两者同时输出，`quad` -> `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
-`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图目录契约。
+模式映射：`agent` -> `dfa-doc/AGENTS/`，`human` -> `dfa-doc/handbook/`，`dual` -> 两者同时输出，`quad` -> `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
+`dual` 模式会在一次 refresh 流程中把 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图目录契约。
 这项四视图能力强调的是结构目标，不等于每一页双语内容都已经完全打磨完成。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 

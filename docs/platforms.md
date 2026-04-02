@@ -22,7 +22,7 @@ Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagen
 
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 After init, use `refresh --output-mode agent|human|dual|quad` based on the docs audience.
-Mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`.
+Mode map: `agent` -> `dfa-doc/AGENTS/`, `human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, `dfa-doc/handbook.zh/`.
 Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
 The four-view layout is a structure capability, not a claim that every bilingual view is already complete.
 Platform selection is separate from doc audience: this is not AGENTS-only.

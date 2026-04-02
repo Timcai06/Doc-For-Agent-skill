@@ -3,28 +3,28 @@ import React, { useEffect, useState } from 'react';
 // --- Icon Components (Inline SVG) ---
 const Artifacts = {
   agent: {
-    title: "AGENTS/rules.md",
+    title: "dfa-doc/AGENTS/rules.md",
     mode: "Execution-First",
     status: "Structural Baseline",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
     content: `# Agent Execution Rules (Baseline)\n\nUse this structural baseline to maintain agent grounding. Content is synchronized with logic evolution via \`docagent refresh\`.\n\n## Top Invariants\n- Verify documented command paths before merge.\n- Keep AGENTS and docs refreshed after structural changes.\n- Escalate source-of-truth conflicts instead of guessing.`
   },
   agentZh: {
-    title: "AGENTS.zh/rules.md",
+    title: "dfa-doc/AGENTS.zh/rules.md",
     mode: "执行优先",
     status: "结构化基线 (已就绪)",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10m0 0 4-4m-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>,
     content: `# 智能体执行规则 (结构契约)\n\n在执行 Agent 任务时提供结构化说明。注：此产物为结构化契约，内容质量取决于初始生成后的刷新循环。\n\n## 核心不变式\n- 交付前验证文档化的命令路径。\n- 在结构变更后通过 refresh 保持同步。\n- 遇到真相来源冲突时，选择上报而非猜测。`
   },
   human: {
-    title: "docs/architecture.md",
+    title: "dfa-doc/handbook/architecture.md",
     mode: "Strategic-First",
     status: "Narrative Baseline",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
     content: `# Architecture Overview (Baseline)\n\n## Structural Intent\nThis repository is designed as a modular documentation engine. It prioritizes cross-platform compatibility and dual-doc clarity.\n\n## Systemic Core\n- **Dual-Doc Sync**: Unified single-pass analysis for paired outputs.\n- **Sustainability Loop**: CLI-driven refresh mechanisms to reduce manual drift.`
   },
   humanZh: {
-    title: "docs.zh/architecture.md",
+    title: "dfa-doc/handbook.zh/architecture.md",
     mode: "策略优先",
     status: "结构化基线 (已就绪)",
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h6"/></svg>,
@@ -53,10 +53,10 @@ const heroCases = [
       { text: '[step 1/3] Scanning repository signals...', color: 'var(--text-secondary)' },
       { text: '✓ Detected low-doc codebase state.', color: 'var(--accent)' },
       { text: '[step 2/3] Projecting Four-View Baseline...', color: 'var(--text-secondary)' },
-      { text: '  + /AGENTS/ (EN)', color: '#fff' },
-      { text: '  + /AGENTS.zh/ (ZH)', color: '#fff' },
-      { text: '  + /docs/   (EN)', color: '#fff' },
-      { text: '  + /docs.zh/   (ZH)', color: '#fff' },
+      { text: '  + /dfa-doc/AGENTS/ (EN)', color: '#fff' },
+      { text: '  + /dfa-doc/AGENTS.zh/ (ZH)', color: '#fff' },
+      { text: '  + /dfa-doc/handbook/ (EN)', color: '#fff' },
+      { text: '  + /dfa-doc/handbook.zh/ (ZH)', color: '#fff' },
       { text: '[step 3/3] Baseline established as structural contract.', color: 'var(--accent)' },
     ]
   },
@@ -69,8 +69,8 @@ const heroCases = [
       { text: '[step 1/2] Detecting logic evolution...', color: 'var(--text-secondary)' },
       { text: '✓ Identifying code drifts from baseline.', color: 'var(--accent)' },
       { text: '[step 2/2] Synchronizing dual-doc pair...', color: 'var(--text-secondary)' },
-      { text: '  ↺ /AGENTS/ rules updated.', color: '#fff' },
-      { text: '  ↺ /docs/ narrative refreshed.', color: '#fff' },
+      { text: '  ↺ /dfa-doc/AGENTS/ rules updated.', color: '#fff' },
+      { text: '  ↺ /dfa-doc/handbook/ narrative refreshed.', color: '#fff' },
       { text: 'Documentation lifecycle sync complete.', color: 'var(--primary)' },
     ]
   }
@@ -289,7 +289,7 @@ function App() {
               <span style={{ color: 'var(--primary)', textShadow: '0 0 30px var(--primary-glow)' }}>Agentic Workflows.</span>
             </h1>
             <p className="hero-text">
-              Don't leave your Agent's memory to chance. <strong>doc-for-agent</strong> establishes a sustainable documentation system: <code>/docs/</code> for humans, <code>/AGENTS/</code> for machines. All synchronized via CLI.
+              Don't leave your Agent's memory to chance. <strong>doc-for-agent</strong> establishes a sustainable documentation system: <code>/dfa-doc/handbook/</code> for humans, <code>/dfa-doc/AGENTS/</code> for machines. All synchronized via CLI.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#workflow">
@@ -373,8 +373,8 @@ function App() {
              </div>
              <div className="sync-part results">
                <div className="res-card-group">
-                 <div className="res-card agent"><strong>/AGENTS/</strong> Context Baseline</div>
-                 <div className="res-card human"><strong>/docs/</strong> Narrative Baseline</div>
+                 <div className="res-card agent"><strong>/dfa-doc/AGENTS/</strong> Context Baseline</div>
+                 <div className="res-card human"><strong>/dfa-doc/handbook/</strong> Narrative Baseline</div>
                </div>
                <strong>Unified Knowledge Hub</strong>
                <p>Derived from repository analysis and legacy-document heuristics.</p>
@@ -422,13 +422,13 @@ function App() {
                   <div className="pane-header">Dual-Doc Outputs</div>
                   <div className="dual-doc-tabs">
                     <div className="sync-doc-box human">
-                      <div className="doc-label">/docs/ human narrative</div>
+                      <div className="doc-label">/dfa-doc/handbook/ human narrative</div>
                       <div className="md-content mini">
                         {renderMarkdown(playgroundVariants[activePlayground].human)}
                       </div>
                     </div>
                     <div className="sync-doc-box agent">
-                      <div className="doc-label">/AGENTS/ execution rules</div>
+                      <div className="doc-label">/dfa-doc/AGENTS/ execution rules</div>
                       <div className="md-content mini">
                         {renderMarkdown(playgroundVariants[activePlayground].agent)}
                       </div>
@@ -442,7 +442,7 @@ function App() {
           <div className="dual-grid scroll-reveal" style={{ marginTop: '64px' }}>
             <div className="dual-card agent">
               <div className="card-label">FOR AGENTS (Execution-First)</div>
-              <h3>/AGENTS/ Context</h3>
+              <h3>/dfa-doc/AGENTS/ Context</h3>
               <p>Actionable, high-density execution rules. Designed for Claude Code, Codex, Continue, and Copilot workflows with lower ambiguity and repeatable refresh paths.</p>
               <ul className="mini-features">
                 <li>✓ Deterministic Invariants</li>
@@ -452,7 +452,7 @@ function App() {
             </div>
             <div className="dual-card human">
               <div className="card-label">FOR HUMANS (Narrative-First)</div>
-              <h3>/docs/ Reference</h3>
+              <h3>/dfa-doc/handbook/ Reference</h3>
               <p>Strategic narrative for maintainers and team onboarding. High-level architecture guides and onboarding maps that remain synchronized with machine rules.</p>
               <ul className="mini-features">
                 <li>✓ Strategic Architecture Maps</li>
@@ -473,7 +473,7 @@ function App() {
           <div className="scenario-row scroll-reveal">
             {[
               { type: 'Low-Doc Legacy', desc: 'Bootstrap a professional documentation system from source code and scattered configs.' },
-              { type: 'Messy-Doc Repos', desc: 'Inhale outdated, conflicting READMEs and systemize them into a durable /AGENTS/ baseline.' },
+              { type: 'Messy-Doc Repos', desc: 'Inhale outdated, conflicting READMEs and systemize them into a durable /dfa-doc/AGENTS/ baseline.' },
               { type: 'Team Scalability', desc: 'Maintain peak alignment for every agent session with a repeatable, automated refresh cycle.' }
             ].map(s => (
               <div key={s.type} className="scenario-pill glass-card">
@@ -603,7 +603,7 @@ function App() {
             <div className="drift-card good">
               <div className="drift-title">Systemic Dual-Doc</div>
               <ul className="mini-features">
-                <li>✓ Persistent /AGENTS/ baseline</li>
+                <li>✓ Persistent /dfa-doc/AGENTS/ baseline</li>
                 <li>✓ More stable truth across sessions</li>
                 <li>✓ Low-doc legacy repo support</li>
                 <li>✓ Automated refresh cycle</li>

@@ -36,6 +36,7 @@ from .helpers import (
     localize_lines,
     resolve_human_output_root,
     resolve_human_template_variant,
+    resolve_agent_output_root,
     role_first_screen_rules,
     strip_supporting_sources_suffix,
     supporting_doc_insight_lines,
@@ -97,14 +98,24 @@ def build_human_overview(analysis: RepoAnalysis, human_output_root: str, human_l
         if unresolved:
             priorities.append("将被列为“未决”的事项转化为明确的 责任人+期限 决策。")
         if not priorities:
-            priorities.append("在 `docs/` 中记录最新决策，并确保在变更后同步更新 AGENTS 文档。")
+            priorities.append(
+                get_ui_string("priority_sync", locale).format(
+                    root=human_output_root,
+                    agent_root=resolve_agent_output_root("en"),
+                )
+            )
     else:
         if conflicting:
             priorities.append("Resolve conflicting product statements before locking roadmap or interface commitments.")
         if unresolved:
             priorities.append("Convert unresolved items into explicit owner+deadline decisions.")
         if not priorities:
-            priorities.append("Capture latest decisions in `docs/` and keep AGENTS synchronized after changes.")
+            priorities.append(
+                get_ui_string("priority_sync", locale).format(
+                    root=human_output_root,
+                    agent_root=resolve_agent_output_root("en"),
+                )
+            )
 
     documentation_gaps = list(unresolved)
     if not documentation_gaps:
@@ -244,7 +255,7 @@ def build_human_architecture(
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
     boundaries = [
         "Treat source-of-truth files as canonical when supporting docs disagree.",
-        "Refresh both `docs/` and `AGENTS/` after architecture-impacting changes.",
+        f"Refresh both `{human_output_root}/` and `{resolve_agent_output_root('en')}/` after architecture-impacting changes.",
     ]
     system_map = []
     if analysis.frontend_root:
@@ -477,11 +488,11 @@ def build_human_workflows(
 
 ## Output Boundary (Human vs Agent)
 
-{format_bullets(localize_lines(human_output_boundary_lines("execution", human_output_root), human_locale), "Add output boundary rules between docs/ and AGENTS/.")}
+{format_bullets(localize_lines(human_output_boundary_lines("execution", human_output_root), human_locale), "Add output boundary rules between handbook/ and AGENTS/.")}
 
 ## Dual View Rationale
 
-{format_bullets(localize_lines(human_dual_view_rationale_lines("execution", human_output_root), human_locale), "Explain why docs/ and AGENTS/ are paired views of one system.")}
+{format_bullets(localize_lines(human_dual_view_rationale_lines("execution", human_output_root), human_locale), "Explain why handbook/ and AGENTS/ are paired views of one system.")}
 
 ## Setup
 

@@ -245,7 +245,12 @@ def render_quickstart(target_root: Path) -> str:
         "- Refresh the repository documentation system:",
         f"- `docagent refresh --root {repo_placeholder} --output-mode agent`",
         "- Optional modes: `--output-mode human`, `--output-mode dual`, or `--output-mode quad`",
-        "- Output mode map: `agent` -> `AGENTS/`, `human` -> `docs/`, `dual` -> both, `quad` -> `AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`",
+        (
+            "- Output mode map: `agent` -> `dfa-doc/AGENTS/`, "
+            "`human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> "
+            "`dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, "
+            "`dfa-doc/handbook/`, `dfa-doc/handbook.zh/`"
+        ),
         "- Four-view mode establishes structure for bilingual agent/human docs; it does not claim bilingual content polish is complete.",
         "- Verify repository wiring and version state:",
         f"- `docagent doctor --target {repo_placeholder}`",

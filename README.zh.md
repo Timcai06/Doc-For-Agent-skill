@@ -12,7 +12,7 @@
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
 
 它支持 `agent`、`human`、`dual`、`quad` 四种输出。
-模式映射：`agent` 写入 `AGENTS/`，`human` 写入 `docs/`，`dual` 同时写入两者，`quad` 写入 `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
+模式映射：`agent` 写入 `dfa-doc/AGENTS/`，`human` 写入 `dfa-doc/handbook/`，`dual` 同时写入两者，`quad` 写入 `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
 `dual` 模式会在一次 refresh 流程中同时维护 `docs/`（human docs）与 `AGENTS/`（agent docs）。`quad` 模式建立双语四视图目录契约。
 这项四视图能力表达的是结构契约，不等于所有双语内容质量已经完成。
 它不是 AGENTS-only 工具：应按文档受众选择输出模式。

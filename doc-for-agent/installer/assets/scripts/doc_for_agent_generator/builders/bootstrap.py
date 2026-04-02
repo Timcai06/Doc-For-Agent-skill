@@ -39,8 +39,8 @@ def build_readme(analysis: RepoAnalysis) -> str:
 
 ## Dual Documentation System
 
-- `AGENTS/` is the agent-facing rule/runbook layer for execution and handoff.
-- `docs/` is the human-facing system context layer for maintainers and onboarding.
+- `dfa-doc/AGENTS/` is the agent-facing rule/runbook layer for execution and handoff.
+- `dfa-doc/handbook/` is the human-facing system context layer for maintainers and onboarding.
 - Prefer `--output-mode dual` so both layers stay synchronized after refresh.
 
 ## Repository Classification
@@ -145,13 +145,13 @@ def build_architecture(analysis: RepoAnalysis) -> str:
         handoff.extend(
             [
                 "Prompt/instruction changes should stay aligned with generator behavior so agents are not told to do something the script cannot support.",
-                "Generated `AGENTS/` docs are downstream artifacts; review the generator and references before hand-editing broad structure.",
+                "Generated `dfa-doc/AGENTS/` docs are downstream artifacts; review the generator and references before hand-editing broad structure.",
             ]
         )
     else:
         handoff.extend(
             [
-                "Prefer changing source code and config first, then refresh `AGENTS/` docs so agent context stays synchronized.",
+                "Prefer changing source code and config first, then refresh `dfa-doc/AGENTS/` docs so agent context stays synchronized.",
                 "When repo shape is ambiguous, inspect the README and build scripts before assuming ownership boundaries.",
             ]
         )
@@ -546,7 +546,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
             run_lines.append(f"python3 {skill_script_rel} --root /path/to/target-repo --mode refresh")
             refresh_lines.append(f"python3 {skill_script_rel} --root {analysis.root} --mode refresh")
         refresh_lines.append(
-            "Review generated `AGENTS/*.md` and `docs/*.md` files and tighten sections still marked as needing human confirmation."
+            "Review generated `dfa-doc/AGENTS/*.md` and `dfa-doc/handbook/*.md` files and tighten sections still marked as needing human confirmation."
         )
 
     if analysis.script_files:
@@ -562,7 +562,7 @@ def build_workflows(analysis: RepoAnalysis) -> str:
     if not verify_lines:
         verify_lines = ["Run repository verification commands from README or CI (lint/test/build equivalents)."]
     if not refresh_lines:
-        refresh_lines = ["Refresh `AGENTS/` + `docs/` after major codebase, workflow, or terminology changes."]
+        refresh_lines = ["Refresh `dfa-doc/AGENTS/` + `dfa-doc/handbook/` after major codebase, workflow, or terminology changes."]
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "execution"))
 
     return f"""# Workflows

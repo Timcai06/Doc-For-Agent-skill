@@ -275,29 +275,29 @@
     "__profile": "layered",
     "__output_mode": "dual",
     "__required_docs": [
-      "AGENTS/00-entry/AGENTS.md",
-      "AGENTS/01-product/001-core-goals.md",
-      "AGENTS/02-architecture/007-architecture-compatibility.md",
-      "AGENTS/03-execution/008-implementation-plan.md",
-      "AGENTS/04-memory/009-progress.md",
-      "docs/overview.md",
-      "docs/architecture.md",
-      "docs/workflows.md",
-      "docs/glossary.md"
+      "dfa-doc/AGENTS/00-entry/AGENTS.md",
+      "dfa-doc/AGENTS/01-product/001-core-goals.md",
+      "dfa-doc/AGENTS/02-architecture/007-architecture-compatibility.md",
+      "dfa-doc/AGENTS/03-execution/008-implementation-plan.md",
+      "dfa-doc/AGENTS/04-memory/009-progress.md",
+      "dfa-doc/handbook/overview.md",
+      "dfa-doc/handbook/architecture.md",
+      "dfa-doc/handbook/workflows.md",
+      "dfa-doc/handbook/glossary.md"
     ],
-    "AGENTS/01-product/001-core-goals.md": {
+    "dfa-doc/AGENTS/01-product/001-core-goals.md": {
       "contains": [
         "Supporting Doc Synthesis (Product)",
         "Open question: decide whether on-prem deployment is required"
       ]
     },
-    "AGENTS/03-execution/008-implementation-plan.md": {
+    "dfa-doc/AGENTS/03-execution/008-implementation-plan.md": {
       "contains": [
         "Supporting Doc Synthesis (Execution)",
         "Run npm run test before merging release candidates"
       ]
     },
-    "docs/overview.md": {
+    "dfa-doc/handbook/overview.md": {
       "contains": [
         "# Project Overview",
         "## Knowledge Status",
@@ -311,7 +311,7 @@
         "## Provenance"
       ]
     },
-    "docs/architecture.md": {
+    "dfa-doc/handbook/architecture.md": {
       "contains": [
         "# Architecture",
         "## Knowledge Status",
@@ -322,7 +322,7 @@
         "## Bootstrap Backlog (When Docs Are Thin)"
       ]
     },
-    "docs/workflows.md": {
+    "dfa-doc/handbook/workflows.md": {
       "contains": [
         "# Workflows",
         "## Knowledge Status",
@@ -335,7 +335,7 @@
         "## Provenance"
       ]
     },
-    "docs/glossary.md": {
+    "dfa-doc/handbook/glossary.md": {
       "contains": [
         "# Glossary",
         "## Derived Terminology Signals",
@@ -347,12 +347,12 @@
   "human_no_docs": {
     "__output_mode": "human",
     "__required_docs": [
-      "docs/overview.md",
-      "docs/architecture.md",
-      "docs/workflows.md",
-      "docs/glossary.md"
+      "dfa-doc/handbook/overview.md",
+      "dfa-doc/handbook/architecture.md",
+      "dfa-doc/handbook/workflows.md",
+      "dfa-doc/handbook/glossary.md"
     ],
-    "docs/overview.md": {
+    "dfa-doc/handbook/overview.md": {
       "contains": [
         "# Project Overview",
         "Current repo shape:",
@@ -365,7 +365,7 @@
         "No supporting docs matched this role; content below is derived from repository structure and code signals."
       ]
     },
-    "docs/architecture.md": {
+    "dfa-doc/handbook/architecture.md": {
       "contains": [
         "# Architecture",
         "## Source Of Truth",
@@ -373,7 +373,7 @@
         "## Provenance"
       ]
     },
-    "docs/workflows.md": {
+    "dfa-doc/handbook/workflows.md": {
       "contains": [
         "# Workflows",
         "python3 -m pip install -r requirements.txt",
@@ -382,7 +382,7 @@
         "## Bootstrap Backlog (When Docs Are Thin)"
       ]
     },
-    "docs/glossary.md": {
+    "dfa-doc/handbook/glossary.md": {
       "contains": [
         "# Glossary",
         "## Naming Rules",

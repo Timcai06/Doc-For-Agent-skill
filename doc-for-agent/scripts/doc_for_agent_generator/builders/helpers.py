@@ -11,15 +11,16 @@ from ..utils import rel_path
 SUPPORTED_DOC_PROFILES = ("bootstrap", "layered")
 SUPPORTED_OUTPUT_MODES = ("agent", "human", "dual", "quad")
 SUPPORTED_AGENT_LOCALES = ("en", "zh")
+GENERATED_OUTPUT_ROOT = "dfa-doc"
 AGENT_LOCALE_OUTPUT_ROOTS = {
-    "en": "AGENTS",
-    "zh": "AGENTS.zh",
+    "en": f"{GENERATED_OUTPUT_ROOT}/AGENTS",
+    "zh": f"{GENERATED_OUTPUT_ROOT}/AGENTS.zh",
 }
 SUPPORTED_HUMAN_LOCALES = ("en", "zh")
 SUPPORTED_HUMAN_TEMPLATE_VARIANTS = ("paired-core",)
 HUMAN_LOCALE_OUTPUT_ROOTS = {
-    "en": "docs",
-    "zh": "docs.zh",
+    "en": f"{GENERATED_OUTPUT_ROOT}/handbook",
+    "zh": f"{GENERATED_OUTPUT_ROOT}/handbook.zh",
 }
 DEFAULT_HUMAN_TEMPLATE_BY_LOCALE = {
     "en": "paired-core",
@@ -312,8 +313,9 @@ def trim_human_evidence_density(
 
 
 def human_doc_contract_lines(role: str, human_output_root: str) -> list[str]:
+    agent_output_root = resolve_agent_output_root("en")
     base = [
-        f"This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `AGENTS/` in dual mode and `{human_output_root}/` as the human-view root.",
+        f"This page is maintainer-facing source-of-truth for its domain; keep it synchronized with `{agent_output_root}/` in dual mode and `{human_output_root}/` as the human-view root.",
         "Update this page in the same PR as behavior changes; avoid narrative-only refreshes without command or contract changes.",
     ]
     if role == "product":
@@ -328,8 +330,9 @@ def human_doc_contract_lines(role: str, human_output_root: str) -> list[str]:
 
 
 def human_dual_sync_checklist_lines(role: str, human_output_root: str) -> list[str]:
+    agent_output_root = resolve_agent_output_root("en")
     base = [
-        f"After edits, refresh in dual mode and verify both `AGENTS/` and `{human_output_root}/` were updated in the same change set.",
+        f"After edits, refresh in dual mode and verify both `{agent_output_root}/` and `{human_output_root}/` were updated in the same change set.",
         "If one side changed without the other, treat it as documentation drift and resolve before merge.",
     ]
     if role == "execution":
@@ -342,10 +345,14 @@ def human_dual_sync_checklist_lines(role: str, human_output_root: str) -> list[s
 
 
 def human_paired_refresh_rule_lines(role: str, human_output_root: str) -> list[str]:
+    agent_en_root = resolve_agent_output_root("en")
+    agent_zh_root = resolve_agent_output_root("zh")
+    human_en_root = resolve_human_output_root("en")
+    human_zh_root = resolve_human_output_root("zh")
     lines = [
         "Refresh contract: run one refresh/generate action that updates paired views together; do not patch one locale/audience in isolation.",
-        "Path contract: verify changed files include both `AGENTS*/` and `docs*/` counterparts when behavior changes affect shared source-of-truth.",
-        "Quad-mode contract: when using `--output-mode quad`, validate all four roots (`AGENTS/`, `AGENTS.zh/`, `docs/`, `docs.zh/`) in the same review cycle.",
+        f"Path contract: verify changed files include both `{agent_en_root}*/` and `{human_en_root}*/` counterparts when behavior changes affect shared source-of-truth.",
+        f"Quad-mode contract: when using `--output-mode quad`, validate all four roots (`{agent_en_root}/`, `{agent_zh_root}/`, `{human_en_root}/`, `{human_zh_root}/`) in the same review cycle.",
     ]
     if role == "product":
         lines.append(
@@ -365,10 +372,11 @@ def human_paired_refresh_rule_lines(role: str, human_output_root: str) -> list[s
 def paired_agent_doc_lines(analysis: RepoAnalysis, role: str) -> list[str]:
     profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
     mapping = HUMAN_PAIRED_PATH_RULES[profile]
+    agent_output_root = resolve_agent_output_root("en")
 
     lines: list[str] = []
     for relative, purpose in mapping.get(role, []):
-        lines.append(f"`AGENTS/{relative}` for {purpose}.")
+        lines.append(f"`{agent_output_root}/{relative}` for {purpose}.")
     return lines
 
 
@@ -391,30 +399,32 @@ def strip_supporting_sources_suffix(lines: Sequence[str]) -> list[str]:
 
 
 def human_output_boundary_lines(role: str, human_output_root: str, locale: str = "en") -> list[str]:
+    agent_output_root = resolve_agent_output_root("en")
     shared = [
-        get_ui_string("boundary_rule_1", locale).format(root=human_output_root),
+        get_ui_string("boundary_rule_1", locale).format(root=human_output_root, agent_root=agent_output_root),
         get_ui_string("boundary_rule_2", locale),
     ]
     if role == "product":
-        shared.append(get_ui_string("boundary_rule_product", locale).format(root=human_output_root))
+        shared.append(get_ui_string("boundary_rule_product", locale).format(root=human_output_root, agent_root=agent_output_root))
     elif role == "architecture":
-        shared.append(get_ui_string("boundary_rule_architecture", locale).format(root=human_output_root))
+        shared.append(get_ui_string("boundary_rule_architecture", locale).format(root=human_output_root, agent_root=agent_output_root))
     elif role == "execution":
-        shared.append(get_ui_string("boundary_rule_execution", locale).format(root=human_output_root))
+        shared.append(get_ui_string("boundary_rule_execution", locale).format(root=human_output_root, agent_root=agent_output_root))
     return shared
 
 
 def human_dual_view_rationale_lines(role: str, human_output_root: str, locale: str = "en") -> list[str]:
+    agent_output_root = resolve_agent_output_root("en")
     lines = [
-        get_ui_string("rationale_rule_1", locale).format(root=human_output_root),
+        get_ui_string("rationale_rule_1", locale).format(root=human_output_root, agent_root=agent_output_root),
         get_ui_string("rationale_rule_2", locale),
     ]
     if role == "product":
-        lines.append(get_ui_string("rationale_rule_product", locale).format(root=human_output_root))
+        lines.append(get_ui_string("rationale_rule_product", locale).format(root=human_output_root, agent_root=agent_output_root))
     elif role == "architecture":
-        lines.append(get_ui_string("rationale_rule_architecture", locale).format(root=human_output_root))
+        lines.append(get_ui_string("rationale_rule_architecture", locale).format(root=human_output_root, agent_root=agent_output_root))
     elif role == "execution":
-        lines.append(get_ui_string("rationale_rule_execution", locale).format(root=human_output_root))
+        lines.append(get_ui_string("rationale_rule_execution", locale).format(root=human_output_root, agent_root=agent_output_root))
     return lines
 
 
@@ -437,6 +447,7 @@ def human_dual_pairing_contract_lines(
 ) -> list[str]:
     resolved_variant = resolve_human_template_variant(human_locale, human_template_variant)
     profile = analysis.doc_profile if analysis.doc_profile in HUMAN_PAIRED_PATH_RULES else "bootstrap"
+    agent_output_root = resolve_agent_output_root("en")
     lines = [
         get_ui_string("pairing_rule_1", human_locale),
         get_ui_string("pairing_rule_2", human_locale).format(locale=human_locale, root=human_output_root),
@@ -447,7 +458,7 @@ def human_dual_pairing_contract_lines(
         lines.append(
             get_ui_string("pairing_rule_path", human_locale).format(
                 human_path=f"{human_output_root}/{human_rel}",
-                agent_path=f"AGENTS/{relative}",
+                agent_path=f"{agent_output_root}/{relative}",
                 purpose=purpose,
             )
         )

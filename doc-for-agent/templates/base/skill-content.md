@@ -53,7 +53,7 @@ python3 {{SCRIPT_REL_PATH}} --root "<repo-root>" --mode refresh --repo-type cli-
 
 - The engine scans the real repository before generating docs.
 - `docagent` is the install + workflow adapter, not the product itself.
-- Four-view output writes `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
+- Four-view output writes `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, and `dfa-doc/handbook.zh/`.
 - Four-view structure does not imply bilingual content polish is already complete.
 - Manual blocks wrapped in `<!-- doc-for-agent:manual-start -->` and `<!-- doc-for-agent:manual-end -->` are preserved during refresh.
 

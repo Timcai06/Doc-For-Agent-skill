@@ -19,10 +19,10 @@ DEFAULT_REQUIRED_DOCS = [
     "glossary.md",
 ]
 DEFAULT_HUMAN_REQUIRED_DOCS = [
-    "docs/overview.md",
-    "docs/architecture.md",
-    "docs/workflows.md",
-    "docs/glossary.md",
+    "dfa-doc/handbook/overview.md",
+    "dfa-doc/handbook/architecture.md",
+    "dfa-doc/handbook/workflows.md",
+    "dfa-doc/handbook/glossary.md",
 ]
 
 MANUAL_START = "<!-- doc-for-agent:manual-start -->"
@@ -67,10 +67,10 @@ def verify_fixture(generator: Path, fixture_root: Path, expectations: dict) -> l
 
     def resolve_generated_path(path: str) -> str:
         normalized = path.replace("\\", "/")
-        if normalized.startswith("AGENTS/") or normalized.startswith("docs/"):
+        if normalized.startswith("dfa-doc/AGENTS/") or normalized.startswith("dfa-doc/handbook/"):
             return normalized
         if output_mode in {"agent", "dual"}:
-            return f"AGENTS/{normalized}"
+            return f"dfa-doc/AGENTS/{normalized}"
         return normalized
 
     with tempfile.TemporaryDirectory(prefix="doc-for-agent-fixture-") as tmpdir:
@@ -128,7 +128,7 @@ def verify_manual_preservation(generator: Path, fixture_root: Path) -> list[str]
 
         run_generator(generator, sandbox_root, "init")
 
-        product_path = sandbox_root / "AGENTS/product.md"
+        product_path = sandbox_root / "dfa-doc" / "AGENTS" / "product.md"
         original = read_text(product_path)
         marker = "\n".join(
             [

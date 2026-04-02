@@ -15,7 +15,7 @@ FIXTURE_ROOT = TEST_ROOT / "fixtures" / "cli_tool"
 
 
 class DryRunTests(unittest.TestCase):
-    def test_dry_run_defaults_to_dual_outputs_without_writing_directories(self) -> None:
+    def test_dry_run_defaults_to_quad_outputs_without_writing_directories(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dry-run-") as tmpdir:
             sandbox_root = Path(tmpdir) / "cli_tool"
             shutil.copytree(FIXTURE_ROOT, sandbox_root)
@@ -35,11 +35,11 @@ class DryRunTests(unittest.TestCase):
                 text=True,
             )
 
-            self.assertIn("Dry run: would refresh AGENTS + human docs", result.stdout)
-            self.assertIn("create AGENTS/README.md", result.stdout)
-            self.assertIn("create docs/overview.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
-            self.assertFalse((sandbox_root / "docs").exists())
+            self.assertIn("Dry run: would refresh four-view docs", result.stdout)
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("create dfa-doc/handbook/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook").exists())
 
     def test_dry_run_agent_mode_still_reports_agents_only(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dry-run-agent-") as tmpdir:
@@ -64,10 +64,10 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Dry run: would refresh AGENTS docs", result.stdout)
-            self.assertIn("create AGENTS/README.md", result.stdout)
-            self.assertNotIn("create docs/overview.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
-            self.assertFalse((sandbox_root / "docs").exists())
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertNotIn("create dfa-doc/handbook/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook").exists())
 
     def test_explain_and_repo_type_override_can_be_combined_with_dry_run(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-explain-") as tmpdir:
@@ -152,9 +152,9 @@ class DryRunTests(unittest.TestCase):
                 text=True,
             )
 
-            self.assertIn("create AGENTS/00-entry/AGENTS.md", result.stdout)
-            self.assertIn("create AGENTS/04-memory/010-lessons.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("create dfa-doc/AGENTS/04-memory/010-lessons.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
 
     def test_human_output_mode_creates_docs_without_agents_directory(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-human-mode-") as tmpdir:
@@ -178,14 +178,14 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Refreshed human docs in:", result.stdout)
-            self.assertTrue((sandbox_root / "docs/overview.md").exists())
-            self.assertTrue((sandbox_root / "docs/architecture.md").exists())
-            self.assertTrue((sandbox_root / "docs/workflows.md").exists())
-            self.assertTrue((sandbox_root / "docs/glossary.md").exists())
-            overview = (sandbox_root / "docs/overview.md").read_text(encoding="utf-8")
-            architecture = (sandbox_root / "docs/architecture.md").read_text(encoding="utf-8")
-            workflows = (sandbox_root / "docs/workflows.md").read_text(encoding="utf-8")
-            glossary = (sandbox_root / "docs/glossary.md").read_text(encoding="utf-8")
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "architecture.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "workflows.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "glossary.md").exists())
+            overview = (sandbox_root / "dfa-doc" / "handbook" / "overview.md").read_text(encoding="utf-8")
+            architecture = (sandbox_root / "dfa-doc" / "handbook" / "architecture.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "dfa-doc" / "handbook" / "workflows.md").read_text(encoding="utf-8")
+            glossary = (sandbox_root / "dfa-doc" / "handbook" / "glossary.md").read_text(encoding="utf-8")
             self.assertIn("## Knowledge Status", overview)
             self.assertIn("## Top Rules (Read First)", overview)
             self.assertIn("## Document Contract", overview)
@@ -195,7 +195,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("## Paired Agent Docs (Dual Mode)", overview)
             self.assertIn("## Output Boundary (Human vs Agent)", overview)
             self.assertIn("## Dual View Rationale", overview)
-            self.assertIn("AGENTS/product.md", overview)
+            self.assertIn("dfa-doc/AGENTS/product.md", overview)
             self.assertIn("Pairing mode rule:", overview)
             self.assertIn("Rule 1:", overview)
             self.assertIn("## Provenance", overview)
@@ -211,7 +211,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("## Paired Agent Docs (Dual Mode)", architecture)
             self.assertIn("## Output Boundary (Human vs Agent)", architecture)
             self.assertIn("## Dual View Rationale", architecture)
-            self.assertIn("AGENTS/architecture.md", architecture)
+            self.assertIn("dfa-doc/AGENTS/architecture.md", architecture)
             self.assertIn("Rule 1:", architecture)
             self.assertIn("### Supporting Signals", architecture)
             self.assertIn("## Update Triggers", architecture)
@@ -225,7 +225,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("## Paired Agent Docs (Dual Mode)", workflows)
             self.assertIn("## Output Boundary (Human vs Agent)", workflows)
             self.assertIn("## Dual View Rationale", workflows)
-            self.assertIn("AGENTS/workflows.md", workflows)
+            self.assertIn("dfa-doc/AGENTS/workflows.md", workflows)
             self.assertIn("Rule 1:", workflows)
             self.assertIn("### Supporting Signals", workflows)
             self.assertIn("## Update Triggers", workflows)
@@ -233,7 +233,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("## Maintenance Workflow", workflows)
             self.assertIn("## Candidate Terms From Code Signals", glossary)
             self.assertIn("## Derived Terminology Signals", glossary)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
 
     def test_human_output_mode_still_generates_docs_when_repo_has_no_existing_docs(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-human-no-docs-") as tmpdir:
@@ -256,13 +256,13 @@ class DryRunTests(unittest.TestCase):
                 text=True,
             )
 
-            self.assertTrue((sandbox_root / "docs/overview.md").exists())
-            self.assertTrue((sandbox_root / "docs/architecture.md").exists())
-            self.assertTrue((sandbox_root / "docs/workflows.md").exists())
-            self.assertTrue((sandbox_root / "docs/glossary.md").exists())
-            architecture = (sandbox_root / "docs/architecture.md").read_text(encoding="utf-8")
-            overview = (sandbox_root / "docs/overview.md").read_text(encoding="utf-8")
-            workflows = (sandbox_root / "docs/workflows.md").read_text(encoding="utf-8")
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "architecture.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "workflows.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "glossary.md").exists())
+            architecture = (sandbox_root / "dfa-doc" / "handbook" / "architecture.md").read_text(encoding="utf-8")
+            overview = (sandbox_root / "dfa-doc" / "handbook" / "overview.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "dfa-doc" / "handbook" / "workflows.md").read_text(encoding="utf-8")
             self.assertIn("## Source Of Truth", architecture)
             self.assertIn("## Top Rules (Read First)", architecture)
             self.assertIn("## Document Contract", architecture)
@@ -295,7 +295,7 @@ class DryRunTests(unittest.TestCase):
             self.assertIn("Rule 1:", workflows)
             self.assertIn("## Maintenance Workflow", workflows)
 
-    def test_human_locale_zh_routes_outputs_to_docs_zh(self) -> None:
+    def test_human_locale_zh_routes_outputs_to_handbook_zh(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-human-zh-") as tmpdir:
             sandbox_root = Path(tmpdir) / "backend_service"
             shutil.copytree(TEST_ROOT / "fixtures" / "backend_service", sandbox_root)
@@ -321,12 +321,12 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Generated human docs in:", result.stdout)
-            self.assertIn("docs.zh", result.stdout)
-            self.assertTrue((sandbox_root / "docs.zh/overview.md").exists())
-            self.assertTrue((sandbox_root / "docs.zh/architecture.md").exists())
-            self.assertFalse((sandbox_root / "docs/overview.md").exists())
-            overview = (sandbox_root / "docs.zh/overview.md").read_text(encoding="utf-8")
-            self.assertIn("Locale-output rule: human locale `zh` maps to `docs.zh/`.", overview)
+            self.assertIn("dfa-doc/handbook.zh", result.stdout)
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook.zh" / "architecture.md").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            overview = (sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").read_text(encoding="utf-8")
+            self.assertIn("语言输出规则：人类视图语言 `zh` 映射至目录 `dfa-doc/handbook.zh/`。", overview)
 
     def test_dual_output_mode_dry_run_reports_agents_and_human_paths(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-dual-mode-") as tmpdir:
@@ -351,10 +351,10 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Dry run: would refresh AGENTS + human docs", result.stdout)
-            self.assertIn("create AGENTS/README.md", result.stdout)
-            self.assertIn("create docs/overview.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
-            self.assertFalse((sandbox_root / "docs").exists())
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("create dfa-doc/handbook/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook").exists())
 
     def test_generate_mode_dry_run_reports_dual_outputs(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-generate-mode-") as tmpdir:
@@ -379,10 +379,10 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Dry run: would generate AGENTS + human docs", result.stdout)
-            self.assertIn("create AGENTS/README.md", result.stdout)
-            self.assertIn("create docs/overview.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS").exists())
-            self.assertFalse((sandbox_root / "docs").exists())
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("create dfa-doc/handbook/overview.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook").exists())
 
     def test_layered_migration_dry_run_reports_archive_actions(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-dry-run-") as tmpdir:
@@ -409,9 +409,9 @@ class DryRunTests(unittest.TestCase):
                 text=True,
             )
 
-            self.assertIn("archive product.md -> AGENTS/_archive/flat/product.md", result.stdout)
-            self.assertIn("archive workflows.md -> AGENTS/_archive/flat/workflows.md", result.stdout)
-            self.assertFalse((sandbox_root / "AGENTS/_archive").exists())
+            self.assertIn("archive product.md -> dfa-doc/AGENTS/_archive/flat/product.md", result.stdout)
+            self.assertIn("archive workflows.md -> dfa-doc/AGENTS/_archive/flat/workflows.md", result.stdout)
+            self.assertFalse((sandbox_root / "dfa-doc" / "AGENTS" / "_archive").exists())
 
     def test_migrate_mode_forces_layered_profile_behavior(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-migrate-forced-layered-") as tmpdir:
@@ -440,8 +440,8 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertIn("Dry run: would migrate AGENTS docs", result.stdout)
-            self.assertIn("archive product.md -> AGENTS/_archive/flat/product.md", result.stdout)
-            self.assertIn("create AGENTS/00-entry/AGENTS.md", result.stdout)
+            self.assertIn("archive product.md -> dfa-doc/AGENTS/_archive/flat/product.md", result.stdout)
+            self.assertIn("create dfa-doc/AGENTS/00-entry/AGENTS.md", result.stdout)
 
     def test_layered_migration_archives_flat_docs_and_preserves_notes(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-layered-migrate-") as tmpdir:
@@ -477,11 +477,11 @@ class DryRunTests(unittest.TestCase):
 
             self.assertFalse((sandbox_root / "AGENTS/product.md").exists())
             self.assertFalse((sandbox_root / "AGENTS/workflows.md").exists())
-            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/product.md").exists())
-            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/workflows.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "AGENTS" / "_archive/flat/product.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "AGENTS" / "_archive/flat/workflows.md").exists())
 
-            prd_content = (sandbox_root / "AGENTS/01-product/002-prd.md").read_text(encoding="utf-8")
-            plan_content = (sandbox_root / "AGENTS/03-execution/008-implementation-plan.md").read_text(encoding="utf-8")
+            prd_content = (sandbox_root / "dfa-doc" / "AGENTS" / "01-product" / "002-prd.md").read_text(encoding="utf-8")
+            plan_content = (sandbox_root / "dfa-doc" / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
             self.assertIn("## Migrated Notes", prd_content)
             self.assertIn("Legacy source: `AGENTS/product.md`", prd_content)
             self.assertIn("Legacy product notes.", prd_content)
@@ -507,7 +507,7 @@ class DryRunTests(unittest.TestCase):
             )
 
             self.assertFalse((sandbox_root / "AGENTS/product.md").exists())
-            self.assertTrue((sandbox_root / "AGENTS/_archive/flat/product.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "AGENTS" / "_archive/flat/product.md").exists())
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
     
     rules = [
         "Read product and architecture docs before broad refactors.",
-        "Refresh `AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
+        "Refresh `dfa-doc/AGENTS/` after meaningful repo-shape, workflow, or terminology changes.",
         "Prefer confirmed facts over speculative roadmap language.",
         "Protect hand-maintained notes with manual blocks when refresh safety matters.",
     ]
@@ -378,7 +378,7 @@ def build_layered_architecture_compatibility(analysis: RepoAnalysis, locale: str
     top_rules = enumerate_rules(role_first_screen_rules(analysis, "architecture"))
 
     boundaries = [
-        "Prefer changing source code and configuration first, then refresh `AGENTS/` docs.",
+        "Prefer changing source code and configuration first, then refresh `dfa-doc/AGENTS/` docs.",
         "Do not let generated docs drift away from the repository's actual entrypoints and workflows.",
     ]
     if analysis.repo_type == "skill-meta":

@@ -8,7 +8,7 @@ from pathlib import Path
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = TEST_ROOT.parents[1]
-SCRIPTS_ROOT = REPO_ROOT / "doc-for-agent" / "scripts"
+SCRIPTS_ROOT = REPO_ROOT / "dfa-doc" / "scripts"
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_ROOT))
 
@@ -52,7 +52,7 @@ class EngineApiTests(unittest.TestCase):
 
             self.assertEqual(plan.write_mode, "init")
             self.assertIn(str(plan.agents_dir / "00-entry/AGENTS.md"), plan.files)
-            self.assertTrue(any(path.endswith("/docs/overview.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/dfa-doc/handbook/overview.md") for path in plan.files))
             explanation = build_analysis_explanation_lines(plan)
             self.assertTrue(any(line.startswith("Analysis for: ") for line in explanation))
             self.assertTrue(any("Suggested command:" in line for line in explanation))
@@ -77,10 +77,10 @@ class EngineApiTests(unittest.TestCase):
                 )
             )
 
-            self.assertTrue(any(path.endswith("/AGENTS/00-entry/AGENTS.md") for path in plan.files))
-            self.assertTrue(any(path.endswith("/AGENTS.zh/00-entry/AGENTS.md") for path in plan.files))
-            self.assertTrue(any(path.endswith("/docs/overview.md") for path in plan.files))
-            self.assertTrue(any(path.endswith("/docs.zh/overview.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/dfa-doc/AGENTS/00-entry/AGENTS.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/dfa-doc/AGENTS.zh/00-entry/AGENTS.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/dfa-doc/handbook/overview.md") for path in plan.files))
+            self.assertTrue(any(path.endswith("/dfa-doc/handbook.zh/overview.md") for path in plan.files))
             result = execute_engine_request(
                 EngineRequest(
                     root=sandbox_root,
@@ -91,12 +91,12 @@ class EngineApiTests(unittest.TestCase):
                 dry_run=False,
             )
             self.assertIn("four-view docs", result.summary)
-            self.assertTrue((sandbox_root / "AGENTS" / "00-entry" / "AGENTS.md").exists())
-            self.assertTrue((sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").exists())
-            self.assertTrue((sandbox_root / "docs" / "overview.md").exists())
-            self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
-            zh_overview = (sandbox_root / "docs.zh" / "overview.md").read_text(encoding="utf-8")
-            zh_agents_entry = (sandbox_root / "AGENTS.zh" / "00-entry" / "AGENTS.md").read_text(encoding="utf-8")
+            self.assertTrue((sandbox_root / "dfa-doc" / "AGENTS" / "00-entry" / "AGENTS.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "AGENTS.zh" / "00-entry" / "AGENTS.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").exists())
+            zh_overview = (sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").read_text(encoding="utf-8")
+            zh_agents_entry = (sandbox_root / "dfa-doc" / "AGENTS.zh" / "00-entry" / "AGENTS.md").read_text(encoding="utf-8")
             self.assertNotIn("This page is maintainer-facing source-of-truth", zh_overview)
             self.assertNotIn("Locale-output rule:", zh_overview)
             self.assertNotIn("Path pair rule:", zh_overview)
@@ -106,24 +106,24 @@ class EngineApiTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-quad-contract-") as tmpdir:
             root = Path(tmpdir)
             files = {
-                str(root / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
-                str(root / "AGENTS.zh" / "00-entry" / "AGENTS.md"): "agent zh",
-                str(root / "docs" / "overview.md"): "human en",
-                str(root / "docs.zh" / "architecture.md"): "human zh mismatch",
+                str(root / "dfa-doc" / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
+                str(root / "dfa-doc" / "AGENTS.zh" / "00-entry" / "AGENTS.md"): "agent zh",
+                str(root / "dfa-doc" / "handbook" / "overview.md"): "human en",
+                str(root / "dfa-doc" / "handbook.zh" / "architecture.md"): "human zh mismatch",
             }
             with self.assertRaises(ValueError):
-                validate_output_contract(root, "generate", "quad", "en", files, root / "AGENTS")
+                validate_output_contract(root, "generate", "quad", "en", files, root / "dfa-doc" / "AGENTS")
 
     def test_validate_output_contract_rejects_mixed_locale_paths_for_dual_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-locale-contract-") as tmpdir:
             root = Path(tmpdir)
             files = {
-                str(root / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
-                str(root / "docs.zh" / "overview.md"): "human zh",
-                str(root / "docs" / "overview.md"): "unexpected en doc path",
+                str(root / "dfa-doc" / "AGENTS" / "00-entry" / "AGENTS.md"): "agent en",
+                str(root / "dfa-doc" / "handbook.zh" / "overview.md"): "human zh",
+                str(root / "dfa-doc" / "handbook" / "overview.md"): "unexpected en doc path",
             }
             with self.assertRaises(ValueError):
-                validate_output_contract(root, "generate", "dual", "zh", files, root / "AGENTS")
+                validate_output_contract(root, "generate", "dual", "zh", files, root / "dfa-doc" / "AGENTS")
 
     def test_refresh_dual_is_rejected_after_quad_footprint_exists(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-refresh-quad-footprint-") as tmpdir:
@@ -168,7 +168,7 @@ class EngineApiTests(unittest.TestCase):
             self.assertEqual(result.plan.write_mode, "refresh")
             self.assertEqual(result.plan.request.profile, "layered")
             self.assertIn("Dry run: would migrate AGENTS docs", result.summary)
-            self.assertTrue(any("AGENTS/00-entry/AGENTS.md" in line for line in result.planned_actions))
+            self.assertTrue(any("dfa-doc/AGENTS/00-entry/AGENTS.md" in line for line in result.planned_actions))
 
     def test_refresh_and_generate_share_outputs_but_different_write_strategy(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-mode-compare-") as tmpdir:
@@ -211,8 +211,8 @@ class EngineApiTests(unittest.TestCase):
                 dry_run=False,
             )
 
-            self.assertTrue((sandbox_root / "docs/overview.md").exists())
-            self.assertTrue((sandbox_root / "docs/architecture.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook" / "architecture.md").exists())
             self.assertFalse((sandbox_root / "AGENTS").exists())
             self.assertIn("Generated human docs in:", result.summary)
 
@@ -238,8 +238,8 @@ class EngineApiTests(unittest.TestCase):
                     "<!-- doc-for-agent:manual-end -->",
                 ]
             )
-            agents_path = sandbox_root / "AGENTS" / "01-product" / "002-prd.md"
-            overview_path = sandbox_root / "docs" / "overview.md"
+            agents_path = sandbox_root / "dfa-doc" / "AGENTS" / "01-product" / "002-prd.md"
+            overview_path = sandbox_root / "dfa-doc" / "handbook" / "overview.md"
             agents_path.write_text(agents_path.read_text(encoding="utf-8").rstrip() + "\n\n" + manual_block + "\n", encoding="utf-8")
             overview_path.write_text(overview_path.read_text(encoding="utf-8").rstrip() + "\n\n" + manual_block + "\n", encoding="utf-8")
 
@@ -270,8 +270,8 @@ class EngineApiTests(unittest.TestCase):
                 ),
                 dry_run=False,
             )
-            first_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
-            first_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+            first_agents = (sandbox_root / "dfa-doc" / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            first_overview = (sandbox_root / "dfa-doc" / "handbook" / "overview.md").read_text(encoding="utf-8")
 
             execute_engine_request(
                 EngineRequest(
@@ -282,8 +282,8 @@ class EngineApiTests(unittest.TestCase):
                 ),
                 dry_run=False,
             )
-            second_agents = (sandbox_root / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
-            second_overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
+            second_agents = (sandbox_root / "dfa-doc" / "AGENTS" / "03-execution" / "008-implementation-plan.md").read_text(encoding="utf-8")
+            second_overview = (sandbox_root / "dfa-doc" / "handbook" / "overview.md").read_text(encoding="utf-8")
 
             self.assertEqual(first_agents, second_agents)
             self.assertEqual(first_overview, second_overview)
@@ -304,13 +304,13 @@ class EngineApiTests(unittest.TestCase):
             )
 
             self.assertIn("Generated human docs in:", result.summary)
-            overview = (sandbox_root / "docs" / "overview.md").read_text(encoding="utf-8")
-            architecture = (sandbox_root / "docs" / "architecture.md").read_text(encoding="utf-8")
-            workflows = (sandbox_root / "docs" / "workflows.md").read_text(encoding="utf-8")
+            overview = (sandbox_root / "dfa-doc" / "handbook" / "overview.md").read_text(encoding="utf-8")
+            architecture = (sandbox_root / "dfa-doc" / "handbook" / "architecture.md").read_text(encoding="utf-8")
+            workflows = (sandbox_root / "dfa-doc" / "handbook" / "workflows.md").read_text(encoding="utf-8")
             self.assertIn("## Paired Agent Docs (Dual Mode)", overview)
-            self.assertIn("AGENTS/01-product/001-core-goals.md", overview)
-            self.assertIn("AGENTS/02-architecture/007-architecture-compatibility.md", architecture)
-            self.assertIn("AGENTS/03-execution/008-implementation-plan.md", workflows)
+            self.assertIn("dfa-doc/AGENTS/01-product/001-core-goals.md", overview)
+            self.assertIn("dfa-doc/AGENTS/02-architecture/007-architecture-compatibility.md", architecture)
+            self.assertIn("dfa-doc/AGENTS/03-execution/008-implementation-plan.md", workflows)
             self.assertIn("## Output Boundary (Human vs Agent)", overview)
             self.assertIn("## Output Boundary (Human vs Agent)", architecture)
             self.assertIn("## Output Boundary (Human vs Agent)", workflows)
@@ -346,13 +346,13 @@ class EngineApiTests(unittest.TestCase):
             )
 
             self.assertIn("AGENTS + human docs", result.summary)
-            self.assertTrue((sandbox_root / "docs.zh" / "overview.md").exists())
-            self.assertTrue((sandbox_root / "docs.zh" / "architecture.md").exists())
-            self.assertFalse((sandbox_root / "docs" / "overview.md").exists())
-            overview = (sandbox_root / "docs.zh" / "overview.md").read_text(encoding="utf-8")
-            self.assertIn("`docs.zh/` 与 `AGENTS/` 是基于同一份仓库分析和事实锚点生成的两套视图。", overview)
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").exists())
+            self.assertTrue((sandbox_root / "dfa-doc" / "handbook.zh" / "architecture.md").exists())
+            self.assertFalse((sandbox_root / "dfa-doc" / "handbook" / "overview.md").exists())
+            overview = (sandbox_root / "dfa-doc" / "handbook.zh" / "overview.md").read_text(encoding="utf-8")
+            self.assertIn("`dfa-doc/handbook.zh/` 与 `dfa-doc/AGENTS/` 是基于同一份仓库分析和事实锚点生成的两套视图。", overview)
             self.assertIn("语言输出规则", overview)
-            self.assertIn("`docs.zh/`", overview)
+            self.assertIn("`dfa-doc/handbook.zh/`", overview)
             self.assertNotIn("This page is maintainer-facing source-of-truth", overview)
             self.assertNotIn("Locale-output rule:", overview)
 

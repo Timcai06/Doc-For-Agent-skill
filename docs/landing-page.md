@@ -24,8 +24,8 @@ For temporary Node onboarding, `npx -y doc-for-agent init ...` can combine both 
 Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
 It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
 The docs output model is `agent`, `human`, `dual`, or `quad` according to user intent.
-Mode map: `agent` for `AGENTS/`, `human` for `docs/`, `dual` for both, and `quad` for `AGENTS/`, `AGENTS.zh/`, `docs/`, and `docs.zh/`.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view layout.
+Mode map: `agent` for `dfa-doc/AGENTS/`, `human` for `dfa-doc/handbook/`, `dual` for both, and `quad` for `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, and `dfa-doc/handbook.zh/`.
+Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view layout.
 That four-view layout is the structure direction, not a claim that every bilingual page is already complete.
 The product message is dual-system, not AGENTS-only.
 

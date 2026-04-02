@@ -24,8 +24,8 @@
 简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
 同时把 `doc-for-agent` 定位为“项目文档系统工具”，而不是一次性 markdown 生成器。
 文档输出模型可按用户意图选择：`agent`、`human`、`dual`、`quad`。
-模式映射：`agent` 面向 `AGENTS/`，`human` 面向 `docs/`，`dual` 同时覆盖两者，`quad` 覆盖 `AGENTS/`、`AGENTS.zh/`、`docs/`、`docs.zh/`。
-`dual` 模式会在一次 refresh 流程中把 `docs/`（human docs）与 `AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图布局。
+模式映射：`agent` 面向 `dfa-doc/AGENTS/`，`human` 面向 `dfa-doc/handbook/`，`dual` 同时覆盖两者，`quad` 覆盖 `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
+`dual` 模式会在一次 refresh 流程中把 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图布局。
 这项四视图布局表达的是结构方向，不等于每一页双语内容都已经完整完成。
 产品对外叙事是双文档系统，而不是 AGENTS-only。
 
