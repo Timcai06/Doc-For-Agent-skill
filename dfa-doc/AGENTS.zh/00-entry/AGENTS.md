@@ -22,7 +22,7 @@
 ## 运行规则
 
 - 在进行大范围重构前，先阅读产品和架构文档。
-- Refresh `dfa-doc/AGENTS/` after meaningful repo-shape, workflow, or terminology changes.
+- 当仓库结构、工作流或术语发生实质变化后，刷新 `dfa-doc/AGENTS/`。
 - 优先采用已确认事实，而不是猜测性的路线图措辞。
 - 当刷新安全性重要时，用 manual blocks 保护手工维护的说明。
 - 保持 skill 清单、SKILL.md 指令和生成器行为一致。
@@ -36,3 +36,4 @@
 - `README.md`
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
+- `docs/maintainers.md`

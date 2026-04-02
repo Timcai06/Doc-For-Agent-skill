@@ -2,10 +2,10 @@
 
 ## 流程指引
 
-- Keep user-facing routes, labels, prompts, or commands stable unless the repository intentionally renames them.
-- Review README examples and visible entry surfaces before changing interaction flows.
-- Treat skill manifests, trigger phrasing, and invocation prompts as the user-facing interface.
-- Do not let manifest language drift away from what the generator actually supports.
+- 除非仓库明确进行了重命名，否则保持面向用户的路由、标签、提示词和命令稳定。
+- 在改动交互流程前，先检查 README 示例和可见入口面。
+- 将 skill 清单、触发措辞和调用提示视为面向用户的界面。
+- 不要让清单中的表述偏离生成器真实支持的能力。
 
 ## 事实凭证与识别
 

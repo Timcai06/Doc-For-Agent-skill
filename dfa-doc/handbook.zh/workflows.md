@@ -24,7 +24,7 @@
 - 刷新契约： 一次 refresh/generate 应同时更新成对视图；不要单独修补某个 locale 或 audience。
 - 路径契约：当行为变更影响共享真相源时，验证变更文件同时包含 `dfa-doc/AGENTS*/` 与 `dfa-doc/handbook*/` 的对应项。
 - Quad 模式契约：当使用 `--output-mode quad` 时，在同一轮审查中验证全部四个根目录（`dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`）。
-- 执行配对规则： if `dfa-doc/handbook.zh/workflows.md` changes due to command/order updates, refresh paired execution paths under both AGENTS roots.
+- 执行配对规则：如果 `dfa-doc/handbook.zh/workflows.md` 因命令或顺序更新而修改，同时刷新两个 AGENTS 根下对应的执行路径。
 
 ## 双视图配对契约（规则）
 
@@ -45,9 +45,9 @@
 
 ## 双视图设计理由
 
-- `dfa-doc/handbook.zh/` 与 `dfa-doc/AGENTS/` 是基于同一份仓库分析和 source-of-truth 锚点生成的两套视图。
+- `dfa-doc/handbook.zh/` 与 `dfa-doc/AGENTS/` 是基于同一份仓库分析和事实锚点生成的两套视图。
 - 当两套视图出现分歧时，将其视为 refresh 漂移，而不是独立的文档权威。
-- Maintainer runbook context lives in `dfa-doc/handbook.zh/workflows.md`, while step ordering for agent actions lives in paired `dfa-doc/AGENTS/` execution docs.
+- 维护者运行手册上下文位于 `dfa-doc/handbook.zh/workflows.md` 中，而智能体动作的步骤顺序位于配对的 `dfa-doc/AGENTS/` 执行文档中。
 
 ## 安装
 

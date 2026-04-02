@@ -14,9 +14,9 @@
 
 ## 严禁打破的开发约束
 
-- Avoid drifting away from the repository's real code, scripts, and naming conventions.
-- Prefer stable entrypoints and contracts over broad structural churn.
-- Review mixed signals before collapsing the repository into a single simplistic mental model.
+- 避免偏离仓库的真实代码、脚本和命名约定。
+- 优先保持稳定的入口点和契约，而不是进行大范围结构改动。
+- 在把仓库简化成单一心智模型之前，先审查相互混杂的信号。
 
 ## 辅助参考文档提炼 (Product)
 
@@ -41,3 +41,4 @@
 - `README.md`
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
+- `docs/maintainers.md`

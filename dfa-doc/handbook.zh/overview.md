@@ -28,7 +28,7 @@
 - 刷新契约： 一次 refresh/generate 应同时更新成对视图；不要单独修补某个 locale 或 audience。
 - 路径契约：当行为变更影响共享真相源时，验证变更文件同时包含 `dfa-doc/AGENTS*/` 与 `dfa-doc/handbook*/` 的对应项。
 - Quad 模式契约：当使用 `--output-mode quad` 时，在同一轮审查中验证全部四个根目录（`dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`）。
-- 产品配对规则： if `dfa-doc/handbook.zh/overview.md` changes due to scope/value decisions, refresh paired product paths under both AGENTS roots.
+- 产品配对规则：如果 `dfa-doc/handbook.zh/overview.md` 因范围或价值决策变化而修改，同时刷新两个 AGENTS 根下对应的产品路径。
 
 ## 双视图关联契约 (Rules)
 
@@ -69,7 +69,7 @@
 
 ## 提炼总结
 
-- 已分析信源数量：`3`
+- 已分析信源数量：`4`
 - 成功提炼结论：`5` 条确认，`0` 条冲突，`0` 条未决
 
 ## 知识健康度
@@ -123,3 +123,4 @@
 - `README.md`
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
+- `docs/maintainers.md`

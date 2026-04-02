@@ -2,14 +2,14 @@
 
 ## 已确认的客观事实
 
-- Detected repo type: `skill-meta`.
-- Doc profile in use: `layered`.
-- Classification confidence: `medium`.
+- 检测到的仓库类型： `skill-meta`.
+- 当前使用的文档剖面： `layered`.
+- 分类置信度： `medium`.
 - Repository summary: [English](README.md) | 简体中文
 
 ## 当前关注焦点
 
-- Confirm the next milestone and keep this file updated with human-approved progress.
+- 确认下一个里程碑，并用人工确认后的进展持续更新此文件。
 
 ## 辅助参考文档提炼 (Memory)
 

@@ -4,7 +4,7 @@
 
 - Repo type: `skill-meta`.
 - Doc profile: `layered`.
-- Classification confidence: `medium`.
+- 分类置信度： `medium`.
 - Package manager: `npm`.
 - Frontend stack: No dedicated frontend detected.
 - Backend/runtime stack: No dedicated backend detected.

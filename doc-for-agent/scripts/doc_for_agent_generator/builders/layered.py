@@ -51,6 +51,8 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
     if analysis.repo_type == "skill-meta":
          rules.append("Keep the skill manifest, SKILL.md instructions, and generator behavior aligned.")
 
+    localized_rules = [translate_to_zh(rule) for rule in rules] if locale == "zh" else rules
+
     return f"""{get_ui_string('entry_header', locale)}
 
 {get_ui_string('purpose_sub', locale)}
@@ -65,7 +67,7 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 {get_ui_string('rules_sub', locale)}
 
-{format_bullets(rules, get_ui_string('no_rules', locale))}
+{format_bullets(localized_rules, get_ui_string('no_rules', locale))}
 
 {get_ui_string('operating_posture_sub', locale)}
 

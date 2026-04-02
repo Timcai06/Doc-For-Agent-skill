@@ -2,9 +2,9 @@
 
 ## 核心映射职责
 
-- Identify the runtime or automation entrypoint before changing behavior.
-- Treat outputs, contracts, and side effects as downstream-facing surfaces.
-- The generator script and helper scripts are the backend-like execution layer.
+- 在修改行为前先识别运行时或自动化入口点。
+- 将输出、契约和副作用视为面向下游的接口面。
+- 生成脚本和辅助脚本构成了类似后端的执行层。
 
 ## 运行时入口点
 

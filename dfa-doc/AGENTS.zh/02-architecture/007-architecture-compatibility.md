@@ -44,10 +44,10 @@
 
 ## 兼容性边界规则
 
-- Prefer changing source code and configuration first, then refresh `dfa-doc/AGENTS/` docs.
-- Do not let generated docs drift away from the repository's actual entrypoints and workflows.
-- Skill manifests, README examples, and generator output should describe the same capability surface.
+- 优先先改源码和配置，再刷新 `dfa-doc/AGENTS/` 文档。
+- 不要让生成文档偏离仓库真实的入口点和工作流。
+- skill 清单、README 示例和生成器输出应描述同一能力边界。
 
 ## 冲突项监控
 
-- Skill markers dominate classification, but packaged tooling signals suggest this repository may also ship installable utilities.
+- skill 标记主导了当前分类结果，但已打包工具链的信号表明该仓库也可能提供可安装工具。

@@ -69,7 +69,7 @@
 
 ## Synthesis Summary
 
-- Sources analyzed: `3`
+- Sources analyzed: `4`
 - Synthesized statements: `5` confirmed, `0` conflicting, `0` unresolved
 
 ## Knowledge Status
@@ -123,3 +123,4 @@
 - `README.md`
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
+- `docs/maintainers.md`

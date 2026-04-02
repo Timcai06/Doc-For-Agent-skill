@@ -31,7 +31,7 @@
 - 刷新契约： 一次 refresh/generate 应同时更新成对视图；不要单独修补某个 locale 或 audience。
 - 路径契约：当行为变更影响共享真相源时，验证变更文件同时包含 `dfa-doc/AGENTS*/` 与 `dfa-doc/handbook*/` 的对应项。
 - Quad 模式契约：当使用 `--output-mode quad` 时，在同一轮审查中验证全部四个根目录（`dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`）。
-- 架构配对规则： if `dfa-doc/handbook.zh/architecture.md` changes due to boundary/source-of-truth updates, refresh paired architecture paths under both AGENTS roots.
+- 架构配对规则：如果 `dfa-doc/handbook.zh/architecture.md` 因边界或事实来源更新而修改，同时刷新两个 AGENTS 根下对应的架构路径。
 
 ## 双视图关联契约 (Rules)
 
@@ -50,13 +50,13 @@
 
 - 使用 `dfa-doc/handbook.zh/` 记录面向维护者的政策与决策；使用 `dfa-doc/AGENTS/` 记录执行顺序、命令编排和运行手册。
 - 如果一项变更同时影响两类受众，应在同一个同步周期内更新两套系统，而非仅单独修补一侧。
-- 在 `dfa-doc/handbook.zh/architecture.md` 中保留架构理由；在 `dfa-doc/AGENTS/architecture.md` (或分层架构文档) 中保留 CLI/构建/事实来源护栏。
+- 在 `dfa-doc/handbook.zh/architecture.md` 中保留架构理由；在 `dfa-doc/AGENTS/architecture.md`（或分层架构文档）中保留命令行、构建和事实来源护栏。
 
 ## 双视图设计逻辑
 
 - `dfa-doc/handbook.zh/` 与 `dfa-doc/AGENTS/` 是基于同一份仓库分析和事实锚点生成的两套视图。
 - 当两套视图出现分歧时，应将其视为“同步漂移”，而非独立的文档权威。
-- 架构理由记录在 `dfa-doc/handbook.zh/architecture.md` 中，而面向 Agent 的操作边界保留在配对的 `dfa-doc/AGENTS/` 架构文档中。
+- 架构理由记录在 `dfa-doc/handbook.zh/architecture.md` 中，而面向智能体的操作边界保留在配对的 `dfa-doc/AGENTS/` 架构文档中。
 
 ## 检测到的技术信号
 

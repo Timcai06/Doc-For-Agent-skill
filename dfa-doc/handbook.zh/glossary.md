@@ -46,9 +46,9 @@
 
 ## 冷启动待办（文档较薄时）
 
-- Promote repeated domain terms into canonical glossary entries.
-- Note deprecated or ambiguous terms and map them to preferred wording.
-- Review docs for vocabulary drift each sprint.
+- 将重复出现的领域术语提升为规范术语表条目。
+- 记录已弃用或有歧义的术语，并映射到推荐措辞。
+- 每个 Sprint 检查一次文档中的术语漂移。
 
 ## 溯源
 

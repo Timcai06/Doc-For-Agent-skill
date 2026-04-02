@@ -41,3 +41,4 @@
 - `README.md`
 - `docs/landing-page.md`
 - `docs/landing-page.zh.md`
+- `docs/maintainers.md`
