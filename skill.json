@@ -2,7 +2,7 @@
   "name": "doc-for-agent",
   "displayName": "Doc-for-Agent",
   "description": "Unified AI-native documentation sync tool. Keeps human docs and AI agent contexts (AGENTS/) synchronized and refreshed continuously.",
-  "version": "0.3.0-dev.1",
+  "version": "0.4.0",
   "author": "Timcai06",
   "license": "MIT",
   "homepage": "https://github.com/Timcai06/Doc-For-Agent-skill",

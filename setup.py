@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 # - doc-for-agent/package.json
 # - doc-for-agent/templates/product.json
 # - doc-for-agent/INSTALLATION.json
-VERSION = "0.3.0.dev1"
+VERSION = "0.4.0"
 
 setup(
     name="doc-for-agent",
