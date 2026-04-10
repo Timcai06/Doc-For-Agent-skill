@@ -8,16 +8,23 @@
 
 ## Reading Order
 
-- ``01-product/001-core-goals.md``
-- ``01-product/002-prd.md``
-- ``02-architecture/004-tech-stack.md``
-- ``01-product/003-app-flow.md``
-- ``02-architecture/006-backend-structure.md``
-- ``02-architecture/005-frontend-guidelines.md``
-- ``02-architecture/007-architecture-compatibility.md``
-- ``03-execution/008-implementation-plan.md``
-- ``04-memory/009-progress.md``
-- ``04-memory/010-lessons.md``
+- `01-product/001-core-goals.md`
+- `01-product/002-prd.md`
+- `02-architecture/004-tech-stack.md`
+- `01-product/003-app-flow.md`
+- `02-architecture/006-backend-structure.md`
+- `02-architecture/005-frontend-guidelines.md`
+- `02-architecture/007-architecture-compatibility.md`
+- `03-execution/008-implementation-plan.md`
+- `04-memory/009-progress.md`
+- `04-memory/010-lessons.md`
+
+## Layer Strategy
+
+- Contract pages (low-variance rule layer): `00-entry/AGENTS.md`, `01-product/001-core-goals.md`, `01-product/002-prd.md`, `01-product/003-app-flow.md`, `02-architecture/004-tech-stack.md`, `02-architecture/005-frontend-guidelines.md`, `02-architecture/006-backend-structure.md`, `02-architecture/007-architecture-compatibility.md`, `03-execution/008-implementation-plan.md`
+- Memory pages (append-oriented memory layer): `04-memory/009-progress.md`, `04-memory/010-lessons.md`
+- Contract pages should stay stable on refresh and avoid narrative rewrites.
+- Memory pages should accumulate project progress, lessons, and terminology decisions over time.
 
 ## Rules
 

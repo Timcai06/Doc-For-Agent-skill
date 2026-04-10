@@ -18,7 +18,7 @@
 - Repository adaptation scope: fit repositories that need ongoing refresh/governance workflows, not one-off documentation scans.
 - Retention value: prioritize repeatable `init -> refresh -> doctor` lifecycle checks so documentation stays governable, not a one-shot generator output.
 - Positioning guardrail: describe `docagent` as an ongoing documentation system (`init/refresh/doctor/migrate`), not a one-shot markdown generator.
-- 简路径（uipro-cli 风格）：npm install -g doc-for-agent@next -> docagent init --ai codex / docagent init --ai claudecode。 (sources: `docs/landing-page.zh.md`)
+- 简路径（uipro-cli 风格）：npm install -g doc-for-agent -> docagent init --ai codex / docagent init --ai claudecode。 (sources: `docs/landing-page.zh.md`)
 
 ### Conflicting
 

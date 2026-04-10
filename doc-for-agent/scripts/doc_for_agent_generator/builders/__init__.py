@@ -21,6 +21,8 @@ from .detectors import (
     supporting_docs_for_role,
 )
 from .helpers import (
+    AGENT_CONTRACT_PAGE_PATHS,
+    AGENT_MEMORY_PAGE_PATHS,
     AGENT_LOCALE_OUTPUT_ROOTS,
     DEFAULT_HUMAN_TEMPLATE_BY_LOCALE,
     HUMAN_LOCALE_OUTPUT_ROOTS,
@@ -76,6 +78,8 @@ def generate_docs(analysis, locale: str = "en"):
 
 __all__ = [
     "AGENT_LOCALE_OUTPUT_ROOTS",
+    "AGENT_CONTRACT_PAGE_PATHS",
+    "AGENT_MEMORY_PAGE_PATHS",
     "DEFAULT_HUMAN_TEMPLATE_BY_LOCALE",
     "HUMAN_LOCALE_OUTPUT_ROOTS",
     "HUMAN_PAIRED_PATH_RULES",

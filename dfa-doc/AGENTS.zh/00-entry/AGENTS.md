@@ -8,16 +8,23 @@
 
 ## 阅读顺序
 
-- ``01-product/001-core-goals.md``
-- ``01-product/002-prd.md``
-- ``02-architecture/004-tech-stack.md``
-- ``01-product/003-app-flow.md``
-- ``02-architecture/006-backend-structure.md``
-- ``02-architecture/005-frontend-guidelines.md``
-- ``02-architecture/007-architecture-compatibility.md``
-- ``03-execution/008-implementation-plan.md``
-- ``04-memory/009-progress.md``
-- ``04-memory/010-lessons.md``
+- `01-product/001-core-goals.md`
+- `01-product/002-prd.md`
+- `02-architecture/004-tech-stack.md`
+- `01-product/003-app-flow.md`
+- `02-architecture/006-backend-structure.md`
+- `02-architecture/005-frontend-guidelines.md`
+- `02-architecture/007-architecture-compatibility.md`
+- `03-execution/008-implementation-plan.md`
+- `04-memory/009-progress.md`
+- `04-memory/010-lessons.md`
+
+## 分层策略
+
+- Contract pages（低波动规则层）: `00-entry/AGENTS.md`, `01-product/001-core-goals.md`, `01-product/002-prd.md`, `01-product/003-app-flow.md`, `02-architecture/004-tech-stack.md`, `02-architecture/005-frontend-guidelines.md`, `02-architecture/006-backend-structure.md`, `02-architecture/007-architecture-compatibility.md`, `03-execution/008-implementation-plan.md`
+- Memory pages（累积记忆层）: `04-memory/009-progress.md`, `04-memory/010-lessons.md`
+- Contract pages 在 refresh 时保持规则稳定，避免叙事性重写。
+- Memory pages 用于持续记录项目进展、复盘和术语决策，允许追加式更新。
 
 ## 运行规则
 

@@ -16,6 +16,8 @@ from .detectors import (
     supporting_docs_for_role,
 )
 from .helpers import (
+    AGENT_CONTRACT_PAGE_PATHS,
+    AGENT_MEMORY_PAGE_PATHS,
     current_operating_posture,
     enumerate_rules,
     extend_unique,
@@ -27,20 +29,56 @@ from .helpers import (
     supporting_doc_lines,
     supporting_doc_provenance_lines,
 )
+
+
+def memory_append_only_block(locale: str = "en") -> str:
+    if locale == "zh":
+        lines = [
+            "- 按时间追加人工确认的里程碑、复盘结论和术语决策。",
+            "- 历史记录只追加修正，不做整段重写。",
+            "- 若需保护手工段落，可在该段落使用 manual block。",
+        ]
+    else:
+        lines = [
+            "- Append human-validated milestones, lessons, and terminology decisions with dates.",
+            "- Keep history append-only: add corrections instead of rewriting old entries.",
+            "- Use manual blocks only for sections that must be preserved verbatim across refresh.",
+        ]
+    return "\n".join(lines)
+
+
+def layer_strategy_lines(locale: str = "en") -> list[str]:
+    contract_line = ", ".join(f"`{path}`" for path in AGENT_CONTRACT_PAGE_PATHS)
+    memory_line = ", ".join(f"`{path}`" for path in AGENT_MEMORY_PAGE_PATHS)
+    if locale == "zh":
+        return [
+            f"Contract pages（低波动规则层）: {contract_line}",
+            f"Memory pages（累积记忆层）: {memory_line}",
+            "Contract pages 在 refresh 时保持规则稳定，避免叙事性重写。",
+            "Memory pages 用于持续记录项目进展、复盘和术语决策，允许追加式更新。",
+        ]
+    return [
+        f"Contract pages (low-variance rule layer): {contract_line}",
+        f"Memory pages (append-oriented memory layer): {memory_line}",
+        "Contract pages should stay stable on refresh and avoid narrative rewrites.",
+        "Memory pages should accumulate project progress, lessons, and terminology decisions over time.",
+    ]
+
+
 def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
     reading_order = [
-        "`01-product/001-core-goals.md`",
-        "`01-product/002-prd.md`",
-        "`02-architecture/004-tech-stack.md`",
-        "`02-architecture/006-backend-structure.md`",
-        "`02-architecture/007-architecture-compatibility.md`",
-        "`03-execution/008-implementation-plan.md`",
-        "`04-memory/009-progress.md`",
-        "`04-memory/010-lessons.md`",
+        "01-product/001-core-goals.md",
+        "01-product/002-prd.md",
+        "02-architecture/004-tech-stack.md",
+        "02-architecture/006-backend-structure.md",
+        "02-architecture/007-architecture-compatibility.md",
+        "03-execution/008-implementation-plan.md",
+        "04-memory/009-progress.md",
+        "04-memory/010-lessons.md",
     ]
     if analysis.repo_type in {"web-app", "skill-meta", "cli-tool"}:
-        reading_order.insert(3, "`01-product/003-app-flow.md`")
-        reading_order.insert(5, "`02-architecture/005-frontend-guidelines.md`")
+        reading_order.insert(3, "01-product/003-app-flow.md")
+        reading_order.insert(5, "02-architecture/005-frontend-guidelines.md")
     
     rules = [
         "Read product and architecture docs before broad refactors.",
@@ -64,6 +102,10 @@ def build_layered_entry(analysis: RepoAnalysis, locale: str = "en") -> str:
 {get_ui_string('reading_order_sub', locale)}
 
 {format_bullets([f"`{path}`" for path in reading_order], get_ui_string('no_reading_order', locale))}
+
+## Layer Strategy
+
+{format_bullets(layer_strategy_lines(locale), "Define contract vs memory pages.")}
 
 {get_ui_string('rules_sub', locale)}
 
@@ -567,12 +609,23 @@ def build_layered_progress(analysis: RepoAnalysis, locale: str = "en") -> str:
     focus = list(analysis.repo_type_questions) or [
         "Confirm the next milestone and keep this file updated with human-approved progress.",
     ]
-    references = supporting_docs_for_role(analysis, "memory")
-    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
-    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
-    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
+    memory_contract = [
+        "This is an append-oriented memory page; preserve historical entries and add corrective follow-ups instead of rewrites.",
+        "Keep dated milestones, pending decisions, and owner assignments so future agents can resume work without replaying full history.",
+        "If a fact is superseded, append the replacement with date + reason instead of deleting the previous record.",
+    ]
+    if locale == "zh":
+        memory_contract = [
+            "这是追加型 memory 页面：保留历史记录，优先追加修正，不要重写历史。",
+            "记录带日期的里程碑、待决事项和负责人，保证后续 agent 无需重放全历史即可接续。",
+            "事实被更新时，追加“日期 + 原因 + 新结论”，不要删除旧记录。",
+        ]
 
     return f"""{get_ui_string('progress_header', locale)}
+
+## Memory Layer Contract
+
+{format_bullets(memory_contract, "Add memory-layer contract rules.")}
 
 {get_ui_string('confirmed_facts_sub', locale)}
 
@@ -582,23 +635,9 @@ def build_layered_progress(analysis: RepoAnalysis, locale: str = "en") -> str:
 
 {format_bullets(focus, get_ui_string('no_focus', locale))}
 
-{get_ui_string('supporting_doc_sub', locale)} (Memory)
+## Maintainer Log (Append-Only)
 
-{get_ui_string('confirmed_sub', locale)}
-
-{format_bullets(confirmed, get_ui_string('no_progress_confirmed', locale))}
-
-{get_ui_string('conflicting_sub', locale)}
-
-{format_bullets(conflicting, get_ui_string('no_progress_conflicts', locale))}
-
-{get_ui_string('unresolved_sub', locale)}
-
-{format_bullets(unresolved, get_ui_string('no_progress_unresolved', locale))}
-
-{get_ui_string('referenced_docs_sub', locale)}
-
-{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
+{memory_append_only_block(locale)}
 """
 
 
@@ -629,34 +668,31 @@ def build_layered_lessons(analysis: RepoAnalysis, locale: str = "en") -> str:
         else:
             lessons.append("Mixed repository signals are a warning to inspect before refactoring across boundaries.")
 
-    references = supporting_docs_for_role(analysis, "memory")
-    confirmed = supporting_doc_insight_lines(analysis, "memory", "confirmed")
-    conflicting = supporting_doc_insight_lines(analysis, "memory", "conflicting")
-    unresolved = supporting_doc_insight_lines(analysis, "memory", "unresolved")
+    memory_contract = [
+        "Treat each lesson as a reusable operating rule tied to concrete failures or regressions.",
+        "Write lessons in imperative form so agents can execute them directly in later sessions.",
+        "When a lesson is outdated, append a superseding note with date and trigger instead of deleting context.",
+    ]
+    if locale == "zh":
+        memory_contract = [
+            "每条 lesson 都应绑定具体失败或回归场景，作为可复用规则而非叙述。",
+            "用可执行的祈使句写 lesson，确保后续 agent 可直接照做。",
+            "lesson 过期时，追加“日期 + 触发条件 + 新规则”覆盖说明，不删除旧上下文。",
+        ]
 
     return f"""{get_ui_string('lessons_header', locale)}
+
+## Memory Layer Contract
+
+{format_bullets(memory_contract, "Add memory-layer contract rules.")}
 
 {get_ui_string('durable_lessons_sub', locale)}
 
 {format_bullets(lessons, get_ui_string('fallback_lessons', locale))}
 
-{get_ui_string('supporting_doc_sub', locale)} (Memory)
+## Lessons Log (Append-Only)
 
-{get_ui_string('confirmed_sub', locale)}
-
-{format_bullets(confirmed, get_ui_string('no_historical_lessons', locale))}
-
-{get_ui_string('conflicting_sub', locale)}
-
-{format_bullets(conflicting, get_ui_string('no_historical_conflicts', locale))}
-
-{get_ui_string('unresolved_sub', locale)}
-
-{format_bullets(unresolved, get_ui_string('no_historical_unresolved', locale))}
-
-{get_ui_string('referenced_docs_sub', locale)}
-
-{format_bullets(supporting_doc_lines(references, analysis.root), get_ui_string('no_additional_docs', locale))}
+{memory_append_only_block(locale)}
 """
 
 
