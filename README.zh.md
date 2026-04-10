@@ -32,6 +32,13 @@
 - `docagent init --ai codex`
 - `docagent init --ai claudecode`
 
+## Memory-First 使用模型
+
+- 当 agent 需要执行上下文、交接状态或长期仓库记忆时，优先查看 `dfa-doc/AGENTS/` 与 `dfa-doc/AGENTS.zh/`。
+- 当维护者需要架构/流程解释与 onboarding 语境时，优先查看 `dfa-doc/handbook/` 与 `dfa-doc/handbook.zh/`。
+- 当仓库知识发生变化（新增模块、流程变更、较大重构）时执行 `refresh`，保持团队记忆同步。
+- 生成文档应被视为长期维护的知识基线，而不是一次性产物。
+
 ## 30 秒开始
 
 先安装一次：

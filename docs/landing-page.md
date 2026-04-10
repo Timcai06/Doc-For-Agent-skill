@@ -32,6 +32,12 @@ That four-view layout is the structure direction, not a claim that every bilingu
 Platform position: first-class for `codex` and `claudecode`, compatibility for `continue` and `copilot`.
 The product message is memory layer + maintainer views, not a generic AGENTS CLI.
 
+## Team Maintenance Lens
+
+- This system is designed for repeated refresh, not one-shot generation.
+- Teams use `dfa-doc/AGENTS*` as the shared agent memory baseline across multi-agent handoffs.
+- Teams use `dfa-doc/handbook*` as maintainer-facing continuity for onboarding and review.
+
 ## Entry Path
 
 From repository entry docs, use this order:

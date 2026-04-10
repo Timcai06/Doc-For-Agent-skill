@@ -32,6 +32,12 @@
 平台定位：`codex`、`claudecode` 是一等平台；`continue`、`copilot` 是 compatibility targets。
 产品对外叙事是 memory layer + maintainer views，而不是普通 AGENTS CLI。
 
+## 团队长期维护视角
+
+- 这套系统面向反复 refresh 的长期维护，而不是一次性生成。
+- 团队把 `dfa-doc/AGENTS*` 作为多 agent 交接时共享的长期记忆基线。
+- 团队把 `dfa-doc/handbook*` 作为维护者 onboarding 与 review 的连续性视图。
+
 ## 入口路径
 
 从仓库入口文档开始，建议按这个顺序：

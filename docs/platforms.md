@@ -27,6 +27,13 @@ Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent do
 The four-view layout is a structure capability, not a claim that every bilingual view is already complete.
 Platform selection is separate from doc audience: this is not AGENTS-only.
 
+## Audience Routing
+
+- Platform choice (`--ai ...`) selects adapter wiring.
+- Output mode (`agent|human|dual|quad`) selects memory audience.
+- `agent`/`dual`/`quad` feed the long-term agent memory layer under `dfa-doc/AGENTS*`.
+- `human`/`dual`/`quad` feed maintainer-facing handbook views under `dfa-doc/handbook*`.
+
 ## Multi-Agent Setup
 
 ```bash
