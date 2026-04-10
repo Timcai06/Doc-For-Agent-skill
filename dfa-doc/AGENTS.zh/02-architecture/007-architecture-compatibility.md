@@ -4,7 +4,7 @@
 
 - 第一原则： CLI 边界： 保持 `docagent` 作为 `codex`、`claudecode`、`continue`、`copilot` 工作流的统一入口。
 - 第二原则： 真相源边界： 当出现冲突时，在修改 CLI 入口、adapter wiring 或分发行为前，先以 `readme.md`、`docs/platforms.md`、`docs/platforms.zh.md` 为裁决依据。
-- 第三原则： 分发结构： 将平台映射保留在 adapter/config 文档中（`Claude Code` -> `docagent init --ai claudecode`），而 CLI 契约变更保持集中管理。
+- 第三原则： 分发结构： platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized.
 
 ## 仓库类型判定信号
 
@@ -24,7 +24,7 @@
 
 - CLI 边界： 保持 `docagent` 作为 `codex`、`claudecode`、`continue`、`copilot` 工作流的统一入口。
 - 真相源边界： 当出现冲突时，在修改 CLI 入口、adapter wiring 或分发行为前，先以 `readme.md`、`docs/platforms.md`、`docs/platforms.zh.md` 为裁决依据。
-- 分发结构： 将平台映射保留在 adapter/config 文档中（`Claude Code` -> `docagent init --ai claudecode`），而 CLI 契约变更保持集中管理。
+- 分发结构： platform-specific differences should stay in adapter/config documents while CLI contract changes stay centralized.
 - 冲突处理顺序：1）检查 `readme.md`、`docs/platforms.md`、`docs/platforms.zh.md`；2）再编辑 adapter/config 映射。
 - 简路径（uipro-cli 风格）：npm install -g doc-for-agent -> docagent init --ai codex / docagent init --ai claudecode。 
 

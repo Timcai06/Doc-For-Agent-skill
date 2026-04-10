@@ -313,6 +313,45 @@ class EngineApiTests(unittest.TestCase):
             self.assertEqual(first_agents, second_agents)
             self.assertEqual(first_overview, second_overview)
 
+    def test_memory_log_section_is_refresh_safe_for_agents_pages(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-memory-refresh-safe-") as tmpdir:
+            sandbox_root = Path(tmpdir) / "dual_mode_app"
+            shutil.copytree(TEST_ROOT / "fixtures" / "dual_mode_app", sandbox_root)
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="generate",
+                    output_mode="agent",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            progress_path = sandbox_root / "dfa-doc" / "AGENTS" / "04-memory" / "009-progress.md"
+            manual_note = "- Human memory note: keep migration ledger tied to release retrospective."
+            original = progress_path.read_text(encoding="utf-8")
+            progress_path.write_text(
+                original.replace(
+                    "## Maintainer Log (Append-Only)\n\n",
+                    f"## Maintainer Log (Append-Only)\n\n{manual_note}\n",
+                ),
+                encoding="utf-8",
+            )
+
+            execute_engine_request(
+                EngineRequest(
+                    root=sandbox_root,
+                    mode="refresh",
+                    output_mode="agent",
+                    profile="layered",
+                ),
+                dry_run=False,
+            )
+
+            refreshed = progress_path.read_text(encoding="utf-8")
+            self.assertIn(manual_note, refreshed)
+
     def test_layered_human_docs_reference_paired_agent_docs(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-layered-human-pairs-") as tmpdir:
             sandbox_root = Path(tmpdir) / "dual_mode_app"
