@@ -3,6 +3,7 @@
 Language: English | [简体中文](platforms.zh.md)
 
 Use `docagent init --ai ...` to choose your platform entrypoint.
+`docagent` is the distribution + workflow adapter for this repository memory skill package.
 Entry path step: this page follows `README.md` -> `docs/landing-page.md` -> `docs/quickstart.md`.
 Two-step model: global install makes the skill visible; repo-local init enables this repository workflow.
 `refresh` is the half-step after init: run it when you want to write or update agent docs, human docs, or both.
@@ -12,13 +13,12 @@ Simple path (`uipro-cli` style): `npm install -g doc-for-agent` -> `docagent ini
 
 ## Platform Matrix
 
-| Platform | First command |
+| Platform tier | First command |
 | --- | --- |
-| Claude Code | `docagent init --ai claudecode` |
-| Codex | `docagent init --ai codex` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
-| Continue | `docagent init --ai continue --target <repo-root>` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+| First-class: Claude Code | `docagent init --ai claudecode` |
+| First-class: Codex | `docagent init --ai codex` |
+| Compatibility: Continue | `docagent init --ai continue --target <repo-root>` |
+| Compatibility: GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 After init, use `refresh --output-mode agent|human|dual|quad` based on the docs audience.

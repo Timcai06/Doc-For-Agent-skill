@@ -7,13 +7,17 @@
 公网 landing URL：发布后补在这里。
 当前落地入口文档：[docs/landing-page.zh.md](docs/landing-page.zh.md)
 
-`doc-for-agent` 是一个面向多 agent 的仓库文档技能包，并提供 CLI 适配层。
+`doc-for-agent` 是一个面向多 agent 的仓库文档技能包。
+`docagent` 是它的 distribution + workflow adapter 命令面。
 
-适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
+一等平台：`codex`、`claudecode`。
+兼容目标：`continue`、`copilot`。
 
 它支持 `agent`、`human`、`dual`、`quad` 四种输出。
 模式映射：`agent` 写入 `dfa-doc/AGENTS/`，`human` 写入 `dfa-doc/handbook/`，`dual` 同时写入两者，`quad` 写入 `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
-`dual` 模式会在一次 refresh 流程中同时维护 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）。`quad` 模式建立双语四视图目录契约。
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` 是长期 agent memory layer。
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` 是 maintainer-facing 视图。
+`dual` 模式会在一次 refresh 流程中同时维护 memory layer 与 handbook 视图。`quad` 模式建立双语四视图目录契约。
 这项四视图能力表达的是结构契约，不等于所有双语内容质量已经完成。
 它不是 AGENTS-only 工具：应按文档受众选择输出模式。
 
@@ -59,14 +63,13 @@ docagent quickstart --target <repo-root>
 
 ## 按 Agent 选入口
 
-| 你使用... | 先执行 |
+| 平台层级 | 先执行 |
 | --- | --- |
-| Claude Code | `docagent init --ai claudecode` |
-| Codex | `docagent init --ai codex` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
-| Continue | `docagent init --ai continue --target <repo-root>` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
-| 多个 Agent | `docagent init --ai all` |
+| 一等：Claude Code | `docagent init --ai claudecode` |
+| 一等：Codex | `docagent init --ai codex` |
+| 兼容：Continue | `docagent init --ai continue --target <repo-root>` |
+| 兼容：GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+| 多平台引导 | `docagent init --ai all` |
 
 ## 安装矩阵
 

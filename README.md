@@ -7,13 +7,17 @@ English | [简体中文](README.zh.md)
 Public landing URL: add here when it is published.
 Current landing entry doc: [docs/landing-page.md](docs/landing-page.md)
 
-`doc-for-agent` is a multi-agent repository documentation skill package with a CLI adapter.
+`doc-for-agent` is a multi-agent repository documentation skill package.
+`docagent` is its distribution + workflow adapter command surface.
 
-It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
+First-class platforms: `codex`, `claudecode`.
+Compatibility targets: `continue`, `copilot`.
 
 It supports `agent`, `human`, `dual`, and `quad` outputs.
 Mode map: `agent` writes `dfa-doc/AGENTS/`, `human` writes `dfa-doc/handbook/`, `dual` writes both, and `quad` writes `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, and `dfa-doc/handbook.zh/`.
-Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` are the long-term agent memory layer.
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` are maintainer-facing views.
+Dual mode keeps memory layer and handbook views paired in one refresh flow. Quad mode establishes the four-view directory contract for bilingual maintenance.
 That four-view contract is a structure capability, not a claim that every bilingual view is already complete.
 This is not an AGENTS-only tool: choose output mode by audience.
 
@@ -59,14 +63,13 @@ docagent quickstart --target <repo-root>
 
 ## Pick Your Agent
 
-| If you use... | Run this first |
+| Platform tier | Run this first |
 | --- | --- |
-| Claude Code | `docagent init --ai claudecode` |
-| Codex | `docagent init --ai codex` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
-| Continue | `docagent init --ai continue --target <repo-root>` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
-| Multiple agents | `docagent init --ai all` |
+| First-class: Claude Code | `docagent init --ai claudecode` |
+| First-class: Codex | `docagent init --ai codex` |
+| Compatibility: Continue | `docagent init --ai continue --target <repo-root>` |
+| Compatibility: GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+| Multi-platform bootstrap | `docagent init --ai all` |
 
 ## Install Matrix
 

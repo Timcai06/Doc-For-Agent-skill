@@ -3,6 +3,7 @@
 [English](platforms.md) | 简体中文
 
 使用 `docagent init --ai ...` 选择你的平台入口。
+`docagent` 是这个仓库 memory skill package 的 distribution + workflow adapter。
 入口链路位置：本页位于 `README.md` -> `docs/landing-page.zh.md` -> `docs/quickstart.zh.md` 之后。
 两步模型：全局安装让 skill 对 agent 可见，repo-local init 启用当前仓库工作流。
 `refresh` 是 init 之后的“半步”：当你需要写入或更新 agent docs、human docs 或两者时再执行它。
@@ -12,13 +13,12 @@
 
 ## 平台矩阵
 
-| 平台 | 首条命令 |
+| 平台层级 | 首条命令 |
 | --- | --- |
-| Claude Code | `docagent init --ai claudecode` |
-| Codex | `docagent init --ai codex` |
-| CodeBuddy | `docagent init --ai codex --target <repo-root>` |
-| Continue | `docagent init --ai continue --target <repo-root>` |
-| GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
+| 一等：Claude Code | `docagent init --ai claudecode` |
+| 一等：Codex | `docagent init --ai codex` |
+| 兼容：Continue | `docagent init --ai continue --target <repo-root>` |
+| 兼容：GitHub Copilot | `docagent init --ai copilot --target <repo-root>` |
 
 `init` 会自动处理各平台适配文件，你只需要选择 `--ai`。
 初始化后，根据文档受众选择 `refresh --output-mode agent|human|dual|quad`。
