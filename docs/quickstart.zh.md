@@ -2,7 +2,8 @@
 
 [English](quickstart.md) | 简体中文
 
-本页面向第一次使用产品的用户。
+本页面面向第一次使用仓库 memory system 的用户。
+`docagent` 是这个 skill package 的 distribution + workflow adapter 命令面。
 
 只记住一个模型：
 
@@ -13,7 +14,9 @@
 
 `refresh` 支持 `agent`、`human`、`dual`、`quad` 四种文档输出。
 模式映射：`agent` -> `dfa-doc/AGENTS/`，`human` -> `dfa-doc/handbook/`，`dual` -> 两者同时输出，`quad` -> `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
-`dual` 模式会在一次 refresh 流程中把 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图目录契约。
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` 是长期 agent memory layer。
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` 是 maintainer-facing 视图。
+`dual` 模式会在一次 refresh 流程中把 memory layer 与 handbook 视图成对维护。`quad` 模式建立双语四视图目录契约。
 这项四视图能力强调的是结构目标，不等于每一页双语内容都已经完全打磨完成。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
@@ -40,7 +43,9 @@ npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 该一次性命令会在临时场景下合并“全局安装 + repo-local init”。如果你要真正生成或更新文档，后一步仍然是执行 `refresh`。
 
-如果你只需要单个平台，把 `all` 替换成 `claudecode`、`codex`、`continue` 或 `copilot`。
+如果你只需要单个平台，把 `all` 替换成：
+- 一等：`codex` 或 `claudecode`
+- 兼容：`continue` 或 `copilot`
 
 ## Init
 
@@ -67,7 +72,7 @@ docagent init --ai claudecode --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
 
-CodeBuddy 用户通常从 `--ai codex` 开始。
+一等平台是 `codex` 与 `claudecode`；`continue` 与 `copilot` 是 compatibility targets。
 
 ## Refresh
 

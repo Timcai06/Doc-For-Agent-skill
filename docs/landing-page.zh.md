@@ -12,7 +12,7 @@
 
 ## 目标
 
-落地页面向 CLI coding-agent 用户，强调短路径：
+落地页面面向 CLI coding-agent 用户，强调 agent memory system 的短路径：
 
 1. install
 2. init
@@ -22,12 +22,15 @@
 把 `refresh` 理解成安装完成后的“半步”：当仓库准备好后，由它负责写入或更新整套文档系统。
 临时 Node 上手场景下，`npx -y doc-for-agent init ...` 可合并前两步；真正写出文档时，`refresh` 仍然单独执行。
 简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
-同时把 `doc-for-agent` 定位为“项目文档系统工具”，而不是一次性 markdown 生成器。
+并将 `doc-for-agent` 定位为 multi-agent repository documentation skill package，将 `docagent` 定位为它的 distribution + workflow adapter。
 文档输出模型可按用户意图选择：`agent`、`human`、`dual`、`quad`。
 模式映射：`agent` 面向 `dfa-doc/AGENTS/`，`human` 面向 `dfa-doc/handbook/`，`dual` 同时覆盖两者，`quad` 覆盖 `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
-`dual` 模式会在一次 refresh 流程中把 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）成对维护。`quad` 模式建立双语四视图布局。
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` 是长期 agent memory layer。
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` 是 maintainer-facing 视图。
+`dual` 模式会在一次 refresh 流程中把 memory layer 与 handbook 视图成对维护。`quad` 模式建立双语四视图布局。
 这项四视图布局表达的是结构方向，不等于每一页双语内容都已经完整完成。
-产品对外叙事是双文档系统，而不是 AGENTS-only。
+平台定位：`codex`、`claudecode` 是一等平台；`continue`、`copilot` 是 compatibility targets。
+产品对外叙事是 memory layer + maintainer views，而不是普通 AGENTS CLI。
 
 ## 入口路径
 

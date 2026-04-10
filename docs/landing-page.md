@@ -12,7 +12,7 @@ Public URL slot: replace this note with the real public landing URL when it is p
 
 ## Goal
 
-The landing page is aimed at CLI coding-agent users and explains the short product path:
+The landing page is aimed at CLI coding-agent users and explains the short product path for an agent memory system:
 
 1. install
 2. init
@@ -22,12 +22,15 @@ Two-step entry model: global install exposes the skill to your coding agent, and
 Treat `refresh` as the half-step after setup: it is what writes or updates the docs system when the repository is ready.
 For temporary Node onboarding, `npx -y doc-for-agent init ...` can combine both setup steps, while `refresh` still happens separately when you want docs written.
 Simple path (`uipro-cli` style): `npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
-It also frames `doc-for-agent` as a project documentation system tool rather than a one-shot markdown generator.
+It frames `doc-for-agent` as a multi-agent repository documentation skill package and `docagent` as its distribution + workflow adapter.
 The docs output model is `agent`, `human`, `dual`, or `quad` according to user intent.
 Mode map: `agent` for `dfa-doc/AGENTS/`, `human` for `dfa-doc/handbook/`, `dual` for both, and `quad` for `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, and `dfa-doc/handbook.zh/`.
-Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view layout.
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` are the long-term agent memory layer.
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` are maintainer-facing views.
+Dual mode keeps memory layer and handbook views paired in one refresh flow. Quad mode establishes the bilingual four-view layout.
 That four-view layout is the structure direction, not a claim that every bilingual page is already complete.
-The product message is dual-system, not AGENTS-only.
+Platform position: first-class for `codex` and `claudecode`, compatibility for `continue` and `copilot`.
+The product message is memory layer + maintainer views, not a generic AGENTS CLI.
 
 ## Entry Path
 

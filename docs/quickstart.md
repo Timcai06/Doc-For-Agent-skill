@@ -2,7 +2,8 @@
 
 Language: English | [简体中文](quickstart.zh.md)
 
-This page is for first-time product users.
+This page is for first-time users of the repository memory system.
+`docagent` is the distribution + workflow adapter command for this skill package.
 
 Use one mental model:
 
@@ -13,7 +14,9 @@ Think of it as two and a half steps: global install for agent visibility, repo-l
 
 `refresh` supports `agent`, `human`, `dual`, and `quad` documentation outputs.
 Mode map: `agent` -> `dfa-doc/AGENTS/`, `human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, `dfa-doc/handbook.zh/`.
-Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
+`dfa-doc/AGENTS/` + `dfa-doc/AGENTS.zh/` are the long-term agent memory layer.
+`dfa-doc/handbook/` + `dfa-doc/handbook.zh/` are maintainer-facing views.
+Dual mode keeps memory layer and handbook views paired in one refresh flow. Quad mode establishes the bilingual four-view directory contract.
 That four-view contract describes the structure target, not a claim that every bilingual page is already fully polished.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 
@@ -40,7 +43,9 @@ npx -y doc-for-agent init --ai all --target <repo-root>
 ```
 This one-off command combines global install and repo-local init for temporary use. `refresh` still comes after it when you want docs generated or updated.
 
-If you only need one platform, replace `all` with `claudecode`, `codex`, `continue`, or `copilot`.
+If you only need one platform, replace `all` with:
+- first-class: `codex` or `claudecode`
+- compatibility: `continue` or `copilot`
 
 ## Init
 
@@ -67,7 +72,7 @@ docagent init --ai claudecode --target <repo-root>
 docagent init --ai codex --target <repo-root>
 ```
 
-CodeBuddy users usually start with `--ai codex`.
+First-class platforms are `codex` and `claudecode`; `continue` and `copilot` are compatibility targets.
 
 ## Refresh
 
