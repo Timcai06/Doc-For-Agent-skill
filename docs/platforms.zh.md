@@ -27,6 +27,13 @@
 四视图布局表达的是结构能力，不等于每个双语视图都已经完整成熟。
 平台选择与文档受众是两件事：这不是 AGENTS-only 工具。
 
+## 受众路由
+
+- 平台选择（`--ai ...`）决定适配器接线。
+- 输出模式（`agent|human|dual|quad`）决定记忆受众。
+- `agent`/`dual`/`quad` 会更新 `dfa-doc/AGENTS*` 下的长期 agent memory layer。
+- `human`/`dual`/`quad` 会更新 `dfa-doc/handbook*` 下的 maintainer-facing handbook 视图。
+
 ## 多 Agent 安装
 
 ```bash

@@ -20,6 +20,12 @@
 这项四视图能力强调的是结构目标，不等于每一页双语内容都已经完全打磨完成。
 这条路径不是 AGENTS-only；按需要选择 `human` 或 `dual`。
 
+## 何时看哪一套
+
+- 当需要 agent 执行记忆（任务上下文、约定、交接连续性）时，使用 `dfa-doc/AGENTS/` 与 `dfa-doc/AGENTS.zh/`。
+- 当需要 maintainer 视角理解（架构、流程、术语）时，使用 `dfa-doc/handbook/` 与 `dfa-doc/handbook.zh/`。
+- 当两类受众都要同步更新时，使用 `dual` 或 `quad`。
+
 ## 安装
 步骤 1（全局安装）：让 coding agent 能看到这个 skill。
 简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
@@ -75,6 +81,11 @@ docagent init --ai codex --target <repo-root>
 一等平台是 `codex` 与 `claudecode`；`continue` 与 `copilot` 是 compatibility targets。
 
 ## Refresh
+
+`refresh` 不只在首次安装后执行；当仓库知识变化时就应执行，例如：
+- 新增模块或服务
+- 流程或架构发生较大变化
+- 交接时发现文档已经陈旧
 
 只生成 agent 文档：
 

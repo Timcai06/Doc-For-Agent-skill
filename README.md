@@ -32,6 +32,13 @@ Simple path (`uipro-cli` style):
 - `docagent init --ai codex`
 - `docagent init --ai claudecode`
 
+## Memory-First Usage
+
+- Read `dfa-doc/AGENTS/` and `dfa-doc/AGENTS.zh/` when agents need execution context, handoff state, or long-term repository memory.
+- Read `dfa-doc/handbook/` and `dfa-doc/handbook.zh/` when maintainers need architecture/workflow explanations and onboarding context.
+- Run `refresh` when repository knowledge changes (new module, workflow shift, major refactor) so team memory stays synchronized.
+- Treat generated docs as a maintained knowledge baseline, not a one-off artifact.
+
 ## 30-Second Start
 
 Install once:

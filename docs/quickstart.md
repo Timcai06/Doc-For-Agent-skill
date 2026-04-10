@@ -20,6 +20,12 @@ Dual mode keeps memory layer and handbook views paired in one refresh flow. Quad
 That four-view contract describes the structure target, not a claim that every bilingual page is already fully polished.
 This flow is not AGENTS-only; use `human` or `dual` when needed.
 
+## When To Read What
+
+- Use `dfa-doc/AGENTS/` and `dfa-doc/AGENTS.zh/` for agent execution memory: task context, conventions, handoff continuity.
+- Use `dfa-doc/handbook/` and `dfa-doc/handbook.zh/` for maintainer-facing understanding: architecture, workflows, glossary.
+- Use `dual` or `quad` when both audiences need synchronized updates.
+
 ## Install
 Step 1 (global install): make the skill visible to your coding agent.
 Simple path (`uipro-cli` style): `npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
@@ -75,6 +81,11 @@ docagent init --ai codex --target <repo-root>
 First-class platforms are `codex` and `claudecode`; `continue` and `copilot` are compatibility targets.
 
 ## Refresh
+
+Run `refresh` when repository knowledge changes, not only at first install:
+- new modules or services added
+- major workflow or architecture shifts
+- handoff friction shows docs are stale
 
 Agent docs:
 
