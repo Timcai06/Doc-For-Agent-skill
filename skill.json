@@ -2,7 +2,7 @@
   "name": "doc-for-agent",
   "displayName": "Doc-for-Agent",
   "description": "Multi-agent repository documentation skill package with a CLI adapter for install, init, refresh, and audit workflows.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "Timcai06",
   "license": "MIT",
   "homepage": "https://github.com/Timcai06/Doc-For-Agent-skill",

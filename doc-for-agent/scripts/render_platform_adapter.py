@@ -131,7 +131,12 @@ def copy_bundled_assets(install_root: Path) -> None:
     for directory_name in bundled_asset_directories():
         source = skill_root() / directory_name
         if source.exists():
-            shutil.copytree(source, install_root / directory_name, dirs_exist_ok=True)
+            shutil.copytree(
+                source,
+                install_root / directory_name,
+                dirs_exist_ok=True,
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+            )
 
 
 def symlink_bundled_assets(install_root: Path) -> None:
