@@ -7,13 +7,13 @@
 公网 landing URL：发布后补在这里。
 当前落地入口文档：[docs/landing-page.zh.md](docs/landing-page.zh.md)
 
-`doc-for-agent` 是一个面向 CLI coding-agent 用户的统一 CLI。
+`doc-for-agent` 是一个面向多 agent 的仓库文档技能包，并提供 CLI 适配层。
 
 适用于 Claude Code、Codex、CodeBuddy、Continue、Copilot 等终端优先工作流。
 
 它支持 `agent`、`human`、`dual`、`quad` 四种输出。
 模式映射：`agent` 写入 `dfa-doc/AGENTS/`，`human` 写入 `dfa-doc/handbook/`，`dual` 同时写入两者，`quad` 写入 `dfa-doc/AGENTS/`、`dfa-doc/AGENTS.zh/`、`dfa-doc/handbook/`、`dfa-doc/handbook.zh/`。
-`dual` 模式会在一次 refresh 流程中同时维护 `docs/`（human docs）与 `AGENTS/`（agent docs）。`quad` 模式建立双语四视图目录契约。
+`dual` 模式会在一次 refresh 流程中同时维护 `dfa-doc/handbook/`（human docs）与 `dfa-doc/AGENTS/`（agent docs）。`quad` 模式建立双语四视图目录契约。
 这项四视图能力表达的是结构契约，不等于所有双语内容质量已经完成。
 它不是 AGENTS-only 工具：应按文档受众选择输出模式。
 
@@ -24,7 +24,7 @@
 3. `refresh`
 把它理解成“两步半”更准确：全局安装让 agent 能看到 skill，repo-local `init` 启用仓库工作流，`refresh` 在需要时负责写入或更新文档。
 简路径（`uipro-cli` 风格）：
-- `npm install -g doc-for-agent@next`
+- `npm install -g doc-for-agent`
 - `docagent init --ai codex`
 - `docagent init --ai claudecode`
 
@@ -34,7 +34,7 @@
 
 ```bash
 # Node 用户
-npm install -g doc-for-agent@next
+npm install -g doc-for-agent
 
 # Python 用户
 pipx install doc-for-agent
@@ -72,7 +72,7 @@ docagent quickstart --target <repo-root>
 
 | 用户类型 | 安装方式 | 起步命令 |
 | --- | --- | --- |
-| Node-first（全局） | `npm install -g doc-for-agent@next` | `docagent init --ai all` |
+| Node-first（全局） | `npm install -g doc-for-agent` | `docagent init --ai all` |
 | Node-first（一次性） | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target <repo-root>` |
 | Python-first（推荐） | `pipx install doc-for-agent` | `docagent init --ai all` |
 | Python-first（venv/system） | `python3 -m pip install doc-for-agent` | `docagent init --ai all` |

@@ -232,7 +232,7 @@ def render_quickstart(target_root: Path) -> str:
         f"{metadata.product_name} quickstart",
         "- Skill package flow: install -> init -> refresh",
         "- Install the npm-distributed skill package:",
-        "- `npm install -g doc-for-agent@next`",
+        "- `npm install -g doc-for-agent`",
         "- One-off npm start:",
         "- `npx -y doc-for-agent init --ai codex`",
         "- Primary init shape:",
@@ -366,7 +366,7 @@ def build_parser() -> argparse.ArgumentParser:
             f"  compatibility commands: {compatibility_commands}\n"
             f"  generate/refresh output modes: {output_modes}\n"
             "Quick start:\n"
-            "  npm install -g doc-for-agent@next\n"
+            "  npm install -g doc-for-agent\n"
             f"  docagent init --ai {DEFAULT_GLOBAL_PLATFORM}\n"
             "  docagent init --ai claudecode\n"
             "  docagent refresh --root <repo-root> --output-mode quad"

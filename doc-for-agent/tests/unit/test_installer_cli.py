@@ -35,7 +35,7 @@ class InstallerCliTests(unittest.TestCase):
         self.assertIn("primary commands: init, refresh, doctor, generate, update, versions", text)
         self.assertIn("compatibility commands: install, all", text)
         self.assertIn("Quick start:", text)
-        self.assertIn("npm install -g doc-for-agent@next", text)
+        self.assertIn("npm install -g doc-for-agent", text)
         self.assertIn("docagent init --ai codex", text)
         self.assertIn("docagent init --ai claudecode", text)
 
@@ -297,7 +297,7 @@ class InstallerCliTests(unittest.TestCase):
             text = stdout.getvalue()
             self.assertIn("doc-for-agent quickstart", text)
             self.assertIn("Skill package flow: install -> init -> refresh", text)
-            self.assertIn("npm install -g doc-for-agent@next", text)
+            self.assertIn("npm install -g doc-for-agent", text)
             self.assertIn("npx -y doc-for-agent init --ai codex", text)
             self.assertIn("docagent init --ai <codex|claudecode|continue|copilot|all>", text)
             self.assertIn("<repo-root>", text)

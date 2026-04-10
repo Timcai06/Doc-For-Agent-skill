@@ -37,7 +37,7 @@ const heroCases = [
     index: 0,
     label: 'Global Install',
     title: 'Registering CLI Engine',
-    command: 'tim@macBook ~ % npm install -g doc-for-agent@next',
+    command: 'tim@macBook ~ % npm install -g doc-for-agent',
     output: [
       { text: '[step 1/1] Fetching docagent engine...', color: 'var(--text-secondary)' },
       { text: '✓ doc-for-agent installed globally.', color: 'var(--accent)' },
@@ -269,7 +269,7 @@ function App() {
         <a className="brand" href="#hero">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--primary)' }}><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/></svg>
           <strong>doc-for-agent</strong>
-          <small>v1.4.0 "@next"</small>
+          <small>v0.4.0 stable</small>
         </a>
         <nav className="nav-links">
           <a href="#dual-logic">Documentation System</a>
@@ -626,7 +626,7 @@ function App() {
                 <div className="l-icon highlight">01</div>
                 <div className="l-info">
                   <strong>npm install -g</strong>
-                  <p>doc-for-agent@next</p>
+                  <p>doc-for-agent</p>
                 </div>
               </div>
               <div className="l-connector" />
@@ -754,7 +754,7 @@ function App() {
             <div className="mega-install-container">
               <div className="install-box mega">
                 <span className="install-prompt">$</span>
-                <code>npm install -g doc-for-agent@next</code>
+                <code>npm install -g doc-for-agent</code>
                 <div className="install-glow" />
               </div>
               <p className="install-hint">Ground your repository with <code>docagent init --ai codex</code></p>

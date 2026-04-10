@@ -19,12 +19,12 @@
 
 ## 安装
 步骤 1（全局安装）：让 coding agent 能看到这个 skill。
-简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
+简路径（`uipro-cli` 风格）：`npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`。
 
 Node：
 
 ```bash
-npm install -g doc-for-agent@next
+npm install -g doc-for-agent
 ```
 
 Python：

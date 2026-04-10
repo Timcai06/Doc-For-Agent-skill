@@ -1,7 +1,7 @@
 {
   "name": "doc-for-agent",
   "version": "0.4.0",
-  "description": "Unified CLI for generating and refreshing agent docs, human docs, or both from a repository.",
+  "description": "Multi-agent repository documentation skill package with a CLI adapter for install, refresh, and audit workflows.",
   "license": "UNLICENSED",
   "private": false,
   "bin": {
@@ -20,10 +20,13 @@
     "node": ">=18"
   },
   "keywords": [
-    "docs",
-    "agents",
-    "cli",
+    "skill",
+    "multi-agent",
+    "repository-docs",
+    "agent-memory",
+    "documentation",
     "codex",
-    "documentation"
+    "claudecode",
+    "cli"
   ]
 }

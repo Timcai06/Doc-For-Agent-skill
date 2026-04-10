@@ -8,7 +8,7 @@ Two-step model: global install makes the skill visible; repo-local init enables 
 `refresh` is the half-step after init: run it when you want to write or update agent docs, human docs, or both.
 For temporary Node use, `npx -y doc-for-agent init ...` combines both setup steps. `refresh` still remains separate.
 Use `--target <repo-root>` only when wiring a specific repository from outside it.
-Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
+Simple path (`uipro-cli` style): `npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
 
 ## Platform Matrix
 
@@ -23,7 +23,7 @@ Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagen
 `init` handles platform-specific adapter files automatically. You only need to select `--ai`.
 After init, use `refresh --output-mode agent|human|dual|quad` based on the docs audience.
 Mode map: `agent` -> `dfa-doc/AGENTS/`, `human` -> `dfa-doc/handbook/`, `dual` -> both, `quad` -> `dfa-doc/AGENTS/`, `dfa-doc/AGENTS.zh/`, `dfa-doc/handbook/`, `dfa-doc/handbook.zh/`.
-Dual mode keeps `docs/` (human docs) and `AGENTS/` (agent docs) paired in one refresh flow.
+Dual mode keeps `dfa-doc/handbook/` (human docs) and `dfa-doc/AGENTS/` (agent docs) paired in one refresh flow.
 The four-view layout is a structure capability, not a claim that every bilingual view is already complete.
 Platform selection is separate from doc audience: this is not AGENTS-only.
 

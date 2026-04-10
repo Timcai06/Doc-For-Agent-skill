@@ -7,7 +7,7 @@ English | [简体中文](README.zh.md)
 Public landing URL: add here when it is published.
 Current landing entry doc: [docs/landing-page.md](docs/landing-page.md)
 
-`doc-for-agent` is a unified CLI for CLI coding-agent users.
+`doc-for-agent` is a multi-agent repository documentation skill package with a CLI adapter.
 
 It is designed for Claude Code, Codex, CodeBuddy, Continue, Copilot, and similar terminal-first agent workflows.
 
@@ -24,7 +24,7 @@ The product path is short:
 3. `refresh`
 Think of this as two and a half steps: global install makes the skill visible to the agent, repo-local `init` enables a repository workflow, and `refresh` writes or updates docs when you need them.
 Simple path (`uipro-cli` style):
-- `npm install -g doc-for-agent@next`
+- `npm install -g doc-for-agent`
 - `docagent init --ai codex`
 - `docagent init --ai claudecode`
 
@@ -34,7 +34,7 @@ Install once:
 
 ```bash
 # Node users
-npm install -g doc-for-agent@next
+npm install -g doc-for-agent
 
 # Python users
 pipx install doc-for-agent
@@ -72,7 +72,7 @@ docagent quickstart --target <repo-root>
 
 | User profile | Install path | Start command |
 | --- | --- | --- |
-| Node-first (global) | `npm install -g doc-for-agent@next` | `docagent init --ai all` |
+| Node-first (global) | `npm install -g doc-for-agent` | `docagent init --ai all` |
 | Node-first (one-off) | `npx -y doc-for-agent` | `npx -y doc-for-agent init --ai all --target <repo-root>` |
 | Python-first (recommended) | `pipx install doc-for-agent` | `docagent init --ai all` |
 | Python-first (venv/system) | `python3 -m pip install doc-for-agent` | `docagent init --ai all` |

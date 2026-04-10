@@ -39,7 +39,7 @@ function runPython(cliScript, args) {
 
   console.error("[docagent] Python runtime was not found.");
   console.error("[docagent] Install Python 3, then run one of:");
-  console.error("  - npm install -g doc-for-agent@next");
+  console.error("  - npm install -g doc-for-agent");
   return 2;
 }
 

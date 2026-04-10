@@ -19,12 +19,12 @@ This flow is not AGENTS-only; use `human` or `dual` when needed.
 
 ## Install
 Step 1 (global install): make the skill visible to your coding agent.
-Simple path (`uipro-cli` style): `npm install -g doc-for-agent@next` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
+Simple path (`uipro-cli` style): `npm install -g doc-for-agent` -> `docagent init --ai codex` / `docagent init --ai claudecode`.
 
 Node:
 
 ```bash
-npm install -g doc-for-agent@next
+npm install -g doc-for-agent
 ```
 
 Python:
