@@ -18,4 +18,4 @@
 
 - Append human-validated milestones, lessons, and terminology decisions with dates.
 - Keep history append-only: add corrections instead of rewriting old entries.
-- Use manual blocks only for sections that must be preserved verbatim across refresh.
+- Refresh-safe rule: this section is preserved during refresh; use manual blocks only for stricter sub-block protection.

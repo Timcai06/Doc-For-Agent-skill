@@ -36,13 +36,13 @@ def memory_append_only_block(locale: str = "en") -> str:
         lines = [
             "- 按时间追加人工确认的里程碑、复盘结论和术语决策。",
             "- 历史记录只追加修正，不做整段重写。",
-            "- 若需保护手工段落，可在该段落使用 manual block。",
+            "- refresh-safe 规则：本节内容在 refresh 时默认保留；若某段需要更强保护，可再使用 manual block。",
         ]
     else:
         lines = [
             "- Append human-validated milestones, lessons, and terminology decisions with dates.",
             "- Keep history append-only: add corrections instead of rewriting old entries.",
-            "- Use manual blocks only for sections that must be preserved verbatim across refresh.",
+            "- Refresh-safe rule: this section is preserved during refresh; use manual blocks only for stricter sub-block protection.",
         ]
     return "\n".join(lines)
 

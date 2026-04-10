@@ -24,7 +24,7 @@ from .builders import (
     resolve_human_output_root,
     resolve_human_template_variant,
 )
-from .markdown import MANUAL_END, MANUAL_START, merge_markdown
+from .markdown import MANUAL_END, MANUAL_START, merge_markdown, split_markdown_sections
 from .models import RepoAnalysis
 from .translator import translate_to_zh
 from .utils import infer_project_name, read_text, write_file
@@ -132,8 +132,42 @@ def normalize_engine_request(request: EngineRequest) -> EngineRequest:
 
 def resolve_output_content(path: Path, generated: str, write_mode: str) -> str:
     if write_mode == "refresh" and path.exists():
-        return merge_markdown(read_text(path), generated)
+        existing = read_text(path)
+        merged = merge_markdown(existing, generated)
+        if is_memory_layer_page(path):
+            return merge_memory_log_sections(existing, merged)
+        return merged
     return generated
+
+
+def is_memory_layer_page(path: Path) -> bool:
+    normalized = str(path).replace("\\", "/")
+    return (
+        normalized.endswith("/04-memory/009-progress.md")
+        or normalized.endswith("/04-memory/010-lessons.md")
+    ) and ("/AGENTS/" in normalized or "/AGENTS.zh/" in normalized)
+
+
+def merge_memory_log_sections(existing: str, generated: str) -> str:
+    protected_heads = {
+        "## Maintainer Log (Append-Only)",
+        "## Lessons Log (Append-Only)",
+        "## 维护者日志（仅追加）",
+        "## 经验日志（仅追加）",
+    }
+
+    _, existing_sections = split_markdown_sections(existing)
+    generated_title, generated_sections = split_markdown_sections(generated)
+    if not generated_sections:
+        return generated
+
+    existing_map = {heading: body for heading, body in existing_sections}
+    merged_lines = [generated_title]
+    for heading, body in generated_sections:
+        if heading in protected_heads and heading in existing_map:
+            body = existing_map[heading]
+        merged_lines.extend(["", heading, "", body or ""])
+    return "\n".join(merged_lines).strip() + "\n"
 
 
 def append_legacy_migration_notes(content: str, source_label: str, source_text: str) -> str:
