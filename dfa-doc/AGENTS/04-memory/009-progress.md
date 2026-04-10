@@ -1,5 +1,11 @@
 # Progress
 
+## Memory Layer Contract
+
+- This is an append-oriented memory page; preserve historical entries and add corrective follow-ups instead of rewrites.
+- Keep dated milestones, pending decisions, and owner assignments so future agents can resume work without replaying full history.
+- If a fact is superseded, append the replacement with date + reason instead of deleting the previous record.
+
 ## Confirmed Facts
 
 - Detected repo type: `skill-meta`.
@@ -11,20 +17,8 @@
 
 - Confirm the next milestone and keep this file updated with human-approved progress.
 
-## Supporting Doc Synthesis (Memory)
+## Maintainer Log (Append-Only)
 
-### Confirmed
-
-- No clear progress facts were synthesized from supporting docs.
-
-### Conflicting
-
-- No direct memory conflicts were synthesized from supporting docs.
-
-### Unresolved
-
-- No unresolved memory items were synthesized from supporting docs.
-
-## Referenced Historical Docs
-
-- No additional lessons or status docs were detected automatically.
+- Append human-validated milestones, lessons, and terminology decisions with dates.
+- Keep history append-only: add corrections instead of rewriting old entries.
+- Use manual blocks only for sections that must be preserved verbatim across refresh.

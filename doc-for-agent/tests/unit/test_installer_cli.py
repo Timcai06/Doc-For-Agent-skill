@@ -341,7 +341,7 @@ class InstallerCliTests(unittest.TestCase):
             self.assertEqual(quad_exit, 0)
 
             dual_exit = main(["refresh", "--root", str(sandbox_root), "--output-mode", "dual"])
-            self.assertNotEqual(dual_exit, 0)
+            self.assertEqual(dual_exit, 1)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from pathlib import Path
 
 TEST_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = TEST_ROOT.parents[1]
-SCRIPTS_ROOT = REPO_ROOT / "dfa-doc" / "scripts"
+SCRIPTS_ROOT = REPO_ROOT / "doc-for-agent" / "scripts"
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_ROOT))
 
@@ -112,7 +112,7 @@ class EngineApiTests(unittest.TestCase):
                 str(root / "dfa-doc" / "handbook.zh" / "architecture.md"): "human zh mismatch",
             }
             with self.assertRaises(ValueError):
-                validate_output_contract(root, "generate", "quad", "en", files, root / "dfa-doc" / "AGENTS")
+                validate_output_contract(root, "bootstrap", "generate", "quad", "en", files, root / "dfa-doc" / "AGENTS")
 
     def test_validate_output_contract_rejects_mixed_locale_paths_for_dual_mode(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-dual-locale-contract-") as tmpdir:
@@ -123,7 +123,32 @@ class EngineApiTests(unittest.TestCase):
                 str(root / "dfa-doc" / "handbook" / "overview.md"): "unexpected en doc path",
             }
             with self.assertRaises(ValueError):
-                validate_output_contract(root, "generate", "dual", "zh", files, root / "dfa-doc" / "AGENTS")
+                validate_output_contract(root, "bootstrap", "generate", "dual", "zh", files, root / "dfa-doc" / "AGENTS")
+
+    def test_validate_output_contract_rejects_layered_missing_memory_pages(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-layered-required-pages-") as tmpdir:
+            root = Path(tmpdir)
+            files = {
+                str(root / "dfa-doc" / "AGENTS" / "00-entry" / "AGENTS.md"): "entry",
+                str(root / "dfa-doc" / "AGENTS" / "01-product" / "001-core-goals.md"): "goals",
+                str(root / "dfa-doc" / "AGENTS" / "01-product" / "002-prd.md"): "prd",
+                str(root / "dfa-doc" / "AGENTS" / "01-product" / "003-app-flow.md"): "flow",
+                str(root / "dfa-doc" / "AGENTS" / "02-architecture" / "004-tech-stack.md"): "stack",
+                str(root / "dfa-doc" / "AGENTS" / "02-architecture" / "005-frontend-guidelines.md"): "frontend",
+                str(root / "dfa-doc" / "AGENTS" / "02-architecture" / "006-backend-structure.md"): "backend",
+                str(root / "dfa-doc" / "AGENTS" / "02-architecture" / "007-architecture-compatibility.md"): "compat",
+                str(root / "dfa-doc" / "AGENTS" / "03-execution" / "008-implementation-plan.md"): "execution",
+            }
+            with self.assertRaises(ValueError):
+                validate_output_contract(
+                    root,
+                    "layered",
+                    "generate",
+                    "agent",
+                    "en",
+                    files,
+                    root / "dfa-doc" / "AGENTS",
+                )
 
     def test_refresh_dual_is_rejected_after_quad_footprint_exists(self) -> None:
         with tempfile.TemporaryDirectory(prefix="doc-for-agent-engine-refresh-quad-footprint-") as tmpdir:

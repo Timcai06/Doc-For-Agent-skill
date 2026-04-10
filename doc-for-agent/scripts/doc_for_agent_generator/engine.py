@@ -7,6 +7,8 @@ from typing import Dict, Iterable, Optional
 
 from .analysis import SUPPORTED_REPO_TYPES, analyze_repo
 from .builders import (
+    AGENT_CONTRACT_PAGE_PATHS,
+    AGENT_MEMORY_PAGE_PATHS,
     AGENT_LOCALE_OUTPUT_ROOTS,
     HUMAN_LOCALE_OUTPUT_ROOTS,
     SUPPORTED_DOC_PROFILES,
@@ -235,6 +237,32 @@ def _relative_file_set_under_root(files: Dict[str, str], root_dir: Path) -> set[
     return relative_paths
 
 
+def _validate_layered_agent_page_contract(
+    root: Path,
+    output_mode: str,
+    files: Dict[str, str],
+) -> None:
+    if output_mode == "human":
+        return
+    if output_mode == "quad":
+        agent_roots = [
+            root / resolve_agent_output_root("en"),
+            root / resolve_agent_output_root("zh"),
+        ]
+    else:
+        agent_roots = [root / resolve_agent_output_root("en")]
+
+    required_pages = set(AGENT_CONTRACT_PAGE_PATHS) | set(AGENT_MEMORY_PAGE_PATHS)
+    for agent_root in agent_roots:
+        generated_pages = _relative_file_set_under_root(files, agent_root)
+        missing_pages = sorted(required_pages.difference(generated_pages))
+        if missing_pages:
+            missing = ", ".join(f"`{path}`" for path in missing_pages)
+            raise ValueError(
+                f"Layered AGENTS contract violation under `{agent_root}`: missing required pages {missing}."
+            )
+
+
 def validate_refresh_pairing_contract(root: Path, mode: str, output_mode: str) -> None:
     if mode != "refresh" or output_mode == "quad":
         return
@@ -282,6 +310,7 @@ def _validate_mode_path_contract(
 
 def validate_output_contract(
     root: Path,
+    doc_profile: str,
     mode: str,
     output_mode: str,
     human_locale: str,
@@ -290,6 +319,8 @@ def validate_output_contract(
 ) -> None:
     validate_refresh_pairing_contract(root, mode, output_mode)
     _validate_mode_path_contract(root, output_mode, human_locale, files, agent_root)
+    if doc_profile == "layered":
+        _validate_layered_agent_page_contract(root, output_mode, files)
     if output_mode != "quad":
         return
 
@@ -339,6 +370,7 @@ def build_generation_plan(request: EngineRequest) -> GenerationPlan:
     agents_dir = normalized_request.root / resolve_agent_output_root("en")
     validate_output_contract(
         normalized_request.root,
+        normalized_request.profile,
         normalized_request.mode,
         normalized_request.output_mode,
         normalized_request.human_locale,

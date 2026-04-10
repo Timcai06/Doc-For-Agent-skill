@@ -53,6 +53,21 @@ HUMAN_PAIRED_PATH_RULES = {
         ],
     },
 }
+AGENT_CONTRACT_PAGE_PATHS = (
+    "00-entry/AGENTS.md",
+    "01-product/001-core-goals.md",
+    "01-product/002-prd.md",
+    "01-product/003-app-flow.md",
+    "02-architecture/004-tech-stack.md",
+    "02-architecture/005-frontend-guidelines.md",
+    "02-architecture/006-backend-structure.md",
+    "02-architecture/007-architecture-compatibility.md",
+    "03-execution/008-implementation-plan.md",
+)
+AGENT_MEMORY_PAGE_PATHS = (
+    "04-memory/009-progress.md",
+    "04-memory/010-lessons.md",
+)
 
 
 def format_bullets(items: Sequence[str], empty_line: str) -> str:

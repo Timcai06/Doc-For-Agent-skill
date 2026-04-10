@@ -260,14 +260,16 @@
     },
     "04-memory/009-progress.md": {
       "contains": [
-        "Supporting Doc Synthesis (Memory)",
-        "Pending: finalize the migration retrospective template"
+        "## Memory Layer Contract",
+        "## Maintainer Log (Append-Only)",
+        "Doc profile in use: `layered`."
       ]
     },
     "04-memory/010-lessons.md": {
       "contains": [
-        "Supporting Doc Synthesis (Memory)",
-        "Pending: finalize the migration retrospective template"
+        "## Memory Layer Contract",
+        "## Lessons Log (Append-Only)",
+        "Refresh generated agent docs after meaningful repository-shape changes."
       ]
     }
   },

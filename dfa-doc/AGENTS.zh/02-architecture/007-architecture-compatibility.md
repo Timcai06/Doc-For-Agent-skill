@@ -26,7 +26,7 @@
 - 真相源边界： 当出现冲突时，在修改 CLI 入口、adapter wiring 或分发行为前，先以 `readme.md`、`docs/platforms.md`、`docs/platforms.zh.md` 为裁决依据。
 - 分发结构： 将平台映射保留在 adapter/config 文档中（`Claude Code` -> `docagent init --ai claudecode`），而 CLI 契约变更保持集中管理。
 - 冲突处理顺序：1）检查 `readme.md`、`docs/platforms.md`、`docs/platforms.zh.md`；2）再编辑 adapter/config 映射。
-- 简路径（uipro-cli 风格）：npm install -g doc-for-agent@next -> docagent init --ai codex / docagent init --ai claudecode。 
+- 简路径（uipro-cli 风格）：npm install -g doc-for-agent -> docagent init --ai codex / docagent init --ai claudecode。 
 
 ### 待清理的矛盾点
 
